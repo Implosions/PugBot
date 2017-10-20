@@ -1,0 +1,28 @@
+
+import java.util.concurrent.TimeUnit;
+
+import bullybot.classfiles.EventHandler;
+
+import bullybot.classfiles.Info;
+import bullybot.classfiles.functions.Stuff;
+import net.dv8tion.jda.core.AccountType;
+import net.dv8tion.jda.core.JDA;
+import net.dv8tion.jda.core.JDABuilder;
+import net.dv8tion.jda.core.entities.Game;
+import okhttp3.OkHttpClient;
+
+public class Bot{
+	
+	public static void main(String[] args) {
+		try{
+			Stuff.createFiles();
+			OkHttpClient.Builder httpBuilder = new OkHttpClient.Builder().readTimeout(1, TimeUnit.MINUTES).connectTimeout(15, TimeUnit.SECONDS).writeTimeout(15, TimeUnit.SECONDS);
+			JDA jda = new JDABuilder(AccountType.BOT).setToken(Info.TOKEN).setHttpClientBuilder(httpBuilder).buildBlocking();
+			jda.setAutoReconnect(true);
+			jda.getPresence().setGame(Game.of("Videogames"));
+			jda.addEventListener(new EventHandler(jda));
+		}catch(Exception ex){
+			ex.printStackTrace();
+		}
+	}
+}
