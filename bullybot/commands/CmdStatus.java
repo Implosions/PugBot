@@ -3,10 +3,10 @@ package bullybot.commands;
 import java.util.ArrayList;
 
 import bullybot.classfiles.Queue;
-import bullybot.classfiles.functions.Stuff;
 import bullybot.classfiles.Game;
 import bullybot.classfiles.Info;
 import bullybot.classfiles.QueueManager;
+import bullybot.classfiles.util.Functions;
 import bullybot.errors.DoesNotExistException;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.User;
@@ -24,7 +24,7 @@ public class CmdStatus extends Command {
 		try {
 			if (!qm.isQueueListEmpty()) {
 				if (args.isEmpty()) {
-					this.response = Stuff.createMessage("", statusBuilder(qm.getQueue()), true);
+					this.response = Functions.createMessage("", statusBuilder(qm.getQueue()), true);
 				} else {
 					ArrayList<Queue> queueList = new ArrayList<Queue>();
 					for (String a : args) {
@@ -38,14 +38,14 @@ public class CmdStatus extends Command {
 							queueList.add(queue);
 						}
 					}
-					this.response = Stuff.createMessage("", statusBuilder(queueList), true);
+					this.response = Functions.createMessage("", statusBuilder(queueList), true);
 				}
 			} else {
 				throw new DoesNotExistException("Queue");
 			}
 			System.out.println("Completed status request");
 		} catch (DoesNotExistException ex) {
-			this.response = Stuff.createMessage("Error!", ex.getMessage(), false);
+			this.response = Functions.createMessage("Error!", ex.getMessage(), false);
 		}
 	}
 

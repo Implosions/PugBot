@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 import bullybot.classfiles.Info;
 import bullybot.classfiles.QueueManager;
-import bullybot.classfiles.functions.Stuff;
+import bullybot.classfiles.util.Functions;
 import bullybot.errors.DoesNotExistException;
 import bullybot.errors.InvalidUseException;
 import net.dv8tion.jda.core.entities.Member;
@@ -34,13 +34,13 @@ public class CmdAdd extends Command{
 			}
 			qm.updateTopic();
 			if(qm.hasPlayerJustFinished(member.getUser())){
-				this.response = Stuff.createMessage(successMsg, "Your game has just finished, you will be randomized into queue after 60 seconds", true);
+				this.response = Functions.createMessage(successMsg, "Your game has just finished, you will be randomized into queue after 60 seconds", true);
 			}else{
-				this.response = Stuff.createMessage(String.format("%s added to queue", member.getEffectiveName()), qm.getHeader(), true);
+				this.response = Functions.createMessage(String.format("%s added to queue", member.getEffectiveName()), qm.getHeader(), true);
 			}
 			System.out.println(successMsg);
 		}catch(DoesNotExistException | InvalidUseException ex){
-			this.response = Stuff.createMessage("Error!", ex.getMessage(), false);
+			this.response = Functions.createMessage("Error!", ex.getMessage(), false);
 		}
 	}
 	

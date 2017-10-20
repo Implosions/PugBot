@@ -5,10 +5,11 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.regex.Pattern;
 
-import bullybot.classfiles.functions.Stuff;
+import bullybot.classfiles.util.Functions;
 import bullybot.commands.Command;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.OnlineStatus;
+import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.Message;
 import net.dv8tion.jda.core.entities.MessageChannel;
 import net.dv8tion.jda.core.entities.User;
@@ -23,12 +24,13 @@ public class EventHandler extends ListenerAdapter {
 
 	@SuppressWarnings("unused")
 	private static Commands cmds;
-	private static PugManager pm;
+	@SuppressWarnings("unused")
+	private static ServerManager sm;
 
 	public EventHandler(JDA jda) {
 		cmds = new Commands();
-		pm = new PugManager(jda);
-		Stuff.loadAdminList();
+		new ServerManager(jda.getGuilds());
+		Functions.loadAdminList();
 	}
 
 	@Override
@@ -71,52 +73,41 @@ public class EventHandler extends ListenerAdapter {
 				if (cmdObj.getDM()) {
 					channel = event.getAuthor().openPrivateChannel().complete();
 				}else if(cmdObj.getPugCommand()){
-					channel = PugManager.getPugChannel(event.getGuild().getId());
+					channel = ServerManager.getServer(event.getGuild().getId()).getPugChannel();
 				}
-				if (cmdObj.getAdminRequired() && !Stuff.isAdmin(event.getMember())) {
-					channel.sendMessage(Stuff.createMessage("Error!", "Admin required", false)).queue();
+				if (cmdObj.getAdminRequired() && !Functions.isAdmin(event.getMember())) {
+					channel.sendMessage(Functions.createMessage("Error!", "Admin required", false)).queue();
 				} else {
-					cmdObj.execCommand(PugManager.getQueueManager(event.getGuild().getId()), event.getMember(), args);
+					cmdObj.execCommand(ServerManager.getServer(event.getGuild().getId()).getQueueManager(), event.getMember(), args);
 					channel.sendMessage(cmdObj.getResponse()).queue();
 				}
 			} else {
-				if(channel.equals(PugManager.getPugChannel(event.getGuild().getId()))){
-					channel.sendMessage(Stuff.createMessage("Error!", "Invalid command", false)).queue();
+				if(channel.equals(ServerManager.getServer(event.getGuild().getId()).getPugChannel())){
+					channel.sendMessage(Functions.createMessage("Error!", "Invalid command", false)).queue();
 				}
 			}
 		}
-		PugManager.updateActivityList(event.getAuthor());
+		ServerManager.getServer(event.getGuild().getId()).updateActivityList(event.getAuthor());
 	}
 
 	public void onUserOnlineStatusUpdate(UserOnlineStatusUpdateEvent event) {
-		if (event.getGuild().getMember(event.getUser()).getOnlineStatus().equals(OnlineStatus.ONLINE)
-				|| event.getGuild().getMember(event.getUser()).getOnlineStatus().equals(OnlineStatus.IDLE)) {
-			if (pm.getDcList().contains(event.getUser())) {
-				pm.getDcList().remove(event.getUser());
-				System.out.println(String.format("User %s has returned", event.getUser().getName()));
-			}
-		} else {
-			if (PugManager.getQueueManager(event.getGuild().getId()).isPlayerInQueue(event.getUser())) {
-				pm.startDcTimer(event.getUser());
-			}
+		Member m = event.getGuild().getMember(event.getUser());
+		if(m.getOnlineStatus().equals(OnlineStatus.OFFLINE)){
+			ServerManager.getServer(event.getGuild().getId()).playerDisconnect(m);
 		}
 	}
 
 	public void onGuildJoin(GuildJoinEvent event) {
-		PugManager.addNewServer(event.getGuild().getId());
+		ServerManager.addNewServer(event.getGuild());
 		System.out.println(String.format("Joined server: %s", event.getGuild().getName()));
 	}
 
 	public void onGuildLeave(GuildLeaveEvent event) {
-		PugManager.removeServer(event.getGuild().getId());
+		ServerManager.removeServer(event.getGuild());
 		System.out.println(String.format("Removed from server: %s", event.getGuild().getName()));
 	}
 
 	public void onGenericMessageReaction(GenericMessageReactionEvent event) {
-		try {
-			PugManager.updateActivityList(event.getUser());
-		} catch (Exception ex) {
-			ex.printStackTrace();
-		}
+		ServerManager.getServer(event.getGuild().getId()).updateActivityList(event.getUser());
 	}
 }

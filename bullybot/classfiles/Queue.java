@@ -6,8 +6,8 @@ import java.util.HashMap;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
-import bullybot.classfiles.functions.Stuff;
-import bullybot.classfiles.functions.TimerTrigger;
+import bullybot.classfiles.util.Functions;
+import bullybot.classfiles.util.TimerTrigger;
 import net.dv8tion.jda.core.OnlineStatus;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.PrivateChannel;
@@ -89,15 +89,15 @@ public class Queue {
 		}
 		names = names.substring(0, names.lastIndexOf(","));
 		
-		PugManager.getQueueManager(guildId).purgeQueue(players);
-		PugManager.getPugChannel(guildId).sendMessage(Stuff.createMessage(String.format("Game: [%s] starting", name), String.format("%s%n**Captains:** <@%s> & <@%s>", names, newGame.getCaptains()[0], newGame.getCaptains()[1]), Color.cyan)).queueAfter(2, TimeUnit.SECONDS);
+		ServerManager.getServer(guildId).getQueueManager().purgeQueue(players);
+		ServerManager.getServer(guildId).getPugChannel().sendMessage(Functions.createMessage(String.format("Game: **%s** starting", name), String.format("%s%n**Captains:** <@%s> & <@%s>", names, newGame.getCaptains()[0], newGame.getCaptains()[1]), Color.cyan)).queueAfter(2, TimeUnit.SECONDS);
 	}
 
 	public void finish(Game g) {
 		ArrayList<User> players = new ArrayList<User>(g.getPlayers());
-		PugManager.getQueueManager(guildId).addToJustFinished(players);
+		ServerManager.getServer(guildId).getQueueManager().addToJustFinished(players);
 		games.remove(g);
-		t = () -> PugManager.getQueueManager(guildId).timerEnd(players);
+		t = () -> ServerManager.getServer(guildId).getQueueManager().timerEnd(players);
 		Timer timer = new Timer(60, t);
 		timer.start();
 	}
@@ -106,6 +106,8 @@ public class Queue {
 		if(playersInQueue.contains(s)){
 			playersInQueue.remove(s);
 			currentPlayers--;
+		}else if(waitList.contains(s)){
+			waitList.remove(s);
 		}
 	}
 
@@ -184,7 +186,7 @@ public class Queue {
 
 	private void notify(ArrayList<User> users) {
 		for(User u : users){
-			Member m = PugManager.getGuild(guildId).getMemberById(u.getId());
+			Member m = ServerManager.getServer(guildId).getGuild().getMemberById(u.getId());
 			if(!playersInQueue.contains(u) && (m.getOnlineStatus().equals(OnlineStatus.ONLINE) || m.getOnlineStatus().equals(OnlineStatus.IDLE))){
 				u.openPrivateChannel().complete().sendMessage(String.format("Queue: %s is at %d players!", name, currentPlayers)).complete();
 			}

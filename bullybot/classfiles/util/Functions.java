@@ -1,4 +1,4 @@
-package bullybot.classfiles.functions;
+package bullybot.classfiles.util;
 
 import java.awt.Color;
 import java.io.File;
@@ -13,7 +13,7 @@ import net.dv8tion.jda.core.Permission;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.Message;
 
-public class Stuff {
+public class Functions {
 	private static ArrayList<String> admins = new ArrayList<String>();
 	
 	public static Message createMessage(String title, String description, boolean success){
@@ -57,16 +57,11 @@ public class Stuff {
 		return false;
 	}
 	
-	public static void createFiles() {
+	public static void createFile(String name) {
 		try{
-			File dir = new File("app_data");
-			File games = new File("app_data/games.txt");
+			File dir = new File("name");
 			if(!dir.exists()){
 				dir.mkdir();
-			}
-		
-			if(!games.exists()){
-				games.createNewFile();
 			}
 		}catch(Exception ex){
 			ex.printStackTrace();

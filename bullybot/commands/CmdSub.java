@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 import bullybot.classfiles.Info;
 import bullybot.classfiles.QueueManager;
-import bullybot.classfiles.functions.Stuff;
+import bullybot.classfiles.util.Functions;
 import bullybot.errors.BadArgumentsException;
 import bullybot.errors.DoesNotExistException;
 import bullybot.errors.InvalidUseException;
@@ -28,10 +28,10 @@ public class CmdSub extends Command{
 				throw new BadArgumentsException();
 			}
 			qm.updateTopic();
-			this.response = Stuff.createMessage(String.format("%s has been subbed with %s", args.get(0), args.get(1)), "", true);
+			this.response = Functions.createMessage(String.format("%s has been subbed with %s", args.get(0), args.get(1)), "", true);
 			System.out.println(successMsg);
 		}catch(DoesNotExistException | BadArgumentsException | InvalidUseException ex){
-			this.response = Stuff.createMessage("Error!", ex.getMessage(), false);
+			this.response = Functions.createMessage("Error!", ex.getMessage(), false);
 		}
 		
 	}

@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 import bullybot.classfiles.Info;
 import bullybot.classfiles.QueueManager;
-import bullybot.classfiles.functions.Stuff;
+import bullybot.classfiles.util.Functions;
 import bullybot.errors.BadArgumentsException;
 import bullybot.errors.DoesNotExistException;
 import net.dv8tion.jda.core.entities.Member;
@@ -34,11 +34,11 @@ public class CmdDeleteNotification extends Command{
 			}else{
 				throw new BadArgumentsException();
 			}
-			this.response = Stuff.createMessage(successMsg, "", true);
+			this.response = Functions.createMessage(successMsg, "", true);
 			System.out.println(successMsg);
 			qm.saveToFile();
 		}catch(BadArgumentsException | DoesNotExistException ex){
-			this.response = Stuff.createMessage("Error!", ex.getMessage(), false);
+			this.response = Functions.createMessage("Error!", ex.getMessage(), false);
 		}
 	}
 	

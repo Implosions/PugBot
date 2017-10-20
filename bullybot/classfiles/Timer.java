@@ -1,6 +1,6 @@
 package bullybot.classfiles;
 
-import bullybot.classfiles.functions.TimerTrigger;
+import bullybot.classfiles.util.TimerTrigger;
 
 public class Timer extends Thread{
 	

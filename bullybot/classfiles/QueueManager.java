@@ -15,6 +15,7 @@ import bullybot.errors.BadArgumentsException;
 import bullybot.errors.DoesNotExistException;
 import bullybot.errors.DuplicateEntryException;
 import bullybot.errors.InvalidUseException;
+import net.dv8tion.jda.core.Permission;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.User;
 
@@ -300,9 +301,11 @@ public class QueueManager {
 	}
 
 	public void updateTopic() {
-		PugManager.getPugChannel(guildId).getManager().setTopic(getHeader()).complete();
-		System.out.println("Topic updated");
-		saveToFile();
+		if(ServerManager.getServer(guildId).getGuild().getSelfMember().getPermissions().contains(Permission.MANAGE_CHANNEL)){
+			ServerManager.getServer(guildId).getPugChannel().getManager().setTopic(getHeader()).complete();
+			System.out.println("Topic updated");
+			saveToFile();
+		}
 	}
 
 	public void remove(String name) {
@@ -352,7 +355,7 @@ public class QueueManager {
 	public void sub(String target, String substitute) {
 		if (!isQueueListEmpty()) {
 			User sub = null;
-			for (Member m : PugManager.getGuild(guildId).getMembers()) {
+			for (Member m : ServerManager.getServer(guildId).getGuild().getMembers()) {
 				if (m.getUser().getName().equalsIgnoreCase(substitute)) {
 					sub = m.getUser();
 					break;
@@ -472,7 +475,7 @@ public class QueueManager {
 	public void saveToFile() {
 		try {
 			System.out.println("Saving queue to file...");
-			PrintWriter writer = new PrintWriter(new FileOutputStream(String.format("app_data/%s.json", guildId)));
+			PrintWriter writer = new PrintWriter(new FileOutputStream(String.format("%s/%s/%s", "app_data", guildId, "queue.json")));
 			writer.println(encodeJSON());
 			writer.close();
 			System.out.println("Queue saved");
@@ -512,7 +515,7 @@ public class QueueManager {
 	}
 
 	private void loadFromFile() {
-		if (new File(String.format("app_data/%s.json", guildId)).exists()) {
+		if (new File(String.format("%s/%s/%s", "app_data", guildId, "queue.json")).exists()) {
 			try {
 				System.out.println("Loading queue from file...");
 				Scanner reader = new Scanner(new FileInputStream(String.format("app_data/%s.json", guildId)));
@@ -541,15 +544,15 @@ public class QueueManager {
 			JSONObject jq = new JSONObject(q.toString());
 			create(jq.getString("name"), jq.getInt("maxplayers"));
 			jq.getJSONArray("inqueue").forEach((p) -> {
-				User player = PugManager.getGuild(guildId).getMemberById(p.toString()).getUser();
+				User player = ServerManager.getServer(guildId).getGuild().getMemberById(p.toString()).getUser();
 				addPlayer(player, jq.getString("name"));
-				PugManager.getActivityList().put(player, System.currentTimeMillis());
+				ServerManager.getServer(guildId).updateActivityList(player);
 			});
 			jq.getJSONArray("notifications").forEach((ns) -> {
 				JSONObject n = new JSONObject(ns.toString());
 				n.getJSONArray("notifyplayers")
 						.forEach((np) -> addNotification(
-								PugManager.getGuild(guildId).getMemberById(np.toString()).getUser(),
+								ServerManager.getServer(guildId).getGuild().getMemberById(np.toString()).getUser(),
 								jq.getString("name"), n.getInt("playercount")));
 			});
 		});

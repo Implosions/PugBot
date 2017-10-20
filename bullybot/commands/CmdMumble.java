@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 import bullybot.classfiles.Info;
 import bullybot.classfiles.QueueManager;
-import bullybot.classfiles.functions.Stuff;
+import bullybot.classfiles.util.Functions;
 import net.dv8tion.jda.core.entities.Member;
 
 public class CmdMumble extends Command{
@@ -18,7 +18,7 @@ public class CmdMumble extends Command{
 
 	@Override
 	public void execCommand(QueueManager qm, Member member, ArrayList<String> args) {
-		this.response = Stuff.createMessage("", successMsg, true);
+		this.response = Functions.createMessage("", successMsg, true);
 	}
 
 }

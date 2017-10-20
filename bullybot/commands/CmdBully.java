@@ -6,7 +6,7 @@ import java.util.HashMap;
 
 import bullybot.classfiles.Info;
 import bullybot.classfiles.QueueManager;
-import bullybot.classfiles.functions.Stuff;
+import bullybot.classfiles.util.Functions;
 import bullybot.errors.BadArgumentsException;
 import bullybot.errors.DoesNotExistException;
 import net.dv8tion.jda.core.entities.Member;
@@ -61,12 +61,12 @@ public class CmdBully extends Command {
 						if (u.getId().equals(vip)) {
 							u = member.getUser();
 						}
-						this.response = Stuff.createMessage(String.format(actionList[random.nextInt(actionList.length)], u.getId()));
+						this.response = Functions.createMessage(String.format(actionList[random.nextInt(actionList.length)], u.getId()));
 						if(!member.getUser().getId().equals(vip)){
 							cooldownCollection.put(member.getUser(), System.currentTimeMillis());
 						}
 					} else {
-						this.response = Stuff.createMessage("Your bullying is on cooldown", String.format("Time remaining: %d Minutes",
+						this.response = Functions.createMessage("Your bullying is on cooldown", String.format("Time remaining: %d Minutes",
 								30 - ((System.currentTimeMillis() - cooldownCollection.get(member.getUser())) / 60000)), false);
 					}
 				} else {
@@ -77,7 +77,7 @@ public class CmdBully extends Command {
 			}
 			System.out.println("Completed bully request");
 		} catch (BadArgumentsException | DoesNotExistException ex) {
-			this.response = Stuff.createMessage("Error!", ex.getMessage(), false);
+			this.response = Functions.createMessage("Error!", ex.getMessage(), false);
 		}
 	}
 

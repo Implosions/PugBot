@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 import bullybot.classfiles.Info;
 import bullybot.classfiles.QueueManager;
-import bullybot.classfiles.functions.Stuff;
+import bullybot.classfiles.util.Functions;
 import bullybot.errors.BadArgumentsException;
 import bullybot.errors.DoesNotExistException;
 import bullybot.errors.InvalidUseException;
@@ -43,10 +43,10 @@ public class CmdRemove extends Command {
 				throw new BadArgumentsException();
 			}
 			qm.updateTopic();
-			this.response = Stuff.createMessage(String.format("Player removed from queue"), qm.getHeader(), true);
+			this.response = Functions.createMessage(String.format("Player removed from queue"), qm.getHeader(), true);
 			System.out.println(successMsg);
 		} catch (BadArgumentsException | DoesNotExistException | InvalidUseException ex) {
-			this.response = Stuff.createMessage("Error!", ex.getMessage(), false);
+			this.response = Functions.createMessage("Error!", ex.getMessage(), false);
 		}
 	}
 

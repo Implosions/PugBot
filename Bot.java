@@ -4,7 +4,6 @@ import java.util.concurrent.TimeUnit;
 import bullybot.classfiles.EventHandler;
 
 import bullybot.classfiles.Info;
-import bullybot.classfiles.functions.Stuff;
 import net.dv8tion.jda.core.AccountType;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.JDABuilder;
@@ -15,7 +14,6 @@ public class Bot{
 	
 	public static void main(String[] args) {
 		try{
-			Stuff.createFiles();
 			OkHttpClient.Builder httpBuilder = new OkHttpClient.Builder().readTimeout(2, TimeUnit.MINUTES).connectTimeout(2, TimeUnit.MINUTES).writeTimeout(2, TimeUnit.MINUTES);
 			JDA jda = new JDABuilder(AccountType.BOT).setToken(Info.TOKEN).setHttpClientBuilder(httpBuilder).buildBlocking();
 			jda.setAutoReconnect(true);
