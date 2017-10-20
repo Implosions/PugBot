@@ -34,7 +34,7 @@ public class EventHandler extends ListenerAdapter {
 	@Override
 	public void onGuildMessageReceived(GuildMessageReceivedEvent event) {
 		String message = event.getMessage().getContent();
-		if (message.startsWith("!") && message.length() > 1 && !event.getAuthor().isBot() && !event.getAuthor().getId().equals("213935477999403008")) {
+		if (message.startsWith("!") && message.length() > 1 && !event.getAuthor().isBot()) {
 			MessageChannel channel = event.getChannel();
 			
 			for(Message m : channel.getHistory().retrievePast(3).complete()){

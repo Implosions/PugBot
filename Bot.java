@@ -16,7 +16,7 @@ public class Bot{
 	public static void main(String[] args) {
 		try{
 			Stuff.createFiles();
-			OkHttpClient.Builder httpBuilder = new OkHttpClient.Builder().readTimeout(1, TimeUnit.MINUTES).connectTimeout(15, TimeUnit.SECONDS).writeTimeout(15, TimeUnit.SECONDS);
+			OkHttpClient.Builder httpBuilder = new OkHttpClient.Builder().readTimeout(2, TimeUnit.MINUTES).connectTimeout(2, TimeUnit.MINUTES).writeTimeout(2, TimeUnit.MINUTES);
 			JDA jda = new JDABuilder(AccountType.BOT).setToken(Info.TOKEN).setHttpClientBuilder(httpBuilder).buildBlocking();
 			jda.setAutoReconnect(true);
 			jda.getPresence().setGame(Game.of("Videogames"));
