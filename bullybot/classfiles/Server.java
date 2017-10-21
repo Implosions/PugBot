@@ -16,6 +16,7 @@ public class Server {
 	private Guild guild;
 	private Settings settings;
 	private QueueManager qm;
+	public Commands cmds;
 	private HashMap<User, Long> activityList;
 
 	public Server(String id, Guild g) {
@@ -23,6 +24,7 @@ public class Server {
 		this.id = id;
 		guild = g;
 		qm = new QueueManager(id);
+		cmds = new Commands();
 		settings = new Settings(id);
 
 		startAFKTimer();

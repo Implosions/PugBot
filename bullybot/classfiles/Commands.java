@@ -7,9 +7,9 @@ import java.util.HashMap;
 import bullybot.commands.*;
 
 public class Commands {
-	private static HashMap<String, Command> cmdList;
-	private static ArrayList<String> adminCmds;
-	private static ArrayList<String> cmds;
+	private HashMap<String, Command> cmdList;
+	private ArrayList<String> adminCmds;
+	private ArrayList<String> cmds;
 
 	public Commands() {
 		cmdList = new HashMap<String, Command>();
@@ -36,11 +36,11 @@ public class Commands {
 		populateLists();
 	}
 
-	public static boolean validateCommand(String cmd) {
+	public boolean validateCommand(String cmd) {
 		return cmdList.containsKey(cmd);
 	}
 
-	public static Command getCommandObj(String cmd) {
+	public Command getCommandObj(String cmd) {
 		return cmdList.get(cmd);
 	}
 	
@@ -56,11 +56,11 @@ public class Commands {
 		Collections.sort(cmds, String.CASE_INSENSITIVE_ORDER);
 	}
 	
-	public static ArrayList<String> getAdminCmds(){
+	public ArrayList<String> getAdminCmds(){
 		return adminCmds;
 	}
 	
-	public static ArrayList<String> getCmds(){
+	public  ArrayList<String> getCmds(){
 		return cmds;
 	}
 }

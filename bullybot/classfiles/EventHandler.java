@@ -25,12 +25,9 @@ import net.dv8tion.jda.core.hooks.ListenerAdapter;
 public class EventHandler extends ListenerAdapter {
 
 	@SuppressWarnings("unused")
-	private static Commands cmds;
-	@SuppressWarnings("unused")
 	private static ServerManager sm;
 
 	public EventHandler(JDA jda) {
-		cmds = new Commands();
 		new ServerManager(jda.getGuilds());
 		Functions.loadAdminList();
 	}
@@ -75,8 +72,8 @@ public class EventHandler extends ListenerAdapter {
 			String cmd = args.get(0).toLowerCase();
 			args.remove(0);
 
-			if (Commands.validateCommand(cmd)) {
-				Command cmdObj = Commands.getCommandObj(cmd);
+			if (ServerManager.getServer(event.getGuild().getId()).cmds.validateCommand(cmd)) {
+				Command cmdObj = ServerManager.getServer(event.getGuild().getId()).cmds.getCommandObj(cmd);
 				if (cmdObj.getDM()) {
 					channel = event.getAuthor().openPrivateChannel().complete();
 				}else if(cmdObj.getPugCommand()){
