@@ -90,7 +90,11 @@ public class Queue {
 		names = names.substring(0, names.lastIndexOf(","));
 		
 		ServerManager.getServer(guildId).getQueueManager().purgeQueue(players);
-		ServerManager.getServer(guildId).getPugChannel().sendMessage(Functions.createMessage(String.format("Game: **%s** starting", name), String.format("%s%n**Captains:** <@%s> & <@%s>", names, newGame.getCaptains()[0], newGame.getCaptains()[1]), Color.cyan)).queueAfter(2, TimeUnit.SECONDS);
+		String captainString = "";
+		if(ServerManager.getServer(guildId).getSettings().randomizeCaptains()){
+			captainString = String.format("%s%n**Captains:** <@%s> & <@%s>", names, newGame.getCaptains()[0], newGame.getCaptains()[1]);
+		}
+		ServerManager.getServer(guildId).getPugChannel().sendMessage(Functions.createMessage(String.format("Game: %s starting", name), captainString, Color.cyan)).queueAfter(2, TimeUnit.SECONDS);
 	}
 
 	public void finish(Game g) {
@@ -98,7 +102,7 @@ public class Queue {
 		ServerManager.getServer(guildId).getQueueManager().addToJustFinished(players);
 		games.remove(g);
 		t = () -> ServerManager.getServer(guildId).getQueueManager().timerEnd(players);
-		Timer timer = new Timer(60, t);
+		Timer timer = new Timer(ServerManager.getServer(guildId).getSettings().finishTime(), t);
 		timer.start();
 	}
 

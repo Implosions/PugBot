@@ -44,7 +44,7 @@ public class Server {
 
 	public TextChannel getPugChannel() {
 		for (TextChannel c : guild.getTextChannels()) {
-			if (c.getName().equalsIgnoreCase(settings.getPugChannelName())) {
+			if (c.getName().equalsIgnoreCase(settings.pugChannel())) {
 				return c;
 			}
 		}
@@ -59,7 +59,7 @@ public class Server {
 
 	private void afkTimerEnd() {
 		activityList.forEach((u, l) -> {
-			if (qm.isPlayerInQueue(u) && (System.currentTimeMillis() - l) / 60000 >= 120) {
+			if (qm.isPlayerInQueue(u) && (System.currentTimeMillis() - l) / 60000 >= settings.afkTime()) {
 				qm.deletePlayer(u);
 				String s = String.format("%s has been removed from the queue due to inactivity", u.getName());
 				getPugChannel().sendMessage(Functions.createMessage("", s, Color.red)).queue();
@@ -68,7 +68,6 @@ public class Server {
 				qm.updateTopic();
 				System.out.println(s);
 			}
-			;
 		});
 
 		startAFKTimer();
@@ -76,7 +75,7 @@ public class Server {
 
 	private void startDcTimer(Member m) {
 		TimerTrigger trigger = () -> dcTimerEnd(m);
-		Timer timer = new Timer(120, trigger);
+		Timer timer = new Timer(settings.dcTime(), trigger);
 		timer.start();
 		System.out.println(String.format("User %s has gone offline, starting dc timer", m.getEffectiveName()));
 	}

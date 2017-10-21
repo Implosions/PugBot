@@ -9,14 +9,17 @@ import java.util.Properties;
 import bullybot.classfiles.util.Functions;
 
 public class Settings {
-	
-	//private String id;
+
 	private String filePath;
 	
-	private String pugChannel;
+	private String pugChannel = "pugs";
+	private Integer afkTime = 120;
+	private Integer dcTime = 120;
+	private Integer finishTime = 60;
+	private boolean randomizeCaptains = true;
+	
 	
 	public Settings(String id){
-		//this.id = id;
 		this.filePath = String.format("%s/%s/%s", "app_data", id, "settings.cfg");
 		if(!new File(filePath).exists()){
 			createSettingsFile();
@@ -29,7 +32,12 @@ public class Settings {
 			FileInputStream is = new FileInputStream(filePath);
 			Properties p = new Properties();
 			p.load(is);
-			pugChannel = p.getProperty("pugchannel", "pugs");
+			pugChannel = p.getProperty("pugchannel", pugChannel);
+			afkTime = Integer.valueOf(p.getProperty("afktime", afkTime.toString()));
+			dcTime = Integer.valueOf(p.getProperty("dctime", dcTime.toString()));
+			finishTime = Integer.valueOf(p.getProperty("finishtime", finishTime.toString()));
+			randomizeCaptains = Boolean.valueOf(p.getProperty("randomizecaptains", String.valueOf(randomizeCaptains)));
+			is.close();
 		}catch(IOException ex){
 			ex.printStackTrace();
 		}
@@ -42,7 +50,11 @@ public class Settings {
 			FileOutputStream os = new FileOutputStream(filePath);
 			Properties p = new Properties();
 			
-			p.setProperty("pugchannel", "pugs");
+			p.setProperty("pugchannel", pugChannel);
+			p.setProperty("afktime", afkTime.toString());
+			p.setProperty("dctime", dcTime.toString());
+			p.setProperty("finishtime", finishTime.toString());
+			p.setProperty("randomizecaptains", String.valueOf(randomizeCaptains));
 			p.store(os, null);
 			os.close();
 		}catch(IOException ex){
@@ -50,7 +62,23 @@ public class Settings {
 		}
 	}
 	
-	public String getPugChannelName(){
+	public String pugChannel(){
 		return pugChannel;
+	}
+	
+	public Integer afkTime(){
+		return afkTime;
+	}
+	
+	public Integer dcTime(){
+		return dcTime;
+	}
+	
+	public Integer finishTime(){
+		return finishTime;
+	}
+	
+	public boolean randomizeCaptains(){
+		return randomizeCaptains;
 	}
 }
