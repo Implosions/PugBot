@@ -6,7 +6,6 @@ import bullybot.classfiles.Queue;
 import bullybot.classfiles.Game;
 import bullybot.classfiles.Info;
 import bullybot.classfiles.QueueManager;
-import bullybot.classfiles.ServerManager;
 import bullybot.classfiles.util.Functions;
 import bullybot.errors.DoesNotExistException;
 import net.dv8tion.jda.core.Permission;
@@ -14,8 +13,6 @@ import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.User;
 
 public class CmdStatus extends Command {
-	
-	private String lastStatusId = null;
 	
 	public CmdStatus() {
 		this.helpMsg = Info.STATUS_HELP;
@@ -47,10 +44,9 @@ public class CmdStatus extends Command {
 			} else {
 				throw new DoesNotExistException("Queue");
 			}
-			if(member.getGuild().getSelfMember().getPermissions().contains(Permission.MESSAGE_MANAGE) && lastStatusId != null){
-				ServerManager.getServer(member.getGuild().getId()).getPugChannel().deleteMessageById(lastStatusId);
+			if(member.getGuild().getSelfMember().getPermissions().contains(Permission.MESSAGE_MANAGE) && lastResponseId != null){
+				qm.getServer().getPugChannel().deleteMessageById(lastResponseId).complete();
 			}
-			lastStatusId = response.getId();
 			System.out.println("Completed status request");
 		} catch (DoesNotExistException ex) {
 			this.response = Functions.createMessage("Error!", ex.getMessage(), false);

@@ -12,6 +12,7 @@ public abstract class Command {
 	protected String successMsg;
 	protected String description;
 	protected Message response;
+	protected String lastResponseId = null;
 	protected boolean dm = false;
 	protected boolean adminRequired = false;
 	protected boolean pugCommand = true;
@@ -44,5 +45,9 @@ public abstract class Command {
 	
 	public boolean getPugCommand(){
 		return pugCommand;
+	}
+	
+	public void setLastResponseId(String id){
+		lastResponseId = id;
 	}
 }

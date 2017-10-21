@@ -19,10 +19,10 @@ public class Server {
 	public Commands cmds;
 	private HashMap<User, Long> activityList = new HashMap<User, Long>();
 
-	public Server(String id, Guild g) {
+	public Server(Guild guild) {
+		this.guild = guild;
+		this.id = guild.getId();
 		Functions.createDir(String.format("%s/%s", "app_data", id));
-		this.id = id;
-		guild = g;
 		qm = new QueueManager(id);
 		cmds = new Commands();
 		settings = new Settings(id);

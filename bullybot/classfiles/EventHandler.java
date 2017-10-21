@@ -43,7 +43,7 @@ public class EventHandler extends ListenerAdapter {
 					if(!m.getId().equals(event.getMessageId()) 
 							&& m.getAuthor().equals(event.getAuthor()) 
 							&& m.getContent().equals(event.getMessage().getContent())
-							&& m.getCreationTime().isBefore(event.getMessage().getCreationTime().minusSeconds(5))){
+							&& m.getCreationTime().isAfter(event.getMessage().getCreationTime().minusSeconds(3))){
 						return;
 					}
 				}
@@ -84,6 +84,7 @@ public class EventHandler extends ListenerAdapter {
 				} else {
 					cmdObj.execCommand(ServerManager.getServer(event.getGuild().getId()).getQueueManager(), event.getMember(), args);
 					channel.sendMessage(cmdObj.getResponse()).queue();
+					cmdObj.setLastResponseId(channel.getHistory().retrievePast(1).complete().get(0).getId());
 				}
 			} else {
 				if(channel.equals(ServerManager.getServer(event.getGuild().getId()).getPugChannel())){

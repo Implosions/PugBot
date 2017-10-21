@@ -544,9 +544,8 @@ public class QueueManager {
 			JSONObject jq = new JSONObject(q.toString());
 			create(jq.getString("name"), jq.getInt("maxplayers"));
 			jq.getJSONArray("inqueue").forEach((p) -> {
-				User player = ServerManager.getServer(guildId).getGuild().getMemberById(p.toString()).getUser();
+				User player = ServerManager.getGuild(guildId).getMemberById(p.toString()).getUser();
 				addPlayer(player, jq.getString("name"));
-				ServerManager.getServer(guildId).updateActivityList(player);
 			});
 			jq.getJSONArray("notifications").forEach((ns) -> {
 				JSONObject n = new JSONObject(ns.toString());
