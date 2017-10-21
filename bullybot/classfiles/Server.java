@@ -17,10 +17,10 @@ public class Server {
 	private Settings settings;
 	private QueueManager qm;
 	public Commands cmds;
-	private HashMap<User, Long> activityList;
+	private HashMap<User, Long> activityList = new HashMap<User, Long>();
 
 	public Server(String id, Guild g) {
-		Functions.createFile(String.format("%s/%s", "app_data", id));
+		Functions.createDir(String.format("%s/%s", "app_data", id));
 		this.id = id;
 		guild = g;
 		qm = new QueueManager(id);
@@ -84,7 +84,7 @@ public class Server {
 		if (m.getOnlineStatus().equals(OnlineStatus.OFFLINE)) {
 			qm.deletePlayer(m.getUser());
 			qm.updateTopic();
-			String s = String.format("%s has been removed from queue after being offline for 2 minutes", m.getEffectiveName());
+			String s = String.format("%s has been removed from queue after being offline for %d minutes", m.getEffectiveName(), settings.dcTime()/60);
 			getPugChannel().sendMessage(Functions.createMessage("", s,Color.red)).queue();
 			System.out.println(s);
 		}else{

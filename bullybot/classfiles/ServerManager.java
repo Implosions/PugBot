@@ -10,9 +10,11 @@ public class ServerManager {
 	private static HashMap<String, Server> serverMap;
 	
 	public ServerManager(List<Guild> guilds){
-		Functions.createFile("app_data");
+		Functions.createDir("app_data");
 		serverMap = new HashMap<String, Server>();
-		guilds.forEach((g) -> serverMap.put(g.getId(), new Server(g.getId(), g)));
+		guilds.forEach((g) -> {serverMap.put(g.getId(), new Server(g.getId(), g));
+									getServer(g.getId()).getQueueManager().updateTopic();
+								});
 	}
 	
 	public static Server getServer(String id){

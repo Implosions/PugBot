@@ -57,9 +57,21 @@ public class Functions {
 		return false;
 	}
 	
-	public static void createFile(String name) {
+	public static void createFile(String path) {
 		try{
-			File dir = new File("name");
+			File file = new File(path);
+			if(!file.exists()){
+				file.createNewFile();
+			}
+		}catch(Exception ex){
+			ex.printStackTrace();
+		}
+		
+	}
+	
+	public static void createDir(String path) {
+		try{
+			File dir = new File(path);
 			if(!dir.exists()){
 				dir.mkdir();
 			}

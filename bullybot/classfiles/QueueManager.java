@@ -28,7 +28,6 @@ public class QueueManager {
 	public QueueManager(String id) {
 		guildId = id;
 		loadFromFile();
-		updateTopic();
 	}
 
 	public void create(String name, Integer players) {
@@ -515,10 +514,11 @@ public class QueueManager {
 	}
 
 	private void loadFromFile() {
-		if (new File(String.format("%s/%s/%s", "app_data", guildId, "queue.json")).exists()) {
+		String s = String.format("%s/%s/%s", "app_data", guildId, "queue.json");
+		if (new File(s).exists()) {
 			try {
 				System.out.println("Loading queue from file...");
-				Scanner reader = new Scanner(new FileInputStream(String.format("app_data/%s.json", guildId)));
+				Scanner reader = new Scanner(new FileInputStream(s));
 				String input = "";
 
 				while (reader.hasNextLine()) {
