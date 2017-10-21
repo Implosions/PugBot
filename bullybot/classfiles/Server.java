@@ -84,7 +84,7 @@ public class Server {
 		if (m.getOnlineStatus().equals(OnlineStatus.OFFLINE)) {
 			qm.deletePlayer(m.getUser());
 			qm.updateTopic();
-			String s = String.format("%s has been removed from queue after being offline for %d minutes", m.getEffectiveName(), settings.dcTime()/60);
+			String s = String.format("%s has been removed from queue after being offline for %d minutes", m.getEffectiveName(), (double)(settings.dcTime()/60));
 			getPugChannel().sendMessage(Functions.createMessage("", s,Color.red)).queue();
 			System.out.println(s);
 		}else{
