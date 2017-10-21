@@ -1,20 +1,24 @@
 package bullybot.classfiles;
 
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Random;
 
+import bullybot.classfiles.util.Functions;
 import net.dv8tion.jda.core.entities.User;
 
 public class Game {
+	private String guildId;
 	private String name;
 	private Long timestamp;
 	private ArrayList<User> players;
 	private String[] captains = new String[]{"",""};
 	
-	public Game(String name, ArrayList<User> players){
+	public Game(String id, String name, ArrayList<User> players){
+		this.guildId = id; 
 		this.name = name;
 		this.timestamp = System.currentTimeMillis();
 		this.players = new ArrayList<User>(players);
@@ -74,13 +78,15 @@ public class Game {
 	}
 	
 	private void writeToFile(){
+		String s = String.format("%s/%s/%s", "app_data", guildId, "games.txt");
+		Functions.createFile(s);
 		try{
 			System.out.println("Logging game to file...");
-			PrintWriter writer = new PrintWriter(new FileOutputStream("app_data/games.txt", true));
+			PrintWriter writer = new PrintWriter(new FileOutputStream(s, true));
 			writer.format("%s %s %3$tk:%3$tM:%3$tS %3$tD%n", name, players.toString(), new Date(timestamp));
 			writer.close();
 			System.out.println("Game logged");
-		}catch(Exception ex){
+		}catch(IOException ex){
 			ex.printStackTrace();
 		}
 	}

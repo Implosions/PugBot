@@ -79,7 +79,7 @@ public class Queue {
 	private void popQueue() {
 		String names = "";
 		ArrayList<User> players = new ArrayList<User>(playersInQueue);
-		Game newGame = new Game(name, players);
+		Game newGame = new Game(guildId, name, players);
 		games.add(newGame);
 		
 		for(User u : players){
