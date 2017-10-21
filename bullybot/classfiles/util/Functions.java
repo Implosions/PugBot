@@ -24,10 +24,10 @@ public class Functions {
 		}else{
 			color = Color.red;
 		}
-		if(!title.isEmpty() && title != null){
+		if(title != null && !title.isEmpty()){
 			embed.append(String.format("`%s`", title));
 		}
-		if(!description.isEmpty() && description != null){
+		if(description != null && !description.isEmpty()){
 			embed.setEmbed(new EmbedBuilder().setDescription(description).setColor(color).build());
 		}
 		
@@ -36,10 +36,12 @@ public class Functions {
 	
 	public static Message createMessage(String title, String description, Color color){
 		MessageBuilder embed = new MessageBuilder();
-		if(!title.isEmpty() && title != null){
+		if(title != null && !title.isEmpty()){
 			embed.append(String.format("`%s`", title));
 		}
-		embed.setEmbed(new EmbedBuilder().setDescription(description).setColor(color).build());
+		if(description != null && !description.isEmpty()){
+			embed.setEmbed(new EmbedBuilder().setDescription(description).setColor(color).build());
+		}
 		return embed.build();
 	}
 	
