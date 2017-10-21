@@ -106,4 +106,8 @@ public class Server {
 	public Guild getGuild(){
 		return guild;
 	}
+	
+	public void setGuild(Guild guild){
+		this.guild = guild;
+	}
 }

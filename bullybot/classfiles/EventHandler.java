@@ -9,10 +9,12 @@ import bullybot.classfiles.util.Functions;
 import bullybot.commands.Command;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.OnlineStatus;
+import net.dv8tion.jda.core.Permission;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.Message;
 import net.dv8tion.jda.core.entities.MessageChannel;
 import net.dv8tion.jda.core.entities.User;
+import net.dv8tion.jda.core.events.guild.GenericGuildEvent;
 import net.dv8tion.jda.core.events.guild.GuildJoinEvent;
 import net.dv8tion.jda.core.events.guild.GuildLeaveEvent;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
@@ -39,9 +41,14 @@ public class EventHandler extends ListenerAdapter {
 		if (message.startsWith("!") && message.length() > 1 && !event.getAuthor().isBot()) {
 			MessageChannel channel = event.getChannel();
 			
-			for(Message m : channel.getHistory().retrievePast(3).complete()){
-				if(!m.getId().equals(event.getMessageId()) && m.getAuthor().equals(event.getAuthor()) && m.getContent().equals(event.getMessage().getContent())){
-					return;
+			if(event.getGuild().getSelfMember().getPermissions().contains(Permission.MESSAGE_HISTORY)){
+				for(Message m : channel.getHistory().retrievePast(3).complete()){
+					if(!m.getId().equals(event.getMessageId()) 
+							&& m.getAuthor().equals(event.getAuthor()) 
+							&& m.getContent().equals(event.getMessage().getContent())
+							&& m.getCreationTime().isBefore(event.getMessage().getCreationTime().minusSeconds(5))){
+						return;
+					}
 				}
 			}
 			
@@ -109,5 +116,9 @@ public class EventHandler extends ListenerAdapter {
 
 	public void onGenericMessageReaction(GenericMessageReactionEvent event) {
 		ServerManager.getServer(event.getGuild().getId()).updateActivityList(event.getUser());
+	}
+	
+	public void onGenericGuild(GenericGuildEvent event){
+		ServerManager.getServer(event.getGuild().getId()).setGuild(event.getGuild());
 	}
 }
