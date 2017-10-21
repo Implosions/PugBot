@@ -300,8 +300,8 @@ public class QueueManager {
 	}
 
 	public void updateTopic() {
-		if(ServerManager.getServer(guildId).getGuild().getSelfMember().getPermissions().contains(Permission.MANAGE_CHANNEL)){
-			ServerManager.getServer(guildId).getPugChannel().getManager().setTopic(getHeader()).complete();
+		if(getServer().getGuild().getSelfMember().getPermissions().contains(Permission.MANAGE_CHANNEL)){
+			getServer().getPugChannel().getManager().setTopic(getHeader()).complete();
 			System.out.println("Topic updated");
 			saveToFile();
 		}
@@ -564,5 +564,9 @@ public class QueueManager {
 
 	public String getId() {
 		return guildId;
+	}
+	
+	public Server getServer(){
+		return ServerManager.getServer(guildId);
 	}
 }
