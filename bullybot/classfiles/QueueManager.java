@@ -509,7 +509,7 @@ public class QueueManager {
 
 			ja.put(jQueue);
 		}
-		root.put("queue", ja);
+		root.put("queuelist", ja);
 		return root.toString(4);
 	}
 
@@ -540,7 +540,7 @@ public class QueueManager {
 
 	private void parseJSON(String input) {
 		JSONObject json = new JSONObject(input);
-		json.getJSONArray("queue").forEach((q) -> {
+		json.getJSONArray("queuelist").forEach((q) -> {
 			JSONObject jq = new JSONObject(q.toString());
 			create(jq.getString("name"), jq.getInt("maxplayers"));
 			jq.getJSONArray("inqueue").forEach((p) -> {
