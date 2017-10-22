@@ -2,9 +2,9 @@ package bullybot.classfiles;
 
 public class Info {
 	//BullyBot
-	//public final static String TOKEN = "MzU5OTI1NTczMTM0MzE5NjI4.DKOGYw.dtcqDt34KpEfA3DSuippvW8g2EY";
+	public final static String TOKEN = "MzU5OTI1NTczMTM0MzE5NjI4.DKOGYw.dtcqDt34KpEfA3DSuippvW8g2EY";
 	//TestBot
-	public final static String TOKEN = "MzYyNDAyNzEyODE1NTM0MDgw.DKyKBw.v34M34tX2S_y9BnFZNWsFBilcOU";
+	//public final static String TOKEN = "MzYyNDAyNzEyODE1NTM0MDgw.DKyKBw.v34M34tX2S_y9BnFZNWsFBilcOU";
 	public final static String CLIENT_ID = "359925573134319628";
 	public final static String PUG_CHANNEL = "pugs";
 	
