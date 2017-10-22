@@ -7,7 +7,6 @@ import bullybot.classfiles.Info;
 import net.dv8tion.jda.core.AccountType;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.JDABuilder;
-import net.dv8tion.jda.core.entities.Game;
 import okhttp3.OkHttpClient;
 
 public class Bot{
@@ -17,7 +16,7 @@ public class Bot{
 			OkHttpClient.Builder httpBuilder = new OkHttpClient.Builder().readTimeout(30, TimeUnit.SECONDS).connectTimeout(30, TimeUnit.SECONDS).writeTimeout(1, TimeUnit.MINUTES);
 			JDA jda = new JDABuilder(AccountType.BOT).setToken(Info.TOKEN).setHttpClientBuilder(httpBuilder).buildBlocking();
 			jda.setAutoReconnect(true);
-			jda.getPresence().setGame(Game.of("Videogames"));
+			//jda.getPresence().setGame(Game.of("Videogames"));
 			jda.addEventListener(new EventHandler(jda));
 		}catch(Exception ex){
 			ex.printStackTrace();

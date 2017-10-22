@@ -27,7 +27,7 @@ public class Server {
 		qm = new QueueManager(id);
 		cmds = new Commands();
 		settings = new Settings(id);
-
+		qm.getQueue().forEach((q) -> q.getPlayersInQueue().forEach((u) -> updateActivityList(u)));
 		startAFKTimer();
 	}
 
@@ -85,7 +85,7 @@ public class Server {
 		if (m.getOnlineStatus().equals(OnlineStatus.OFFLINE)) {
 			qm.deletePlayer(m.getUser());
 			qm.updateTopic();
-			String s = String.format("%s has been removed from queue after being offline for %s minutes", m.getEffectiveName(), new DecimalFormat("#.##").format((double)(settings.dcTime()/60)));
+			String s = String.format("%s has been removed from queue after being offline for %s minutes", m.getEffectiveName(), new DecimalFormat("#.##").format((double)settings.dcTime()/60));
 			getPugChannel().sendMessage(Functions.createMessage("", s,Color.red)).queue();
 			System.out.println(s);
 		}else{

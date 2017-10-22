@@ -326,7 +326,7 @@ public class QueueManager {
 
 	public void remove(String name, Integer index) {
 		Integer i = --index;
-		if (!isQueueListEmpty() && i > 0 && i < queueList.size()) {
+		if (!isQueueListEmpty() && i >= 0 && i < queueList.size()) {
 			Queue q = queueList.get(i);
 			if (q.containsPlayer(name)) {
 				q.delete(q.getPlayer(name));
