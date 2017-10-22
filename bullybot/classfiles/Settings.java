@@ -17,6 +17,7 @@ public class Settings {
 	private Integer afkTime = 120;
 	private Integer dcTime = 120;
 	private Integer finishTime = 60;
+	private Integer minNumberOfGames = 5;
 	private boolean randomizeCaptains = true;
 	
 	
@@ -35,6 +36,7 @@ public class Settings {
 			p.load(is);
 			mumble = p.getProperty("mumble", mumble);
 			pugChannel = p.getProperty("pugchannel", pugChannel);
+			minNumberOfGames = Integer.valueOf(p.getProperty("mingames", minNumberOfGames.toString()));
 			afkTime = Integer.valueOf(p.getProperty("afktime", afkTime.toString()));
 			dcTime = Integer.valueOf(p.getProperty("dctime", dcTime.toString()));
 			finishTime = Integer.valueOf(p.getProperty("finishtime", finishTime.toString()));
@@ -54,6 +56,7 @@ public class Settings {
 			
 			p.setProperty("mumble", mumble);
 			p.setProperty("pugchannel", pugChannel);
+			p.setProperty("mingames", minNumberOfGames.toString());
 			p.setProperty("afktime", afkTime.toString());
 			p.setProperty("dctime", dcTime.toString());
 			p.setProperty("finishtime", finishTime.toString());
