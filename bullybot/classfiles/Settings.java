@@ -29,7 +29,7 @@ public class Settings {
 		loadSettingsFile();
 	}
 
-	private void loadSettingsFile() {
+	public void loadSettingsFile() {
 		try{
 			FileInputStream is = new FileInputStream(filePath);
 			Properties p = new Properties();

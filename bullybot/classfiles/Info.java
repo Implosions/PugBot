@@ -64,4 +64,7 @@ public class Info {
 	public final static String MUMBLE_DESC = "Returns the PUG mumble address";
 	public final static String MUMBLE_SUCCESS = "[xzanth.com:64738](mumble://xzanth.com:64738)";
 	
+	public final static String LOADSETTINGS_HELP = "!loadsettings";
+	public final static String LOADSETTINGS_DESC = "Loads settings from file";
+	
 }

@@ -32,6 +32,7 @@ public class Commands {
 		cmdList.put("deletenotification", new CmdDeleteNotification());
 		cmdList.put("terminate", new CmdTerminate());
 		cmdList.put("mumble", new CmdMumble());
+		cmdList.put("loadsettings", new CmdLoadSettings());
 		
 		populateLists();
 	}
