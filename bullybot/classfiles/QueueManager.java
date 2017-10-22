@@ -3,6 +3,7 @@ package bullybot.classfiles;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -509,7 +510,7 @@ public class QueueManager {
 
 			ja.put(jQueue);
 		}
-		root.put("queuelist", ja);
+		root.put("queue", ja);
 		return root.toString(4);
 	}
 
@@ -531,7 +532,7 @@ public class QueueManager {
 					System.out.println("Queue loaded");
 				}
 
-			} catch (Exception ex) {
+			} catch (IOException ex) {
 				ex.printStackTrace();
 			}
 		}
@@ -540,7 +541,7 @@ public class QueueManager {
 
 	private void parseJSON(String input) {
 		JSONObject json = new JSONObject(input);
-		json.getJSONArray("queuelist").forEach((q) -> {
+		json.getJSONArray("queue").forEach((q) -> {
 			JSONObject jq = new JSONObject(q.toString());
 			create(jq.getString("name"), jq.getInt("maxplayers"));
 			jq.getJSONArray("inqueue").forEach((p) -> {

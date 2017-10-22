@@ -91,4 +91,8 @@ public class Settings {
 	public String mumble(){
 		return mumble;
 	}
+	
+	public Integer minNumberOfGames(){
+		return minNumberOfGames;
+	}
 }
