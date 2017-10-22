@@ -84,7 +84,9 @@ public class EventHandler extends ListenerAdapter {
 				} else {
 					cmdObj.execCommand(ServerManager.getServer(event.getGuild().getId()).getQueueManager(), event.getMember(), args);
 					channel.sendMessage(cmdObj.getResponse()).queue();
-					cmdObj.setLastResponseId(channel.getHistory().retrievePast(1).complete().get(0).getId());
+					if(event.getGuild().getSelfMember().hasPermission(Permission.MESSAGE_HISTORY)){
+						cmdObj.setLastResponseId(channel.getHistory().retrievePast(1).complete().get(0).getId());
+					}
 				}
 			} else {
 				if(channel.equals(ServerManager.getServer(event.getGuild().getId()).getPugChannel())){

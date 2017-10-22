@@ -8,7 +8,6 @@ import bullybot.classfiles.Info;
 import bullybot.classfiles.QueueManager;
 import bullybot.classfiles.util.Functions;
 import bullybot.errors.DoesNotExistException;
-import net.dv8tion.jda.core.Permission;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.User;
 
@@ -44,7 +43,7 @@ public class CmdStatus extends Command {
 			} else {
 				throw new DoesNotExistException("Queue");
 			}
-			if(member.getGuild().getSelfMember().getPermissions().contains(Permission.MESSAGE_MANAGE) && lastResponseId != null){
+			if(lastResponseId != null){
 				qm.getServer().getPugChannel().deleteMessageById(lastResponseId).complete();
 			}
 			System.out.println("Completed status request");
