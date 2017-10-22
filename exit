@@ -1,0 +1,95 @@
+[33mcommit f091047675356116c8b282507c5125553e3e59de[m[33m ([m[1;36mHEAD -> [m[1;32mmaster[m[33m, [m[1;32msettings[m[33m)[m
+Author: Implosions <ImplosionsTA@gmail.com>
+Date:   Sat Oct 21 20:34:25 2017 -0400
+
+    Fixed remove not working on index 0
+
+[33mcommit ef82dba7ee2e2645221c122c3b2537628ea4bf71[m
+Author: Implosions <ImplosionsTA@gmail.com>
+Date:   Sat Oct 21 17:46:32 2017 -0400
+
+    Fixed null messages
+
+[33mcommit cbae50ad2378cba1c551513e1772d31aaf818b97[m
+Author: Implosions <ImplosionsTA@gmail.com>
+Date:   Sat Oct 21 17:37:33 2017 -0400
+
+    Fixed decimal formatting in afk timer message
+
+[33mcommit c2ca2d8aff09495f89238ef76b72950dd9cb7339[m
+Author: Implosions <ImplosionsTA@gmail.com>
+Date:   Sat Oct 21 17:27:04 2017 -0400
+
+    Lowered http timeout times
+
+[33mcommit 209a69a6bda9750df6acec29cf4ad6fe6b835392[m
+Author: Implosions <ImplosionsTA@gmail.com>
+Date:   Sat Oct 21 17:24:28 2017 -0400
+
+    dc time is casted as double in message
+
+[33mcommit 2f606ef28d91b2a73c081cd6c6aa6e9d2c533a6e[m
+Author: Implosions <ImplosionsTA@gmail.com>
+Date:   Sat Oct 21 17:18:37 2017 -0400
+
+    Fixed bunch of bugs
+
+[33mcommit 7875cd63e4a3478efc062ef326a1de2a6e0b6c0b[m
+Author: Implosions <ImplosionsTA@gmail.com>
+Date:   Sat Oct 21 03:47:44 2017 -0400
+
+    Made strings dynamic with settings
+
+[33mcommit ec1dd763ac523fe3652d8de27faad1b683cdf38f[m
+Author: Implosions <ImplosionsTA@gmail.com>
+Date:   Sat Oct 21 03:37:11 2017 -0400
+
+    Fixed a bunch of bugs caused by settings restructure
+
+[33mcommit 60efb8c6d519379d6a6e1cb5d68bb2cc3961c28c[m
+Author: Implosions <ImplosionsTA@gmail.com>
+Date:   Fri Oct 20 22:04:09 2017 -0400
+
+    Status will delete last status message
+
+[33mcommit a8dfc9479454aab55b3317946ebc03286441015d[m
+Author: Implosions <ImplosionsTA@gmail.com>
+Date:   Fri Oct 20 21:56:16 2017 -0400
+
+    Implemented more settings
+
+[33mcommit 9370f68659a10e6eb8e65d896141a2afec8388d1[m
+Author: Implosions <ImplosionsTA@gmail.com>
+Date:   Fri Oct 20 21:14:52 2017 -0400
+
+    Fixed file outputs
+
+[33mcommit f97d8fbc08c25f111cd129cd2ff63318653eee24[m
+Author: Implosions <ImplosionsTA@gmail.com>
+Date:   Fri Oct 20 21:02:00 2017 -0400
+
+    Instanced Commands class
+
+[33mcommit a220b69c56848854efae3a9bc9f4dcedda8e9c87[m
+Author: Implosions <ImplosionsTA@gmail.com>
+Date:   Fri Oct 20 20:21:55 2017 -0400
+
+    Added 5s timeframe to spam protection
+
+[33mcommit 17a40d9d015e643aec81123ba26ddae70bec24ec[m
+Author: Implosions <ImplosionsTA@gmail.com>
+Date:   Fri Oct 20 18:45:57 2017 -0400
+
+    First settings implementation
+
+[33mcommit ca6e226f005e55035bac9518b3bee9eabd1a6f31[m
+Author: Implosions <ImplosionsTA@gmail.com>
+Date:   Fri Oct 20 09:22:10 2017 -0400
+
+    Increased timout duration
+
+[33mcommit 6203da200e37cd975fc5b6031dbe7bad50cf3824[m
+Author: Implosions <ImplosionsTA@gmail.com>
+Date:   Fri Oct 20 09:14:37 2017 -0400
+
+    Initial commit

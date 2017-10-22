@@ -13,6 +13,7 @@ public class Settings {
 	private String filePath;
 	
 	private String pugChannel = "pugs";
+	private String mumble = "N/A";
 	private Integer afkTime = 120;
 	private Integer dcTime = 120;
 	private Integer finishTime = 60;
@@ -32,6 +33,7 @@ public class Settings {
 			FileInputStream is = new FileInputStream(filePath);
 			Properties p = new Properties();
 			p.load(is);
+			mumble = p.getProperty("mumble", mumble);
 			pugChannel = p.getProperty("pugchannel", pugChannel);
 			afkTime = Integer.valueOf(p.getProperty("afktime", afkTime.toString()));
 			dcTime = Integer.valueOf(p.getProperty("dctime", dcTime.toString()));
@@ -50,6 +52,7 @@ public class Settings {
 			FileOutputStream os = new FileOutputStream(filePath);
 			Properties p = new Properties();
 			
+			p.setProperty("mumble", mumble);
 			p.setProperty("pugchannel", pugChannel);
 			p.setProperty("afktime", afkTime.toString());
 			p.setProperty("dctime", dcTime.toString());
@@ -80,5 +83,9 @@ public class Settings {
 	
 	public boolean randomizeCaptains(){
 		return randomizeCaptains;
+	}
+	
+	public String mumble(){
+		return mumble;
 	}
 }

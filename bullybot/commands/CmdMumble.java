@@ -18,7 +18,7 @@ public class CmdMumble extends Command{
 
 	@Override
 	public void execCommand(QueueManager qm, Member member, ArrayList<String> args) {
-		this.response = Functions.createMessage("", successMsg, true);
+		this.response = Functions.createMessage("", qm.getServer().getSettings().mumble(), true);
 	}
 
 }
