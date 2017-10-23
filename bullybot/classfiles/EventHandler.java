@@ -38,7 +38,7 @@ public class EventHandler extends ListenerAdapter {
 		if (message.startsWith("!") && message.length() > 1 && !event.getAuthor().isBot()) {
 			MessageChannel channel = event.getChannel();
 			
-			if(true){
+			if(event.getGuild().getSelfMember().hasPermission(Permission.MESSAGE_HISTORY)){
 				for(Message m : channel.getHistory().retrievePast(3).complete()){
 					if(!m.getId().equals(event.getMessageId()) 
 							&& m.getAuthor().equals(event.getAuthor()) 
@@ -84,7 +84,9 @@ public class EventHandler extends ListenerAdapter {
 				} else {
 					cmdObj.execCommand(ServerManager.getServer(event.getGuild().getId()).getQueueManager(), event.getMember(), args);
 					channel.sendMessage(cmdObj.getResponse()).queue();
-					cmdObj.setLastResponseId(channel.getHistory().retrievePast(1).complete().get(0).getId());
+					if(event.getGuild().getSelfMember().hasPermission(Permission.MESSAGE_HISTORY)){
+						cmdObj.setLastResponseId(channel.getHistory().retrievePast(1).complete().get(0).getId());
+					}
 				}
 			} else {
 				if(channel.equals(ServerManager.getServer(event.getGuild().getId()).getPugChannel())){

@@ -53,7 +53,7 @@ public class Functions {
 	}
 	
 	public static boolean isAdmin(Member m){
-		if(admins.contains(m.getUser().getId()) || m.getPermissions().contains(Permission.KICK_MEMBERS)){
+		if(admins.contains(m.getUser().getId()) || m.hasPermission(Permission.KICK_MEMBERS)){
 			return true;
 		}
 		return false;

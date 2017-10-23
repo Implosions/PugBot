@@ -10,6 +10,7 @@ import bullybot.classfiles.util.Functions;
 import bullybot.errors.DoesNotExistException;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.User;
+import net.dv8tion.jda.core.exceptions.PermissionException;
 
 public class CmdStatus extends Command {
 	
@@ -49,6 +50,8 @@ public class CmdStatus extends Command {
 			System.out.println("Completed status request");
 		} catch (DoesNotExistException ex) {
 			this.response = Functions.createMessage("Error!", ex.getMessage(), false);
+		} catch (PermissionException ex){
+			ex.printStackTrace();
 		}
 	}
 
