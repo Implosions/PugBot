@@ -50,6 +50,11 @@ public class Game {
 		}
 		return null;
 	}
+	
+	public void sub(User target, User substitute){
+		players.remove(target);
+		players.add(substitute);
+	}
 
 	public boolean containsPlayer(String name) {
 		for (User u : players) {

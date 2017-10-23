@@ -16,9 +16,9 @@ import bullybot.errors.BadArgumentsException;
 import bullybot.errors.DoesNotExistException;
 import bullybot.errors.DuplicateEntryException;
 import bullybot.errors.InvalidUseException;
-import net.dv8tion.jda.core.Permission;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.User;
+import net.dv8tion.jda.core.exceptions.PermissionException;
 
 public class QueueManager {
 	private ArrayList<Queue> queueList = new ArrayList<Queue>();
@@ -301,11 +301,13 @@ public class QueueManager {
 	}
 
 	public void updateTopic() {
-		if(ServerManager.getGuild(guildId).getSelfMember().hasPermission(Permission.MANAGE_CHANNEL)){
+		try{
 			getServer().getPugChannel().getManager().setTopic(getHeader()).complete();
 			System.out.println("Topic updated");
-			saveToFile();
+		}catch(PermissionException ex){
+			ex.printStackTrace();
 		}
+		saveToFile();
 	}
 
 	public void remove(String name) {
