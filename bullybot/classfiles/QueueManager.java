@@ -369,8 +369,7 @@ public class QueueManager {
 			for (Queue q : queueList) {
 				for (Game g : q.getGames()) {
 					if (g.containsPlayer(target)) {
-						g.getPlayers().remove(g.getPlayer(target));
-						g.getPlayers().add(sub);
+						g.sub(g.getPlayer(target), sub);
 						purgeQueue(sub);
 						return;
 					}
