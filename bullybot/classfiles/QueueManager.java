@@ -552,7 +552,7 @@ public class QueueManager {
 				JSONObject n = new JSONObject(ns.toString());
 				n.getJSONArray("notifyplayers")
 						.forEach((np) -> addNotification(
-								ServerManager.getServer(guildId).getGuild().getMemberById(np.toString()).getUser(),
+								ServerManager.getGuild(guildId).getMemberById(p.toString()).getUser(),
 								jq.getString("name"), n.getInt("playercount")));
 			});
 		});
