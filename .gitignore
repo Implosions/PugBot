@@ -1,0 +1,9 @@
+# project files
+src/test/
+app_data/
+
+# eclipse files
+.classpath
+.project
+.settings/
+/bin/
