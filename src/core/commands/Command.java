@@ -1,10 +1,10 @@
 package core.commands;
 
-import java.util.ArrayList;
-
-import core.entities.QueueManager;
+import core.entities.Server;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.Message;
+
+// Command abstract class
 
 public abstract class Command {
 	protected String name;
@@ -17,7 +17,7 @@ public abstract class Command {
 	protected boolean adminRequired = false;
 	protected boolean pugCommand = true;
 	
-	public abstract void execCommand(QueueManager qm, Member member, ArrayList<String> args);
+	public abstract void execCommand(Server server, Member member, String[] args);
 	
 	public String help(){
 		return this.helpMsg;
