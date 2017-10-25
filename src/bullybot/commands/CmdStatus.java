@@ -51,6 +51,7 @@ public class CmdStatus extends Command {
 		} catch (DoesNotExistException ex) {
 			this.response = Functions.createMessage("Error!", ex.getMessage(), false);
 		} catch (PermissionException ex){
+			lastResponseId = null;
 			ex.printStackTrace();
 		}
 	}

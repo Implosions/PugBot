@@ -24,9 +24,6 @@ import net.dv8tion.jda.core.hooks.ListenerAdapter;
 
 public class EventHandler extends ListenerAdapter {
 
-	@SuppressWarnings("unused")
-	private static ServerManager sm;
-
 	public EventHandler(JDA jda) {
 		new ServerManager(jda.getGuilds());
 		Functions.loadAdminList();
