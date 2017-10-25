@@ -17,7 +17,7 @@ public class CmdStatus extends Command {
 	public CmdStatus() {
 		this.helpMsg = Constants.STATUS_HELP;
 		this.description = Constants.STATUS_DESC;
-		this.name = "status";
+		this.name = Constants.STATUS_NAME;
 	}
 
 	@Override

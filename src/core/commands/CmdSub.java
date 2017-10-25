@@ -14,9 +14,8 @@ public class CmdSub extends Command{
 	
 	public CmdSub(){
 		this.helpMsg = Constants.SUB_HELP;
-		this.successMsg = Constants.SUB_SUCCESS;
 		this.description = Constants.SUB_DESC;
-		this.name = "sub";
+		this.name = Constants.SUB_NAME;
 	}
 	
 	@Override

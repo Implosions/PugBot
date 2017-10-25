@@ -16,7 +16,7 @@ public class CmdHelp extends Command{
 	public CmdHelp(){
 		this.helpMsg = Constants.HELP_HELP;
 		this.description = Constants.HELP_DESC;
-		this.name = "help";
+		this.name = Constants.HELP_NAME;
 		this.dm = true;
 	}
 	@Override

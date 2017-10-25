@@ -13,9 +13,8 @@ public class CmdCreateQueue extends Command {
 
 	public CmdCreateQueue() {
 		this.helpMsg = Constants.CREATEQUEUE_HELP;
-		this.successMsg = Constants.CREATEQUEUE_SUCCESS;
 		this.description = Constants.CREATEQUEUE_DESC;
-		this.name = "createqueue";
+		this.name = Constants.CREATEQUEUE_NAME;
 		this.adminRequired = true;
 	}
 

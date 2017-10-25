@@ -13,10 +13,9 @@ public class CmdRemoveQueue extends Command {
 
 	public CmdRemoveQueue() {
 		this.helpMsg = Constants.REMOVEQUEUE_HELP;
-		this.successMsg = Constants.REMOVEQUEUE_SUCCESS;
 		this.description = Constants.REMOVEQUEUE_DESC;
+		this.name = Constants.REMOVEQUEUE_NAME;
 		this.adminRequired = true;
-		this.name = "removequeue";
 	}
 
 	@Override

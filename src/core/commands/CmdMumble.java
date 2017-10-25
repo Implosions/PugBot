@@ -12,8 +12,7 @@ public class CmdMumble extends Command{
 	public CmdMumble(){
 		this.helpMsg = Constants.MUMBLE_HELP;
 		this.description = Constants.MUMBLE_DESC;
-		this.name = "mumble";
-		this.successMsg = Constants.MUMBLE_SUCCESS;
+		this.name = Constants.MUMBLE_NAME;
 	}
 
 	@Override

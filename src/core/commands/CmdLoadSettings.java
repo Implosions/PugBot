@@ -10,7 +10,7 @@ import net.dv8tion.jda.core.entities.Member;
 public class CmdLoadSettings extends Command{
 	
 	public CmdLoadSettings(){
-		this.name = "loadsettings";
+		this.name = Constants.LOADSETTINGS_NAME;
 		this.helpMsg = Constants.LOADSETTINGS_HELP;
 		this.description = Constants.LOADSETTINGS_DESC;
 		this.adminRequired = true;

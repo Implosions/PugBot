@@ -13,9 +13,8 @@ public class CmdAdd extends Command{
 	
 	public CmdAdd(){
 		this.helpMsg = Constants.ADD_HELP;
-		this.successMsg = Constants.ADD_SUCCESS;
 		this.description = Constants.ADD_DESC;
-		this.name = "add";
+		this.name = Constants.ADD_NAME;
 	}
 	
 	@Override

@@ -39,7 +39,7 @@ public class CmdBully extends Command {
 	public CmdBully() {
 		this.helpMsg = Constants.BULLY_HELP;
 		this.description = Constants.BULLY_DESC;
-		this.name = "bully";
+		this.name = Constants.BULLY_NAME;
 		this.pugCommand = false;
 		random = new Random();
 		cooldownCollection = new HashMap<User, Long>();

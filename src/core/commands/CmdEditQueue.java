@@ -13,10 +13,9 @@ public class CmdEditQueue extends Command{
 	
 	public CmdEditQueue(){
 		this.helpMsg = Constants.EDITQUEUE_HELP;
-		this.successMsg = Constants.EDITQUEUE_SUCCESS;
 		this.description = Constants.EDITQUEUE_DESC;
+		this.name = Constants.EDITQUEUE_NAME;
 		this.adminRequired = true;
-		this.name = "editqueue";
 	}
 	
 	@Override

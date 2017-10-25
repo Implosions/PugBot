@@ -14,10 +14,9 @@ public class CmdRemove extends Command {
 
 	public CmdRemove() {
 		this.helpMsg = Constants.REMOVE_HELP;
-		this.successMsg = Constants.REMOVE_SUCCESS;
 		this.description = Constants.REMOVE_DESC;
+		this.name = Constants.REMOVE_NAME;
 		this.adminRequired = true;
-		this.name = "remove";
 	}
 
 	@Override

@@ -14,8 +14,7 @@ public class CmdNotify extends Command{
 	public CmdNotify(){
 		this.helpMsg = Constants.NOTIFY_HELP;
 		this.description = Constants.NOTIFY_DESC;
-		this.successMsg = Constants.NOTIFY_SUCCESS;
-		this.name = "notify";
+		this.name = Constants.NOTIFY_NAME;
 	}
 	
 	@Override

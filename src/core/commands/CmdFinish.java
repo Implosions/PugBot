@@ -12,9 +12,8 @@ public class CmdFinish extends Command{
 	
 	public CmdFinish(){
 		this.helpMsg = Constants.FINISH_HELP;
-		this.successMsg = Constants.FINISH_SUCCESS;
 		this.description = Constants.FINISH_DESC;
-		this.name = "finish";
+		this.name = Constants.FINISH_NAME;
 	}
 	
 	@Override

@@ -13,9 +13,8 @@ public class CmdDel extends Command{
 	
 	public CmdDel(){
 		this.helpMsg = Constants.DEL_HELP;
-		this.successMsg = Constants.DEL_SUCCESS;
 		this.description = Constants.DEL_DESC;
-		this.name = "del";
+		this.name = Constants.DEL_NAME;
 	}
 
 	@Override

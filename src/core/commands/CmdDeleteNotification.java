@@ -13,9 +13,8 @@ public class CmdDeleteNotification extends Command{
 	
 	public CmdDeleteNotification(){
 		this.helpMsg = Constants.DELETENOTIFICATION_HELP;
-		this.successMsg = Constants.DELETENOTIFICATION_SUCCESS;
 		this.description = Constants.DELETENOTIFICATION_DESC;
-		this.name = "deletenotification";
+		this.name = Constants.DELETENOTIFICATION_NAME;
 	}
 	
 	@Override
