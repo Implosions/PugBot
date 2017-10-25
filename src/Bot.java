@@ -1,8 +1,7 @@
 
 import java.util.concurrent.TimeUnit;
 
-import bullybot.classfiles.EventHandler;
-
+import core.EventHandler;
 import net.dv8tion.jda.core.AccountType;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.JDABuilder;
