@@ -1,9 +1,8 @@
 package core.commands;
 
-import java.util.ArrayList;
-
 import core.Constants;
 import core.entities.QueueManager;
+import core.entities.Server;
 import core.exceptions.BadArgumentsException;
 import core.exceptions.DoesNotExistException;
 import core.util.Functions;
@@ -18,22 +17,23 @@ public class CmdDeleteNotification extends Command{
 	}
 	
 	@Override
-	public void execCommand(QueueManager qm, Member member, ArrayList<String> args) {
+	public void execCommand(Server server, Member member, String[] args) {
+		QueueManager qm = server.getQueueManager();
 		try{
-			if(args.size() <= 1){
-				if(args.size() == 0){
+			if(args.length <= 1){
+				if(args.length == 0){
 					qm.removeNotifications(member.getUser());
 				}else{
 					try{
-						qm.removeNotifications(member.getUser(), Integer.valueOf(args.get(1)));
+						qm.removeNotifications(member.getUser(), Integer.valueOf(args[0]));
 					}catch(NumberFormatException ex){
-						qm.removeNotifications(member.getUser(), args.get(1));
+						qm.removeNotifications(member.getUser(), args[1]);
 					}
 				}
 			}else{
 				throw new BadArgumentsException();
 			}
-			this.response = Functions.createMessage(successMsg, "", true);
+			this.response = Functions.createMessage("Notification(s) removed", "", true);
 			System.out.println(successMsg);
 			qm.saveToFile();
 		}catch(BadArgumentsException | DoesNotExistException ex){

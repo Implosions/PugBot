@@ -2,6 +2,8 @@ package core;
 
 public class Constants {
 	
+	public final static String OWNER_ID = "236345439706808321";
+	
 	public final static String CREATEQUEUE_NAME = "createqueue";
 	public final static String CREATEQUEUE_HELP = "!createqueue <name> <maxplayers>";
 	public final static String CREATEQUEUE_DESC = "Creates a new queue";

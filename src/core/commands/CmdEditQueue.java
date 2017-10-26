@@ -1,9 +1,8 @@
 package core.commands;
 
-import java.util.ArrayList;
-
 import core.Constants;
 import core.entities.QueueManager;
+import core.entities.Server;
 import core.exceptions.BadArgumentsException;
 import core.exceptions.DoesNotExistException;
 import core.util.Functions;
@@ -19,14 +18,15 @@ public class CmdEditQueue extends Command{
 	}
 	
 	@Override
-	public void execCommand(QueueManager qm, Member member, ArrayList<String> args) {
+	public void execCommand(Server server, Member member, String[] args) {
+		QueueManager qm = server.getQueueManager();
 		try{
-			if(args.size() == 3 && Integer.valueOf(args.get(2)) != null){
+			if(args.length == 3){
 				try{
-					qm.editQueue(Integer.valueOf(args.get(0)), args.get(1), Integer.valueOf(args.get(2)));
+					qm.editQueue(Integer.valueOf(args[0]), args[1], Integer.valueOf(args[2]));
 				}catch(NumberFormatException ex){
 					try{
-						qm.editQueue(args.get(0), args.get(1), Integer.valueOf(args.get(2)));
+						qm.editQueue(args[0], args[1], Integer.valueOf(args[2]));
 					}catch(NumberFormatException e){
 						throw new BadArgumentsException("New max player count must be a valid number");
 					}
@@ -35,7 +35,7 @@ public class CmdEditQueue extends Command{
 				throw new BadArgumentsException();
 			}
 			qm.updateTopic();
-			this.response = Functions.createMessage(String.format("Queue %s edited", args.get(0)), qm.getHeader(), true);
+			this.response = Functions.createMessage(String.format("Queue %s edited", args[0]), qm.getHeader(), true);
 			System.out.println(successMsg);
 		}catch(BadArgumentsException | DoesNotExistException ex){
 			this.response = Functions.createMessage("Error!", ex.getMessage(), false);

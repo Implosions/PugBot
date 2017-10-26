@@ -1,9 +1,8 @@
 package core.commands;
 
-import java.util.ArrayList;
-
 import core.Constants;
 import core.entities.QueueManager;
+import core.entities.Server;
 import core.exceptions.DoesNotExistException;
 import core.exceptions.InvalidUseException;
 import core.util.Functions;
@@ -18,9 +17,10 @@ public class CmdDel extends Command{
 	}
 
 	@Override
-	public void execCommand(QueueManager qm, Member member, ArrayList<String> args) {
+	public void execCommand(Server server, Member member, String[] args) {
+		QueueManager qm = server.getQueueManager();
 		try{
-			if(args.isEmpty()){
+			if(args.length == 1){
 				qm.deletePlayer(member.getUser());
 			}else{
 				for(String q : args){

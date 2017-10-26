@@ -1,16 +1,17 @@
 package core.commands;
 
-import java.util.ArrayList;
 import java.util.Random;
 import java.util.HashMap;
 
 import core.Constants;
-import core.entities.QueueManager;
+import core.entities.Server;
 import core.exceptions.BadArgumentsException;
 import core.exceptions.DoesNotExistException;
 import core.util.Functions;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.User;
+
+// TODO: Load actionList from file
 
 public class CmdBully extends Command {
 
@@ -32,37 +33,37 @@ public class CmdBully extends Command {
 			"<@%s> so ugly, his portraits hang themselves", "<@%s> so dumb it take him 2 hours to watch 60 minutes",
 			"<@%s> so fat, I swerved to miss him and my car ran outta gas" };
 	
-	private Random random;
-	private HashMap<User, Long> cooldownCollection;
-	private String vip = "236345439706808321";
+	private Random random = new Random();
+	private HashMap<User, Long> cooldownCollection = new HashMap<User, Long>();
 
 	public CmdBully() {
 		this.helpMsg = Constants.BULLY_HELP;
 		this.description = Constants.BULLY_DESC;
 		this.name = Constants.BULLY_NAME;
 		this.pugCommand = false;
-		random = new Random();
-		cooldownCollection = new HashMap<User, Long>();
 	}
 
 	@Override
-	public void execCommand(QueueManager qm, Member member, ArrayList<String> args) {
+	public void execCommand(Server server, Member member, String[] args) {
 		try {
-			if (args.size() == 1) {
+			if (args.length == 1) {
+				// Match user to given name
 				User u = null;
 				for (Member m : member.getGuild().getMembers()) {
-					if (m.getUser().getName().equalsIgnoreCase(args.get(0)) || (m.getNickname() != null && m.getNickname().equalsIgnoreCase(args.get(0)))) {
+					if (m.getUser().getName().equalsIgnoreCase(args[0]) ||  m.getEffectiveName().equalsIgnoreCase(args[0])) {
 						u = m.getUser();
 						break;
 					}
 				}
 				if (u != null) {
+					// Check invoker is not on cooldown
 					if (!cooldownCollection.containsKey(member.getUser()) || System.currentTimeMillis() - (60000 * 30) >= cooldownCollection.get(member.getUser())) {
-						if (u.getId().equals(vip)) {
+						if (u.getId().equals(Constants.OWNER_ID)) {
 							u = member.getUser();
 						}
 						this.response = Functions.createMessage(String.format(actionList[random.nextInt(actionList.length)], u.getId()));
-						if(!member.getUser().getId().equals(vip)){
+						// Put user in cooldownCollection
+						if(!member.getUser().getId().equals(Constants.OWNER_ID)){
 							cooldownCollection.put(member.getUser(), System.currentTimeMillis());
 						}
 					} else {
@@ -75,7 +76,7 @@ public class CmdBully extends Command {
 			} else {
 				throw new BadArgumentsException();
 			}
-			System.out.println("Completed bully request");
+			System.out.println(successMsg);
 		} catch (BadArgumentsException | DoesNotExistException ex) {
 			this.response = Functions.createMessage("Error!", ex.getMessage(), false);
 		}

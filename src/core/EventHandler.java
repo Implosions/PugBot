@@ -1,16 +1,14 @@
 package core;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.regex.Pattern;
 
 import core.commands.Command;
+import core.entities.Server;
 import core.entities.ServerManager;
 import core.util.Functions;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.OnlineStatus;
-import net.dv8tion.jda.core.Permission;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.Message;
 import net.dv8tion.jda.core.entities.MessageChannel;
@@ -21,7 +19,11 @@ import net.dv8tion.jda.core.events.guild.GuildLeaveEvent;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.core.events.message.react.GenericMessageReactionEvent;
 import net.dv8tion.jda.core.events.user.UserOnlineStatusUpdateEvent;
+import net.dv8tion.jda.core.exceptions.PermissionException;
 import net.dv8tion.jda.core.hooks.ListenerAdapter;
+
+// EventHandler class
+// TODO: move admin list to Server
 
 public class EventHandler extends ListenerAdapter {
 
@@ -29,15 +31,20 @@ public class EventHandler extends ListenerAdapter {
 		new ServerManager(jda.getGuilds());
 		Functions.loadAdminList();
 	}
-
+	
+	
+	// Executes commands based on input from discord server
 	@Override
 	public void onGuildMessageReceived(GuildMessageReceivedEvent event) {
+		Server server = ServerManager.getServer(event.getGuild().getId());
 		String message = event.getMessage().getContent();
 		if (message.startsWith("!") && message.length() > 1 && !event.getAuthor().isBot()) {
 			MessageChannel channel = event.getChannel();
 			
-			if(event.getGuild().getSelfMember().hasPermission(Permission.MESSAGE_HISTORY)){
-				for(Message m : channel.getHistory().retrievePast(3).complete()){
+			// Command spam check
+			// Checks last 5 messages if the same input was submitted in the past 3 seconds
+			try{
+				for(Message m : channel.getHistory().retrievePast(5).complete()){
 					if(!m.getId().equals(event.getMessageId()) 
 							&& m.getAuthor().equals(event.getAuthor()) 
 							&& m.getContent().equals(event.getMessage().getContent())
@@ -45,56 +52,66 @@ public class EventHandler extends ListenerAdapter {
 						return;
 					}
 				}
+			}catch(PermissionException ex){
+				ex.printStackTrace();
 			}
-			
-			ArrayList<String> args;
-
+			// Workaround for users with spaces in their name
+			// Replaces name with user id
 			if (event.getMessage().getMentionedUsers().size() > 0) {
 				for (User u : event.getMessage().getMentionedUsers()) {
 					System.out.println(event.getGuild().getMemberById(u.getId()).getEffectiveName());
 					message = message.replace("@" + event.getGuild().getMemberById(u.getId()).getEffectiveName(), u.getId());
 				}
 			}
-			args = new ArrayList<String>(Arrays.asList(message.substring(1).split(" ")));
+			
+			String[] tokens = message.substring(1).split(" ");
+			// Replaces user id's with names after being tokenized
 			try {
-				args.forEach((s) -> {
+				for(String s : tokens){
 					if (Pattern.matches("\\d{15,}", s)) {
-						Collections.replaceAll(args, s, event.getGuild().getMemberById(s).getUser().getName());
+						s.replace(s, event.getGuild().getMemberById(s).getUser().getName());
 					}
-				});
+				}
 			} catch (NumberFormatException ex) {
-				System.out.println(ex.getMessage());
+				ex.printStackTrace();
 			}
+			// Log input
+			System.out.println("Command input: " + event.getAuthor().toString() + " " + tokens.toString());
+			
+			String cmd = tokens[0].toLowerCase();
+			String[] args = Arrays.copyOfRange(tokens, 1, tokens.length);
 
-			System.out.println("Command input: " + event.getAuthor().toString() + " " + args.toString());
-			String cmd = args.get(0).toLowerCase();
-			args.remove(0);
-
-			if (ServerManager.getServer(event.getGuild().getId()).cmds.validateCommand(cmd)) {
-				Command cmdObj = ServerManager.getServer(event.getGuild().getId()).cmds.getCommandObj(cmd);
+			if (server.cmds.validateCommand(cmd)) {
+				Command cmdObj = server.cmds.getCommandObj(cmd);
+				// Determine which channel to send response
 				if (cmdObj.getDM()) {
 					channel = event.getAuthor().openPrivateChannel().complete();
 				}else if(cmdObj.getPugCommand()){
-					channel = ServerManager.getServer(event.getGuild().getId()).getPugChannel();
+					channel = server.getPugChannel();
 				}
 				if (cmdObj.getAdminRequired() && !Functions.isAdmin(event.getMember())) {
 					channel.sendMessage(Functions.createMessage("Error!", "Admin required", false)).queue();
 				} else {
-					cmdObj.execCommand(ServerManager.getServer(event.getGuild().getId()).getQueueManager(), event.getMember(), args);
+					// Executes command and sends response to proper channel
+					cmdObj.execCommand(server, event.getMember(), args);
 					channel.sendMessage(cmdObj.getResponse()).queue();
-					if(event.getGuild().getSelfMember().hasPermission(Permission.MESSAGE_HISTORY)){
+					// Gets message id of response after it is sent
+					try{
 						cmdObj.setLastResponseId(channel.getHistory().retrievePast(1).complete().get(0).getId());
+					}catch(PermissionException ex){
+						ex.printStackTrace();
 					}
 				}
 			} else {
-				if(channel.equals(ServerManager.getServer(event.getGuild().getId()).getPugChannel())){
+				// Will only respond to invalid commands in the pug channel
+				if(channel.equals(server.getPugChannel())){
 					channel.sendMessage(Functions.createMessage("Error!", "Invalid command", false)).queue();
 				}
 			}
 		}
-		ServerManager.getServer(event.getGuild().getId()).updateActivityList(event.getAuthor());
+		server.updateActivityList(event.getAuthor());
 	}
-
+	
 	public void onUserOnlineStatusUpdate(UserOnlineStatusUpdateEvent event) {
 		Member m = event.getGuild().getMember(event.getUser());
 		if(m.getOnlineStatus().equals(OnlineStatus.OFFLINE)){
