@@ -23,7 +23,7 @@ public class CmdCreateQueue extends Command {
 		try {
 			if (args.length == 2) {
 				try{
-					qm.create(args[0], Integer.valueOf(args[1]));
+					qm.createQueue(args[0], Integer.valueOf(args[1]));
 				}catch(NumberFormatException ex){
 					throw new BadArgumentsException("Max players must be an integer value");
 				}

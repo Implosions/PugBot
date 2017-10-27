@@ -3,6 +3,7 @@ package core.entities;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
@@ -15,22 +16,19 @@ import net.dv8tion.jda.core.entities.User;
 
 public class Queue {
 	private Integer maxPlayers;
-	private Integer currentPlayers;
+	private Integer currentPlayers = 0;
 	private String name;
 	private String guildId;
-	private ArrayList<User> playersInQueue;
-	private ArrayList<Game> games;
-	private ArrayList<User> waitList = new ArrayList<User>();
-	private HashMap<Integer,ArrayList<User>> notifications = new HashMap<Integer,ArrayList<User>>();
+	private List<User> playersInQueue = new ArrayList<User>();;
+	private List<Game> games = new ArrayList<Game>();;
+	private List<User> waitList = new ArrayList<User>();
+	private HashMap<Integer, List<User>> notifications = new HashMap<Integer, List<User>>();
 	private TimerTrigger t;
 	
 	public Queue(String name, Integer maxPlayers, String guildId) {
 		this.name = name;
 		this.maxPlayers = maxPlayers;
 		this.guildId = guildId;
-		this.currentPlayers = 0;
-		this.playersInQueue = new ArrayList<User>();
-		this.games = new ArrayList<Game>();
 	}
 
 	public void add(User name) {
@@ -68,17 +66,17 @@ public class Queue {
 		return games.size();
 	}
 
-	public ArrayList<Game> getGames() {
+	public List<Game> getGames() {
 		return games;
 	}
 
-	public ArrayList<User> getPlayersInQueue() {
+	public List<User> getPlayersInQueue() {
 		return playersInQueue;
 	}
 
 	private void popQueue() {
 		String names = "";
-		ArrayList<User> players = new ArrayList<User>(playersInQueue);
+		List<User> players = new ArrayList<User>(playersInQueue);
 		Game newGame = new Game(guildId, name, players);
 		games.add(newGame);
 		
@@ -98,7 +96,7 @@ public class Queue {
 	}
 
 	public void finish(Game g) {
-		ArrayList<User> players = new ArrayList<User>(g.getPlayers());
+		List<User> players = new ArrayList<User>(g.getPlayers());
 		ServerManager.getServer(guildId).getQueueManager().addToJustFinished(players);
 		games.remove(g);
 		t = () -> ServerManager.getServer(guildId).getQueueManager().timerEnd(players);
@@ -115,7 +113,7 @@ public class Queue {
 		}
 	}
 
-	public void purge(ArrayList<User> players) {
+	public void purge(List<User> players) {
 		playersInQueue.removeAll(players);
 		waitList.removeAll(players);
 		currentPlayers = playersInQueue.size();
@@ -145,10 +143,10 @@ public class Queue {
 		return null;
 	}
 
-	public void addPlayersWaiting(ArrayList<User> players) {
+	public void addPlayersWaiting(List<User> players) {
 		if(waitList.size() > 0){
 			Random random = new Random();
-			ArrayList<User> playersToAdd = new ArrayList<User>(players);
+			List<User> playersToAdd = new ArrayList<User>(players);
 			while(playersToAdd.size() > 0){
 				Integer i = random.nextInt(playersToAdd.size());
 				User player = playersToAdd.get(i);
@@ -188,7 +186,7 @@ public class Queue {
 		}
 	}
 
-	private void notify(ArrayList<User> users) {
+	private void notify(List<User> users) {
 		for(User u : users){
 			Member m = ServerManager.getServer(guildId).getGuild().getMemberById(u.getId());
 			if(!playersInQueue.contains(u) && (m.getOnlineStatus().equals(OnlineStatus.ONLINE) || m.getOnlineStatus().equals(OnlineStatus.IDLE))){
@@ -198,12 +196,12 @@ public class Queue {
 	}
 
 	public void removeNotification(User user) {
-		for(ArrayList<User> list : notifications.values()){
+		for(List<User> list : notifications.values()){
 			list.remove(user);
 		}
 	}
 	
-	public HashMap<Integer,ArrayList<User>> getNotifications(){
+	public HashMap<Integer, List<User>> getNotifications(){
 		return notifications;
 	}
 }

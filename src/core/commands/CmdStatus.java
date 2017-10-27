@@ -28,7 +28,7 @@ public class CmdStatus extends Command {
 		try {
 			if (!qm.isQueueListEmpty()) {
 				if (args.length == 0) {
-					this.response = Functions.createMessage("", statusBuilder(qm.getQueue()), true);
+					this.response = Functions.createMessage("", statusBuilder(qm.getQueueList()), true);
 				} else {
 					List<Queue> queueList = new ArrayList<Queue>();
 					for (String a : args) {

@@ -6,7 +6,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.List;
 import java.util.Scanner;
 
 import org.json.JSONArray;
@@ -20,10 +20,10 @@ import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.User;
 import net.dv8tion.jda.core.exceptions.PermissionException;
 
+// QueueManager class; Is the interface between commands and queues on a server
 public class QueueManager {
-	private ArrayList<Queue> queueList = new ArrayList<Queue>();
-	private HashMap<String, Integer> queueMap = new HashMap<String, Integer>();
-	private ArrayList<User> justFinished = new ArrayList<User>();
+	private List<Queue> queueList = new ArrayList<Queue>();
+	private List<User> justFinished = new ArrayList<User>();
 	private String guildId;
 
 	public QueueManager(String id) {
@@ -31,11 +31,13 @@ public class QueueManager {
 		loadFromFile();
 	}
 
-	public void create(String name, Integer players) {
+	/*
+	 * Creates queue and adds it to queueList
+	 */
+	public void createQueue(String name, Integer players) {
 		if (players > 0) {
-			if (!queueMap.containsKey(name.toLowerCase())) {
+			if (!doesQueueExist(name)) {
 				queueList.add(new Queue(name, players, guildId));
-				queueMap.put(name.toLowerCase(), queueMap.size());
 			} else {
 				throw new DuplicateEntryException("A queue with the same name already exists");
 			}
@@ -44,44 +46,23 @@ public class QueueManager {
 		}
 	}
 
-	public void addPlayer(User player) {
+	/*
+	 * Adds user to each queue
+	 * Adds user to queue's waitList instead if in justFinished
+	 */
+	public void addPlayerToQueue(User player) {
 		if (!isQueueListEmpty()) {
 			if (!isPlayerIngame(player)) {
 				for (Queue q : queueList) {
-					if (!q.isPlayerWaiting(player)) {
-						if (!justFinished.contains(player)) {
-							q.add(player);
-							if (isPlayerIngame(player)) {
-								return;
-							}
-						} else {
-							q.addToWaitList(player);
+					if (!justFinished.contains(player)) {
+						q.add(player);
+						// If queue pops return
+						if (isPlayerIngame(player)) {
+							return;
 						}
 					} else {
-						return;
-					}
-				}
-			} else {
-				throw new InvalidUseException("You are already in-game");
-			}
-
-		} else {
-			throw new DoesNotExistException("Queue");
-		}
-	}
-
-	public void addPlayer(User player, String qName) {
-		if (!isQueueListEmpty() && queueMap.containsKey(qName.toLowerCase())) {
-			if (!isPlayerIngame(player)) {
-				Queue q = queueList.get(queueMap.get(qName.toLowerCase()));
-				if (!q.isPlayerWaiting(player)) {
-					if (!justFinished.contains(player)) {
-						q.add(player);
-					} else {
 						q.addToWaitList(player);
 					}
-				} else {
-					return;
 				}
 			} else {
 				throw new InvalidUseException("You are already in-game");
@@ -91,20 +72,18 @@ public class QueueManager {
 			throw new DoesNotExistException("Queue");
 		}
 	}
-
-	public void addPlayer(User player, Integer qIndex) {
-		Integer index = --qIndex;
-		if (!isQueueListEmpty() && index >= 0 && queueMap.containsValue(index)) {
+	
+	/*
+	 * Adds user to specified queue with params User, String
+	 */
+	public void addPlayerToQueue(User player, String name) {
+		if (doesQueueExist(name)) {
 			if (!isPlayerIngame(player)) {
-				Queue q = queueList.get(index);
-				if (!q.isPlayerWaiting(player)) {
-					if (!justFinished.contains(player)) {
-						q.add(player);
-					} else {
-						q.addToWaitList(player);
-					}
+				Queue q = getQueue(name);
+				if (!justFinished.contains(player)) {
+					q.add(player);
 				} else {
-					return;
+					q.addToWaitList(player);
 				}
 			} else {
 				throw new InvalidUseException("You are already in-game");
@@ -114,109 +93,101 @@ public class QueueManager {
 			throw new DoesNotExistException("Queue");
 		}
 	}
+	
+	/*
+	 * Adds user to specified queue with params User, Integer
+	 */
+	public void addPlayerToQueue(User player, Integer index) {
+		Integer i = --index;
+		if (doesQueueExist(i)) {
+			if (!isPlayerIngame(player)) {
+				Queue q = queueList.get(i);
+				if (!justFinished.contains(player)) {
+					q.add(player);
+				} else {
+					q.addToWaitList(player);
+				}
+			} else {
+				throw new InvalidUseException("You are already in-game");
+			}
 
+		} else {
+			throw new DoesNotExistException("Queue");
+		}
+	}
+	
+	/*
+	 * Edits queue with params Integer, String, Integer
+	 * Does not allow maxPlayers <= currentPlayers
+	 */
 	public void editQueue(Integer index, String newName, Integer maxPlayers) {
 		Integer i = --index;
-		if (!isQueueListEmpty() && i >= 0 && i < queueList.size()) {
+		if (doesQueueExist(i)) {
 			Queue q = queueList.get(i);
 			if (q.getCurrentPlayers() < maxPlayers) {
-				updateQueueMap(q.getName(), i, newName);
 				q.setName(newName);
 				q.setMaxPlayers(maxPlayers);
 			} else {
 				throw new BadArgumentsException("New max players value must be lower than the old value");
 			}
-
 		} else {
 			throw new DoesNotExistException("Queue");
 		}
 	}
-
+	/*
+	 * Edits queue with params String, String, Integer
+	 */
 	public void editQueue(String oldName, String newName, Integer maxPlayers) {
-		if (!isQueueListEmpty() && queueMap.containsKey(oldName.toLowerCase())) {
-			Integer i = queueMap.get(oldName.toLowerCase());
-			Queue q = queueList.get(i);
+		if (doesQueueExist(oldName)) {
+			Queue q = getQueue(oldName);
 			if (q.getCurrentPlayers() < maxPlayers) {
-				updateQueueMap(oldName.toLowerCase(), i, newName);
 				q.setName(newName);
 				q.setMaxPlayers(maxPlayers);
 			} else {
 				throw new BadArgumentsException("New max players value must be lower than the old value");
 			}
-
 		} else {
 			throw new DoesNotExistException("Queue");
 		}
 	}
-
-	public void removeQueue(Integer qIndex) {
-		Integer index = --qIndex;
-		System.out.println(String.valueOf(index));
-		if (!isQueueListEmpty() && index < queueList.size() && index >= 0) {
-			queueMap.remove(queueList.get(index).getName());
-			queueList.remove(queueList.get(index));
-			updateQueueMap(index);
-		} else {
-			throw new DoesNotExistException("Queue");
-		}
-	}
-
-	public void removeQueue(String qName) {
-		if (!isQueueListEmpty() && queueMap.containsKey(qName)) {
-			Integer i = queueMap.get(qName);
+	
+	/*
+	 * Removes queue with param Integer
+	 */
+	public void removeQueue(Integer index) {
+		Integer i = --index;
+		if (doesQueueExist(i)) {
 			queueList.remove(queueList.get(i));
-			queueMap.remove(qName);
-			updateQueueMap(i);
 		} else {
 			throw new DoesNotExistException("Queue");
 		}
 	}
 
-	private void updateQueueMap(Integer i) {
-		for (Integer index : queueMap.values()) {
-			if (index > i) {
-				index--;
-			}
-		}
-	}
-
-	private void updateQueueMap(String oldName, Integer index, String newName) {
-		queueMap.remove(oldName.toLowerCase());
-		queueMap.put(newName.toLowerCase(), index);
-	}
-
-	public Queue getQueue(String name) {
-		Integer index = queueMap.get(name.toLowerCase());
-		if (index != null) {
-			return queueList.get(index);
+	/*
+	 * Removes queue with param String
+	 */
+	public void removeQueue(String name) {
+		if (doesQueueExist(name)) {
+			queueList.remove(getQueue(name));
 		} else {
-			return null;
+			throw new DoesNotExistException("Queue");
 		}
 	}
-
-	public Queue getQueue(Integer index) {
-		if (index > 0 && index <= queueList.size()) {
-			return queueList.get(--index);
-		} else {
-			return null;
-		}
-	}
-
-	public ArrayList<Queue> getQueue() {
+	
+	public List<Queue> getQueueList() {
 		return queueList;
 	}
 
 	public boolean isQueueListEmpty() {
-		if (queueList.isEmpty()) {
-			return true;
-		} else {
-			return false;
-		}
+		return queueList.isEmpty();
 	}
-
+	
+	/*
+	 * Returns basic queue information in the format <name> [<playercount>/<maxplayers>]...
+	 */
 	public String getHeader() {
 		if (isQueueListEmpty()) {
-			return "**NO ACTIVE QUEUES**";
+			return "NO ACTIVE QUEUES";
 		} else {
 			String header = "";
 			for (Queue q : queueList) {
@@ -224,14 +195,16 @@ public class QueueManager {
 				if (q.getNumberOfGames() > 0) {
 					games = String.format(" (In game)");
 				}
-				header += String.format("%s [%d/%d]%s ", q.getName(), q.getCurrentPlayers(), q.getMaxPlayers(),
-						games);
+				header += String.format("%s [%d/%d]%s ", q.getName(), q.getCurrentPlayers(), q.getMaxPlayers(), games);
 			}
 			header = header.substring(0, header.lastIndexOf(" "));
 			return header;
 		}
 	}
-
+	
+	/*
+	 * Finds game that contains player and finishes it
+	 */
 	public void finish(User player) {
 		if (isPlayerIngame(player)) {
 			for (Queue q : queueList) {
@@ -263,10 +236,10 @@ public class QueueManager {
 		}
 	}
 
-	public void deletePlayer(User player, String qName) {
-		if (queueMap.containsKey(qName.toLowerCase())) {
+	public void deletePlayer(User player, String name) {
+		if (doesQueueExist(name)) {
 			if (!isPlayerIngame(player)) {
-				queueList.get(queueMap.get(qName.toLowerCase())).delete(player);
+				getQueue(name).delete(player);
 			} else {
 				throw new InvalidUseException("You are already in-game");
 			}
@@ -275,11 +248,11 @@ public class QueueManager {
 		}
 	}
 
-	public void deletePlayer(User player, Integer qIndex) {
-		Integer index = --qIndex;
-		if (queueMap.containsValue(index)) {
+	public void deletePlayer(User player, Integer index) {
+		Integer i = index;
+		if (doesQueueExist(i)) {
 			if (!isPlayerIngame(player)) {
-				queueList.get(index).delete(player);
+				queueList.get(i).delete(player);
 			} else {
 				throw new InvalidUseException("You are already in-game");
 			}
@@ -288,23 +261,23 @@ public class QueueManager {
 		}
 	}
 
-	public void purgeQueue(ArrayList<User> players) {
+	public void purgeQueue(List<User> players) {
 		for (Queue q : queueList) {
 			q.purge(players);
 		}
 	}
-	
-	public void purgeQueue(User player){
-		for (Queue q : queueList){
+
+	public void purgeQueue(User player) {
+		for (Queue q : queueList) {
 			q.purge(player);
 		}
 	}
 
 	public void updateTopic() {
-		try{
+		try {
 			getServer().getPugChannel().getManager().setTopic(getHeader()).complete();
 			System.out.println("Topic updated");
-		}catch(PermissionException ex){
+		} catch (PermissionException ex) {
 			ex.printStackTrace();
 		}
 		saveToFile();
@@ -333,21 +306,17 @@ public class QueueManager {
 			Queue q = queueList.get(i);
 			if (q.containsPlayer(name)) {
 				q.delete(q.getPlayer(name));
-			} else {
-				return;
 			}
 		} else {
 			throw new DoesNotExistException("Queue");
 		}
 	}
 
-	public void remove(String pName, String qName) {
-		if (!isQueueListEmpty() && queueMap.containsKey(qName)) {
-			Queue q = queueList.get(queueMap.get(qName));
-			if (q.containsPlayer(pName)) {
-				q.delete(q.getPlayer(pName));
-			} else {
-				return;
+	public void remove(String playerName, String queueName) {
+		if (doesQueueExist(queueName)) {
+			Queue q = getQueue(queueName);
+			if (q.containsPlayer(playerName)) {
+				q.delete(q.getPlayer(playerName));
 			}
 		} else {
 			throw new DoesNotExistException();
@@ -358,7 +327,7 @@ public class QueueManager {
 		if (!isQueueListEmpty()) {
 			User sub = null;
 			for (Member m : ServerManager.getServer(guildId).getGuild().getMembers()) {
-				if (m.getUser().getName().equalsIgnoreCase(substitute)) {
+				if (m.getEffectiveName().equalsIgnoreCase(substitute)) {
 					sub = m.getUser();
 					break;
 				}
@@ -366,7 +335,7 @@ public class QueueManager {
 			if (sub == null) {
 				throw new DoesNotExistException("Substitute player");
 			} else if (isPlayerIngame(sub)) {
-				throw new InvalidUseException("Player is already in-game");
+				throw new InvalidUseException(sub.getName() + " is already in-game");
 			}
 			for (Queue q : queueList) {
 				for (Game g : q.getGames()) {
@@ -384,23 +353,21 @@ public class QueueManager {
 	}
 
 	public boolean isPlayerIngame(User player) {
-		if (!isQueueListEmpty()) {
-			for (Queue q : queueList) {
-				for (Game g : q.getGames()) {
-					if (g.getPlayers().contains(player)) {
-						return true;
-					}
+		for (Queue q : queueList) {
+			for (Game g : q.getGames()) {
+				if (g.getPlayers().contains(player)) {
+					return true;
 				}
 			}
 		}
 		return false;
 	}
 
-	public void addToJustFinished(ArrayList<User> players) {
+	public void addToJustFinished(List<User> players) {
 		justFinished.addAll(players);
 	}
 
-	public void timerEnd(ArrayList<User> players) {
+	public void timerEnd(List<User> players) {
 		justFinished.removeAll(players);
 		for (Queue q : queueList) {
 			q.addPlayersWaiting(players);
@@ -410,11 +377,9 @@ public class QueueManager {
 	}
 
 	public boolean isPlayerInQueue(User player) {
-		if (!isQueueListEmpty()) {
-			for (Queue q : queueList) {
-				if (q.getPlayersInQueue().contains(player)) {
-					return true;
-				}
+		for (Queue q : queueList) {
+			if (q.getPlayersInQueue().contains(player)) {
+				return true;
 			}
 		}
 		return false;
@@ -422,20 +387,8 @@ public class QueueManager {
 
 	public void addNotification(User player, Integer index, Integer playerCount) {
 		Integer i = --index;
-		if (!isQueueListEmpty() && i >= 0 && i < queueList.size()) {
-			if (playerCount < queueList.get(i).getMaxPlayers()) {
-				queueList.get(i).addNotification(player, playerCount);
-			} else {
-				throw new BadArgumentsException("Error! Number of players must be less than the max amount of players");
-			}
-		} else {
-			throw new DoesNotExistException("Queue");
-		}
-	}
-
-	public void addNotification(User player, String qName, Integer playerCount) {
-		if (queueMap.containsKey(qName.toLowerCase())) {
-			Queue q = queueList.get(queueMap.get(qName.toLowerCase()));
+		if (doesQueueExist(i)) {
+			Queue q = queueList.get(i);
 			if (playerCount < q.getMaxPlayers()) {
 				q.addNotification(player, playerCount);
 			} else {
@@ -446,7 +399,20 @@ public class QueueManager {
 		}
 	}
 
-	public void removeNotifications(User user) {
+	public void addNotification(User player, String name, Integer playerCount) {
+		if (doesQueueExist(name)) {
+			Queue q = getQueue(name);
+			if (playerCount < q.getMaxPlayers()) {
+				q.addNotification(player, playerCount);
+			} else {
+				throw new BadArgumentsException("Error! Number of players must be less than the max amount of players");
+			}
+		} else {
+			throw new DoesNotExistException("Queue");
+		}
+	}
+
+	public void removeNotification(User user) {
 		if (!isQueueListEmpty()) {
 			for (Queue q : queueList) {
 				q.removeNotification(user);
@@ -456,18 +422,18 @@ public class QueueManager {
 		}
 	}
 
-	public void removeNotifications(User user, Integer index) {
+	public void removeNotification(User user, Integer index) {
 		Integer i = --index;
-		if (!isQueueListEmpty() && i >= 0 && i < queueList.size()) {
+		if (doesQueueExist(i)) {
 			queueList.get(i).removeNotification(user);
 		} else {
 			throw new DoesNotExistException("Queue");
 		}
 	}
 
-	public void removeNotifications(User user, String qName) {
-		if (queueMap.containsKey(qName)) {
-			queueList.get(queueMap.get(qName)).removeNotification(user);
+	public void removeNotification(User user, String name) {
+		if (doesQueueExist(name)) {
+			getQueue(name).removeNotification(user);
 		} else {
 			throw new DoesNotExistException("Queue");
 		}
@@ -477,7 +443,7 @@ public class QueueManager {
 		try {
 			System.out.println("Saving queue to file...");
 			PrintWriter writer = new PrintWriter(new FileOutputStream(String.format("%s/%s/%s", "app_data", guildId, "queue.json")));
-			writer.println(encodeJSON());
+			writer.println(getJSON());
 			writer.close();
 			System.out.println("Queue saved");
 		} catch (Exception ex) {
@@ -485,7 +451,7 @@ public class QueueManager {
 		}
 	}
 
-	private String encodeJSON() {
+	private String getJSON() {
 		JSONObject root = new JSONObject();
 		JSONArray ja = new JSONArray();
 		for (Queue q : queueList) {
@@ -544,10 +510,10 @@ public class QueueManager {
 		JSONObject json = new JSONObject(input);
 		json.getJSONArray("queue").forEach((q) -> {
 			JSONObject jq = new JSONObject(q.toString());
-			create(jq.getString("name"), jq.getInt("maxplayers"));
+			createQueue(jq.getString("name"), jq.getInt("maxplayers"));
 			jq.getJSONArray("inqueue").forEach((p) -> {
 				User player = ServerManager.getGuild(guildId).getMemberById(p.toString()).getUser();
-				addPlayer(player, jq.getString("name"));
+				addPlayerToQueue(player, jq.getString("name"));
 			});
 			jq.getJSONArray("notifications").forEach((ns) -> {
 				JSONObject n = new JSONObject(ns.toString());
@@ -566,8 +532,38 @@ public class QueueManager {
 	public String getId() {
 		return guildId;
 	}
-	
-	public Server getServer(){
+
+	public Server getServer() {
 		return ServerManager.getServer(guildId);
+	}
+
+	public boolean doesQueueExist(String name) {
+		for (Queue q : queueList) {
+			if (q.getName().equalsIgnoreCase(name)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public boolean doesQueueExist(Integer index) {
+		if (index >= 0 && index < queueList.size()) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+	
+	public Queue getQueue(String name){
+		for(Queue q : queueList){
+			if(q.getName().equalsIgnoreCase(name)){
+				return q;
+			}
+		}
+		return null;
+	}
+	
+	public Queue getQueue(Integer index){
+		return queueList.get(--index);
 	}
 }

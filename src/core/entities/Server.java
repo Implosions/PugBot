@@ -12,6 +12,7 @@ import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.TextChannel;
 import net.dv8tion.jda.core.entities.User;
 
+// Server class; Controls bot actions for each server
 public class Server {
 	private String id;
 	private Guild guild;
@@ -28,7 +29,7 @@ public class Server {
 		qm = new QueueManager(id);
 		cmds = new Commands();
 		settings = new Settings(id);
-		qm.getQueue().forEach((q) -> q.getPlayersInQueue().forEach((u) -> updateActivityList(u)));
+		qm.getQueueList().forEach((q) -> q.getPlayersInQueue().forEach((u) -> updateActivityList(u)));
 		startAFKTimer();
 	}
 

@@ -20,10 +20,10 @@ public class Game {
 	private String guildId;
 	private String name;
 	private Long timestamp;
-	private ArrayList<User> players;
+	private List<User> players;
 	private String[] captains = new String[] { "", "" };
 
-	public Game(String id, String name, ArrayList<User> players) {
+	public Game(String id, String name, List<User> players) {
 		this.guildId = id;
 		this.name = name;
 		this.timestamp = System.currentTimeMillis();
@@ -34,7 +34,7 @@ public class Game {
 		logGame();
 	}
 
-	public ArrayList<User> getPlayers() {
+	public List<User> getPlayers() {
 		return players;
 	}
 

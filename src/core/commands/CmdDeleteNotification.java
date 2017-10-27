@@ -22,12 +22,12 @@ public class CmdDeleteNotification extends Command{
 		try{
 			if(args.length <= 1){
 				if(args.length == 0){
-					qm.removeNotifications(member.getUser());
+					qm.removeNotification(member.getUser());
 				}else{
 					try{
-						qm.removeNotifications(member.getUser(), Integer.valueOf(args[0]));
+						qm.removeNotification(member.getUser(), Integer.valueOf(args[0]));
 					}catch(NumberFormatException ex){
-						qm.removeNotifications(member.getUser(), args[1]);
+						qm.removeNotification(member.getUser(), args[1]);
 					}
 				}
 			}else{

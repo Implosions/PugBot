@@ -21,13 +21,13 @@ public class CmdAdd extends Command{
 		try{
 			QueueManager qm = server.getQueueManager();
 			if(args.length == 0){
-				qm.addPlayer(member.getUser());
+				qm.addPlayerToQueue(member.getUser());
 			}else{
 				for(String q : args){
 					try {
-						qm.addPlayer(member.getUser(), Integer.valueOf(q));
+						qm.addPlayerToQueue(member.getUser(), Integer.valueOf(q));
 					} catch (NumberFormatException ex) {
-						qm.addPlayer(member.getUser(), q);
+						qm.addPlayerToQueue(member.getUser(), q);
 					}
 				}
 			}

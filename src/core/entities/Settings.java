@@ -7,7 +7,7 @@ import java.io.IOException;
 import java.util.Properties;
 
 import core.util.Functions;
-
+// Settings class; Configurable settings for each server
 public class Settings {
 
 	private String filePath;
