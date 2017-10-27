@@ -1,9 +1,8 @@
 package core.commands;
 
-import java.util.ArrayList;
-
 import core.Constants;
 import core.entities.QueueManager;
+import core.entities.Server;
 import core.exceptions.InvalidUseException;
 import core.util.Functions;
 import net.dv8tion.jda.core.entities.Member;
@@ -17,11 +16,12 @@ public class CmdFinish extends Command{
 	}
 	
 	@Override
-	public void execCommand(QueueManager qm, Member member, ArrayList<String> args) {
+	public void execCommand(Server server, Member member, String[] args) {
+		QueueManager qm = server.getQueueManager();
 		try{
 			qm.finish(member.getUser());
 			qm.updateTopic();
-			this.response = Functions.createMessage(successMsg, qm.getHeader(), true);
+			this.response = Functions.createMessage("Game finished", qm.getHeader(), true);
 			System.out.println(successMsg);
 		}catch(InvalidUseException ex){
 			this.response = Functions.createMessage("Error!", ex.getMessage(), false);

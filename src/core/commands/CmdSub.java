@@ -1,9 +1,8 @@
 package core.commands;
 
-import java.util.ArrayList;
-
 import core.Constants;
 import core.entities.QueueManager;
+import core.entities.Server;
 import core.exceptions.BadArgumentsException;
 import core.exceptions.DoesNotExistException;
 import core.exceptions.InvalidUseException;
@@ -19,15 +18,16 @@ public class CmdSub extends Command{
 	}
 	
 	@Override
-	public void execCommand(QueueManager qm, Member member, ArrayList<String> args) {
+	public void execCommand(Server server, Member member, String[] args) {
+		QueueManager qm = server.getQueueManager();
 		try{
-			if(args.size() == 2){
-				qm.sub(args.get(0), args.get(1));
+			if(args.length == 2){
+				qm.sub(args[0], args[1]);
 			}else{
 				throw new BadArgumentsException();
 			}
 			qm.updateTopic();
-			this.response = Functions.createMessage(String.format("%s has been subbed with %s", args.get(0), args.get(1)), "", true);
+			this.response = Functions.createMessage(String.format("%s has been subbed with %s", args[0], args[1]), "", true);
 			System.out.println(successMsg);
 		}catch(DoesNotExistException | BadArgumentsException | InvalidUseException ex){
 			this.response = Functions.createMessage("Error!", ex.getMessage(), false);

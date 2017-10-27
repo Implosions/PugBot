@@ -1,11 +1,13 @@
 package core.commands;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import core.Constants;
 import core.entities.Game;
 import core.entities.Queue;
 import core.entities.QueueManager;
+import core.entities.Server;
 import core.exceptions.DoesNotExistException;
 import core.util.Functions;
 import net.dv8tion.jda.core.entities.Member;
@@ -21,13 +23,14 @@ public class CmdStatus extends Command {
 	}
 
 	@Override
-	public void execCommand(QueueManager qm, Member member, ArrayList<String> args) {
+	public void execCommand(Server server, Member member, String[] args) {
+		QueueManager qm = server.getQueueManager();
 		try {
 			if (!qm.isQueueListEmpty()) {
-				if (args.isEmpty()) {
+				if (args.length == 0) {
 					this.response = Functions.createMessage("", statusBuilder(qm.getQueue()), true);
 				} else {
-					ArrayList<Queue> queueList = new ArrayList<Queue>();
+					List<Queue> queueList = new ArrayList<Queue>();
 					for (String a : args) {
 						Queue queue;
 						try {
@@ -44,6 +47,7 @@ public class CmdStatus extends Command {
 			} else {
 				throw new DoesNotExistException("Queue");
 			}
+			// Delete last status message
 			if(lastResponseId != null){
 				qm.getServer().getPugChannel().deleteMessageById(lastResponseId).complete();
 			}
@@ -56,11 +60,14 @@ public class CmdStatus extends Command {
 		}
 	}
 
-	private String statusBuilder(ArrayList<Queue> queueList) {
+	private String statusBuilder(List<Queue> queueList) {
 		String statusMsg = "";
 
 		for (Queue q : queueList) {
+			// Get basic queue information
 			statusMsg += String.format("**%s** [%s/%s]%n", q.getName(), q.getCurrentPlayers(), q.getMaxPlayers());
+			
+			// Get players in queue
 			if (q.getCurrentPlayers() > 0) {
 				String names = ""; 
 				for (User u : q.getPlayersInQueue()) {
@@ -69,6 +76,8 @@ public class CmdStatus extends Command {
 				names = names.substring(0, names.lastIndexOf(","));
 				statusMsg += String.format("**IN QUEUE**: %s%n", names);
 			}
+			
+			// Get players in game
 			if (q.getNumberOfGames() > 0) {
 				for (Game g : q.getGames()) {
 					String names = "";

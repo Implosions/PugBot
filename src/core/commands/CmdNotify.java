@@ -1,9 +1,8 @@
 package core.commands;
 
-import java.util.ArrayList;
-
 import core.Constants;
 import core.entities.QueueManager;
+import core.entities.Server;
 import core.exceptions.BadArgumentsException;
 import core.exceptions.DoesNotExistException;
 import core.util.Functions;
@@ -18,24 +17,25 @@ public class CmdNotify extends Command{
 	}
 	
 	@Override
-	public void execCommand(QueueManager qm, Member member, ArrayList<String> args) {
+	public void execCommand(Server server, Member member, String[] args) {
+		QueueManager qm = server.getQueueManager();
 		try{
-			if(args.size() == 2){
+			if(args.length == 2){
 				Integer playerCount;
 				try{
-					playerCount = Integer.valueOf(args.get(1));
+					playerCount = Integer.valueOf(args[1]);
 				}catch(NumberFormatException ex){
 					throw new BadArgumentsException();
 				}
 				try{
-					qm.addNotification(member.getUser(), Integer.valueOf(args.get(0)), playerCount);
+					qm.addNotification(member.getUser(), Integer.valueOf(args[0]), playerCount);
 				}catch(NumberFormatException ex){
-					qm.addNotification(member.getUser(), args.get(0), playerCount);
+					qm.addNotification(member.getUser(), args[0], playerCount);
 				}
 			}else{
 				throw new BadArgumentsException();
 			}
-			this.response = Functions.createMessage(successMsg, "", true);
+			this.response = Functions.createMessage("Notification added", "", true);
 			System.out.println(successMsg);
 			qm.saveToFile();
 		}catch(BadArgumentsException | DoesNotExistException ex){

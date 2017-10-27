@@ -1,9 +1,8 @@
 package core.commands;
 
-import java.util.ArrayList;
-
 import core.Constants;
 import core.entities.QueueManager;
+import core.entities.Server;
 import core.exceptions.BadArgumentsException;
 import core.exceptions.DoesNotExistException;
 import core.exceptions.InvalidUseException;
@@ -20,13 +19,13 @@ public class CmdRemove extends Command {
 	}
 
 	@Override
-	public void execCommand(QueueManager qm, Member member, ArrayList<String> args) {
+	public void execCommand(Server server, Member member, String[] args) {
+		QueueManager qm = server.getQueueManager();
 		try {
-			if (args.size() > 0) {
-				String name = args.get(0);
-				args.remove(0);
+			if (args.length > 0) {
+				String name = args[0];
 				
-				if (args.size() == 0) {
+				if (args.length == 1) {
 					qm.remove(name);
 				} else {
 					for (String s : args) {
@@ -42,7 +41,7 @@ public class CmdRemove extends Command {
 				throw new BadArgumentsException();
 			}
 			qm.updateTopic();
-			this.response = Functions.createMessage(String.format("Player removed from queue"), qm.getHeader(), true);
+			this.response = Functions.createMessage(String.format("%s removed from queue", args[0]), qm.getHeader(), true);
 			System.out.println(successMsg);
 		} catch (BadArgumentsException | DoesNotExistException | InvalidUseException ex) {
 			this.response = Functions.createMessage("Error!", ex.getMessage(), false);
