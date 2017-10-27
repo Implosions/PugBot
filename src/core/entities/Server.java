@@ -17,8 +17,9 @@ public class Server {
 	private Guild guild;
 	private Settings settings;
 	private QueueManager qm;
-	public Commands cmds;
 	private HashMap<User, Long> activityList = new HashMap<User, Long>();
+	
+	public Commands cmds;
 
 	public Server(Guild guild) {
 		this.guild = guild;
@@ -82,14 +83,12 @@ public class Server {
 	}
 
 	private void dcTimerEnd(Member m) {
-		if (m.getOnlineStatus().equals(OnlineStatus.OFFLINE)) {
+		if (m.getOnlineStatus().equals(OnlineStatus.OFFLINE) && qm.isPlayerInQueue(m.getUser())) {
 			qm.deletePlayer(m.getUser());
 			qm.updateTopic();
 			String s = String.format("%s has been removed from queue after being offline for %s minutes", m.getEffectiveName(), new DecimalFormat("#.##").format((double)settings.dcTime()/60));
 			getPugChannel().sendMessage(Functions.createMessage("", s,Color.red)).queue();
 			System.out.println(s);
-		}else{
-			System.out.println(String.format("%s has returned", m.getEffectiveName()));
 		}
 	}
 	
