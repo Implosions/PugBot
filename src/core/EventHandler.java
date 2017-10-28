@@ -6,7 +6,7 @@ import java.util.regex.Pattern;
 import core.commands.Command;
 import core.entities.Server;
 import core.entities.ServerManager;
-import core.util.Functions;
+import core.util.Utils;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.OnlineStatus;
 import net.dv8tion.jda.core.entities.Member;
@@ -29,7 +29,7 @@ public class EventHandler extends ListenerAdapter {
 
 	public EventHandler(JDA jda) {
 		new ServerManager(jda.getGuilds());
-		Functions.loadAdminList();
+		Utils.loadAdminList();
 	}
 	
 	
@@ -89,8 +89,8 @@ public class EventHandler extends ListenerAdapter {
 				}else if(cmdObj.getPugCommand()){
 					channel = server.getPugChannel();
 				}
-				if (cmdObj.getAdminRequired() && !Functions.isAdmin(event.getMember())) {
-					channel.sendMessage(Functions.createMessage("Error!", "Admin required", false)).queue();
+				if (cmdObj.getAdminRequired() && !Utils.isAdmin(event.getMember())) {
+					channel.sendMessage(Utils.createMessage("Error!", "Admin required", false)).queue();
 				} else {
 					// Executes command and sends response to proper channel
 					cmdObj.execCommand(server, event.getMember(), args);
@@ -105,7 +105,7 @@ public class EventHandler extends ListenerAdapter {
 			} else {
 				// Will only respond to invalid commands in the pug channel
 				if(channel.equals(server.getPugChannel())){
-					channel.sendMessage(Functions.createMessage("Error!", "Invalid command", false)).queue();
+					channel.sendMessage(Utils.createMessage("Error!", "Invalid command", false)).queue();
 				}
 			}
 		}

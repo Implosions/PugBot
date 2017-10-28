@@ -13,7 +13,7 @@ import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import core.util.Functions;
+import core.util.Utils;
 import net.dv8tion.jda.core.entities.User;
 
 public class Game {
@@ -114,7 +114,7 @@ public class Game {
 
 	private void logGame() {
 		String s = String.format("%s/%s/%s", "app_data", guildId, "games.txt");
-		Functions.createFile(s);
+		Utils.createFile(s);
 		try {
 			System.out.println("Logging game to file...");
 			PrintWriter writer = new PrintWriter(new FileOutputStream(s, true));

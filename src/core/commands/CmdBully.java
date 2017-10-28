@@ -7,7 +7,7 @@ import core.Constants;
 import core.entities.Server;
 import core.exceptions.BadArgumentsException;
 import core.exceptions.DoesNotExistException;
-import core.util.Functions;
+import core.util.Utils;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.User;
 
@@ -61,13 +61,13 @@ public class CmdBully extends Command {
 						if (u.getId().equals(Constants.OWNER_ID)) {
 							u = member.getUser();
 						}
-						this.response = Functions.createMessage(String.format(actionList[random.nextInt(actionList.length)], u.getId()));
+						this.response = Utils.createMessage(String.format(actionList[random.nextInt(actionList.length)], u.getId()));
 						// Put user in cooldownCollection
 						if(!member.getUser().getId().equals(Constants.OWNER_ID)){
 							cooldownCollection.put(member.getUser(), System.currentTimeMillis());
 						}
 					} else {
-						this.response = Functions.createMessage("Your bullying is on cooldown", String.format("Time remaining: %d Minutes",
+						this.response = Utils.createMessage("Your bullying is on cooldown", String.format("Time remaining: %d Minutes",
 								30 - ((System.currentTimeMillis() - cooldownCollection.get(member.getUser())) / 60000)), false);
 					}
 				} else {
@@ -78,7 +78,7 @@ public class CmdBully extends Command {
 			}
 			System.out.println(successMsg);
 		} catch (BadArgumentsException | DoesNotExistException ex) {
-			this.response = Functions.createMessage("Error!", ex.getMessage(), false);
+			this.response = Utils.createMessage("Error!", ex.getMessage(), false);
 		}
 	}
 

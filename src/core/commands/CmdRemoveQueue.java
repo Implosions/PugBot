@@ -5,7 +5,7 @@ import core.entities.QueueManager;
 import core.entities.Server;
 import core.exceptions.BadArgumentsException;
 import core.exceptions.DoesNotExistException;
-import core.util.Functions;
+import core.util.Utils;
 import net.dv8tion.jda.core.entities.Member;
 
 public class CmdRemoveQueue extends Command {
@@ -33,10 +33,10 @@ public class CmdRemoveQueue extends Command {
 				throw new BadArgumentsException();
 			}
 			qm.updateTopic();
-			this.response = Functions.createMessage(String.format("Queue %s removed", args[0]), qm.getHeader(), true);
+			this.response = Utils.createMessage(String.format("Queue %s removed", args[0]), qm.getHeader(), true);
 			System.out.println(successMsg);
 		} catch (DoesNotExistException | BadArgumentsException ex) {
-			this.response = Functions.createMessage("Error!", ex.getMessage(), false);
+			this.response = Utils.createMessage("Error!", ex.getMessage(), false);
 		}
 
 	}

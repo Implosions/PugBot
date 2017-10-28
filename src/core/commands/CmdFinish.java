@@ -4,7 +4,7 @@ import core.Constants;
 import core.entities.QueueManager;
 import core.entities.Server;
 import core.exceptions.InvalidUseException;
-import core.util.Functions;
+import core.util.Utils;
 import net.dv8tion.jda.core.entities.Member;
 
 public class CmdFinish extends Command{
@@ -21,10 +21,10 @@ public class CmdFinish extends Command{
 		try{
 			qm.finish(member.getUser());
 			qm.updateTopic();
-			this.response = Functions.createMessage("Game finished", qm.getHeader(), true);
+			this.response = Utils.createMessage("Game finished", qm.getHeader(), true);
 			System.out.println(successMsg);
 		}catch(InvalidUseException ex){
-			this.response = Functions.createMessage("Error!", ex.getMessage(), false);
+			this.response = Utils.createMessage("Error!", ex.getMessage(), false);
 		}
 	}
 

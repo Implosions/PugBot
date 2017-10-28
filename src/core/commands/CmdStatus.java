@@ -9,7 +9,7 @@ import core.entities.Queue;
 import core.entities.QueueManager;
 import core.entities.Server;
 import core.exceptions.DoesNotExistException;
-import core.util.Functions;
+import core.util.Utils;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.User;
 import net.dv8tion.jda.core.exceptions.PermissionException;
@@ -28,7 +28,7 @@ public class CmdStatus extends Command {
 		try {
 			if (!qm.isQueueListEmpty()) {
 				if (args.length == 0) {
-					this.response = Functions.createMessage("", statusBuilder(qm.getQueueList()), true);
+					this.response = Utils.createMessage("", statusBuilder(qm.getQueueList()), true);
 				} else {
 					List<Queue> queueList = new ArrayList<Queue>();
 					for (String a : args) {
@@ -42,7 +42,7 @@ public class CmdStatus extends Command {
 							queueList.add(queue);
 						}
 					}
-					this.response = Functions.createMessage("", statusBuilder(queueList), true);
+					this.response = Utils.createMessage("", statusBuilder(queueList), true);
 				}
 			} else {
 				throw new DoesNotExistException("Queue");
@@ -53,7 +53,7 @@ public class CmdStatus extends Command {
 			}
 			System.out.println("Completed status request");
 		} catch (DoesNotExistException ex) {
-			this.response = Functions.createMessage("Error!", ex.getMessage(), false);
+			this.response = Utils.createMessage("Error!", ex.getMessage(), false);
 		} catch (PermissionException ex){
 			lastResponseId = null;
 			ex.printStackTrace();

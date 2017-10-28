@@ -5,7 +5,7 @@ import core.entities.QueueManager;
 import core.entities.Server;
 import core.exceptions.BadArgumentsException;
 import core.exceptions.DoesNotExistException;
-import core.util.Functions;
+import core.util.Utils;
 import net.dv8tion.jda.core.entities.Member;
 
 public class CmdEditQueue extends Command{
@@ -35,10 +35,10 @@ public class CmdEditQueue extends Command{
 				throw new BadArgumentsException();
 			}
 			qm.updateTopic();
-			this.response = Functions.createMessage(String.format("Queue %s edited", args[0]), qm.getHeader(), true);
+			this.response = Utils.createMessage(String.format("Queue %s edited", args[0]), qm.getHeader(), true);
 			System.out.println(successMsg);
 		}catch(BadArgumentsException | DoesNotExistException ex){
-			this.response = Functions.createMessage("Error!", ex.getMessage(), false);
+			this.response = Utils.createMessage("Error!", ex.getMessage(), false);
 		}
 	}
 

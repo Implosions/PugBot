@@ -4,7 +4,7 @@ import java.awt.Color;
 import java.text.DecimalFormat;
 import java.util.HashMap;
 
-import core.util.Functions;
+import core.util.Utils;
 import core.util.TimerTrigger;
 import net.dv8tion.jda.core.OnlineStatus;
 import net.dv8tion.jda.core.entities.Guild;
@@ -25,7 +25,7 @@ public class Server {
 	public Server(Guild guild) {
 		this.guild = guild;
 		this.id = guild.getId();
-		Functions.createDir(String.format("%s/%s", "app_data", id));
+		Utils.createDir(String.format("%s/%s", "app_data", id));
 		qm = new QueueManager(id);
 		cmds = new Commands();
 		settings = new Settings(id);
@@ -65,7 +65,7 @@ public class Server {
 			if (qm.isPlayerInQueue(u) && (System.currentTimeMillis() - l) / 60000 >= settings.afkTime()) {
 				qm.deletePlayer(u);
 				String s = String.format("%s has been removed from the queue due to inactivity", u.getName());
-				getPugChannel().sendMessage(Functions.createMessage("", s, Color.red)).queue();
+				getPugChannel().sendMessage(Utils.createMessage("", s, Color.red)).queue();
 				u.openPrivateChannel().complete().sendMessage("You have been removed from the queue due to inactivity")
 						.queue();
 				qm.updateTopic();
@@ -88,7 +88,7 @@ public class Server {
 			qm.deletePlayer(m.getUser());
 			qm.updateTopic();
 			String s = String.format("%s has been removed from queue after being offline for %s minutes", m.getEffectiveName(), new DecimalFormat("#.##").format((double)settings.dcTime()/60));
-			getPugChannel().sendMessage(Functions.createMessage("", s,Color.red)).queue();
+			getPugChannel().sendMessage(Utils.createMessage("", s,Color.red)).queue();
 			System.out.println(s);
 		}
 	}

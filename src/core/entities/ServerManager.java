@@ -3,7 +3,7 @@ package core.entities;
 import java.util.ArrayList;
 import java.util.List;
 
-import core.util.Functions;
+import core.util.Utils;
 import net.dv8tion.jda.core.entities.Guild;
 
 public class ServerManager {
@@ -11,7 +11,7 @@ public class ServerManager {
 	private static List<Guild> guilds;
 	
 	public ServerManager(List<Guild> guilds){
-		Functions.createDir("app_data");
+		Utils.createDir("app_data");
 		ServerManager.guilds = guilds;
 		guilds.forEach((g) -> {servers.add(new Server(g));
 									servers.get(servers.size() - 1).getQueueManager().updateTopic();

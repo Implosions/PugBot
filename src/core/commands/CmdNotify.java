@@ -5,7 +5,7 @@ import core.entities.QueueManager;
 import core.entities.Server;
 import core.exceptions.BadArgumentsException;
 import core.exceptions.DoesNotExistException;
-import core.util.Functions;
+import core.util.Utils;
 import net.dv8tion.jda.core.entities.Member;
 
 public class CmdNotify extends Command{
@@ -35,11 +35,11 @@ public class CmdNotify extends Command{
 			}else{
 				throw new BadArgumentsException();
 			}
-			this.response = Functions.createMessage("Notification added", "", true);
+			this.response = Utils.createMessage("Notification added", "", true);
 			System.out.println(successMsg);
 			qm.saveToFile();
 		}catch(BadArgumentsException | DoesNotExistException ex){
-			this.response = Functions.createMessage("Error!", ex.getMessage(), false);
+			this.response = Utils.createMessage("Error!", ex.getMessage(), false);
 		}
 	}
 

@@ -6,7 +6,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Properties;
 
-import core.util.Functions;
+import core.util.Utils;
 // Settings class; Configurable settings for each server
 public class Settings {
 
@@ -48,7 +48,7 @@ public class Settings {
 	}
 
 	private void createSettingsFile() {
-		Functions.createFile(filePath);
+		Utils.createFile(filePath);
 		
 		try{
 			FileOutputStream os = new FileOutputStream(filePath);

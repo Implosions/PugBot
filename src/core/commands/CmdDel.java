@@ -5,7 +5,7 @@ import core.entities.QueueManager;
 import core.entities.Server;
 import core.exceptions.DoesNotExistException;
 import core.exceptions.InvalidUseException;
-import core.util.Functions;
+import core.util.Utils;
 import net.dv8tion.jda.core.entities.Member;
 
 public class CmdDel extends Command{
@@ -32,10 +32,10 @@ public class CmdDel extends Command{
 				}
 			}
 			qm.updateTopic();
-			this.response = Functions.createMessage(String.format("%s deleted from queue", member.getEffectiveName()), qm.getHeader(), true);
+			this.response = Utils.createMessage(String.format("%s deleted from queue", member.getEffectiveName()), qm.getHeader(), true);
 			System.out.println(successMsg);
 		}catch(DoesNotExistException | InvalidUseException ex){
-			this.response = Functions.createMessage("Error!", ex.getMessage(), false);
+			this.response = Utils.createMessage("Error!", ex.getMessage(), false);
 		}
 	}
 

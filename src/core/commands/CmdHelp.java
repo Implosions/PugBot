@@ -3,7 +3,7 @@ package core.commands;
 import core.Constants;
 import core.entities.Commands;
 import core.entities.Server;
-import core.util.Functions;
+import core.util.Utils;
 import net.dv8tion.jda.core.entities.Member;
 
 public class CmdHelp extends Command{
@@ -21,14 +21,14 @@ public class CmdHelp extends Command{
 		try{
 			cmds = server.cmds;
 			if(args.length == 0){
-				this.response = Functions.createMessage(helpBuilder(member));
+				this.response = Utils.createMessage(helpBuilder(member));
 			}else{
 				if(cmds.validateCommand(args[0])){
-					this.response = Functions.createMessage(cmds.getCommandObj(args[0]).help());
+					this.response = Utils.createMessage(cmds.getCommandObj(args[0]).help());
 				}
 			}
 		}catch(Exception ex){
-			this.response = Functions.createMessage("Error!", ex.getMessage(), false);
+			this.response = Utils.createMessage("Error!", ex.getMessage(), false);
 		}
 	}
 	
@@ -43,7 +43,7 @@ public class CmdHelp extends Command{
 		}
 		
 		// List admin commands
-		if(Functions.isAdmin(member)){
+		if(Utils.isAdmin(member)){
 			s += "\nAdmin commands:\n\n";
 			for(String cmd : cmds.getAdminCmds()){
 				cmdObj = cmds.getCommandObj(cmd);

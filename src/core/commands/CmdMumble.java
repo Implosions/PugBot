@@ -2,7 +2,7 @@ package core.commands;
 
 import core.Constants;
 import core.entities.Server;
-import core.util.Functions;
+import core.util.Utils;
 import net.dv8tion.jda.core.entities.Member;
 
 public class CmdMumble extends Command{
@@ -15,7 +15,7 @@ public class CmdMumble extends Command{
 
 	@Override
 	public void execCommand(Server server, Member member, String[] args) {
-		this.response = Functions.createMessage("", server.getSettings().mumble(), true);
+		this.response = Utils.createMessage("", server.getSettings().mumble(), true);
 	}
 
 }

@@ -13,7 +13,7 @@ import net.dv8tion.jda.core.Permission;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.Message;
 
-public class Functions {
+public class Utils {
 	private static ArrayList<String> admins = new ArrayList<String>();
 	
 	public static Message createMessage(String title, String description, boolean success){
