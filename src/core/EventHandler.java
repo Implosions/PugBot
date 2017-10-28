@@ -59,7 +59,6 @@ public class EventHandler extends ListenerAdapter {
 			// Replaces name with user id
 			if (event.getMessage().getMentionedUsers().size() > 0) {
 				for (User u : event.getMessage().getMentionedUsers()) {
-					System.out.println(event.getGuild().getMemberById(u.getId()).getEffectiveName());
 					message = message.replace("@" + event.getGuild().getMemberById(u.getId()).getEffectiveName(), u.getId());
 				}
 			}
@@ -67,9 +66,9 @@ public class EventHandler extends ListenerAdapter {
 			String[] tokens = message.substring(1).split(" ");
 			// Replaces user id's with names after being tokenized
 			try {
-				for(String s : tokens){
-					if (Pattern.matches("\\d{15,}", s)) {
-						s.replace(s, event.getGuild().getMemberById(s).getEffectiveName());
+				for(Integer i = 0;i < tokens.length;i++){
+					if (Pattern.matches("\\d{15,}", tokens[i])) {
+						tokens[i] = event.getGuild().getMemberById(tokens[i]).getEffectiveName();
 					}
 				}
 			} catch (NumberFormatException ex) {
