@@ -222,9 +222,8 @@ public class QueueManager {
 		if (!isQueueListEmpty()) {
 			if (!isPlayerIngame(player)) {
 				for (Queue q : queueList) {
-					if (q.getPlayersInQueue().contains(player)) {
-						q.delete(player);
-					}
+					System.out.println("test");
+					q.delete(player);
 				}
 			} else {
 				throw new InvalidUseException("You are already in-game");
@@ -318,7 +317,7 @@ public class QueueManager {
 	 */
 	public void remove(String name, Integer index) {
 		Integer i = --index;
-		if (!isQueueListEmpty() && i >= 0 && i < queueList.size()) {
+		if (doesQueueExist(i)) {
 			Queue q = queueList.get(i);
 			if (q.containsPlayer(name)) {
 				q.delete(q.getPlayer(name));
@@ -338,7 +337,7 @@ public class QueueManager {
 				q.delete(q.getPlayer(playerName));
 			}
 		} else {
-			throw new DoesNotExistException();
+			throw new DoesNotExistException("Queue");
 		}
 	}
 

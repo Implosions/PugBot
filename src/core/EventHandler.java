@@ -69,7 +69,7 @@ public class EventHandler extends ListenerAdapter {
 			try {
 				for(String s : tokens){
 					if (Pattern.matches("\\d{15,}", s)) {
-						s.replace(s, event.getGuild().getMemberById(s).getUser().getName());
+						s.replace(s, event.getGuild().getMemberById(s).getEffectiveName());
 					}
 				}
 			} catch (NumberFormatException ex) {

@@ -20,7 +20,7 @@ public class CmdDel extends Command{
 	public void execCommand(Server server, Member member, String[] args) {
 		QueueManager qm = server.getQueueManager();
 		try{
-			if(args.length == 1){
+			if(args.length == 0){
 				qm.deletePlayer(member.getUser());
 			}else{
 				for(String q : args){

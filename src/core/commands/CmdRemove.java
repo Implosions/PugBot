@@ -1,5 +1,7 @@
 package core.commands;
 
+import java.util.Arrays;
+
 import core.Constants;
 import core.entities.QueueManager;
 import core.entities.Server;
@@ -23,16 +25,14 @@ public class CmdRemove extends Command {
 		QueueManager qm = server.getQueueManager();
 		try {
 			if (args.length > 0) {
-				String name = args[0];
-				
 				if (args.length == 1) {
-					qm.remove(name);
+					qm.remove(args[0]);
 				} else {
-					for (String s : args) {
+					for (String s : Arrays.copyOfRange(args, 1, args.length)) {
 						try {
-							qm.remove(name, Integer.valueOf(s));
+							qm.remove(args[0], Integer.valueOf(s));
 						} catch (NumberFormatException ex) {
-							qm.remove(name, s);
+							qm.remove(args[0], s);
 						}
 					}
 				}
