@@ -31,6 +31,11 @@ public class Queue {
 		this.guildId = guildId;
 	}
 
+	/*
+	 * Adds player to queue
+	 * Checks to fire notifications
+	 * Pops queue if at max capacity
+	 */
 	public void add(User name) {
 		if (!playersInQueue.contains(name)) {
 			playersInQueue.add(name);
@@ -74,6 +79,11 @@ public class Queue {
 		return playersInQueue;
 	}
 
+	/*
+	 * Creates a new game
+	 * Removes players in-game from other queues
+	 * Sends notification to the pug channel and to each player in queue
+	 */
 	private void popQueue() {
 		String names = "";
 		List<User> players = new ArrayList<User>(playersInQueue);
@@ -95,6 +105,9 @@ public class Queue {
 		ServerManager.getServer(guildId).getPugChannel().sendMessage(Functions.createMessage(String.format("Game: %s starting", name), captainString, Color.cyan)).queueAfter(2, TimeUnit.SECONDS);
 	}
 
+	/*
+	 * Ends game, adds players to justFinished list, starts finish timer
+	 */
 	public void finish(Game g) {
 		List<User> players = new ArrayList<User>(g.getPlayers());
 		ServerManager.getServer(guildId).getQueueManager().addToJustFinished(players);
@@ -104,6 +117,9 @@ public class Queue {
 		timer.start();
 	}
 
+	/*
+	 * Removes player from queue or waitList
+	 */
 	public void delete(User s) {
 		if(playersInQueue.contains(s)){
 			playersInQueue.remove(s);
@@ -113,18 +129,26 @@ public class Queue {
 		}
 	}
 
+	/*
+	 * Removes all players in the list from queue
+	 */
 	public void purge(List<User> players) {
 		playersInQueue.removeAll(players);
 		waitList.removeAll(players);
 		currentPlayers = playersInQueue.size();
 	}
-	
+	/*
+	 * Removes specified player from queue
+	 */
 	public void purge(User player){
 		playersInQueue.remove(player);
 		waitList.remove(player);
 		currentPlayers = playersInQueue.size();
 	}
 
+	/*
+	 * Returns true if player by String name is in queue
+	 */
 	public boolean containsPlayer(String name) {
 		for (User u : playersInQueue) {
 			if (u.getName().equalsIgnoreCase(name)) {
@@ -134,6 +158,9 @@ public class Queue {
 		return false;
 	}
 
+	/*
+	 * Returns user by String name
+	 */
 	public User getPlayer(String name) {
 		for (User u : playersInQueue) {
 			if (u.getName().equalsIgnoreCase(name)) {
@@ -143,6 +170,9 @@ public class Queue {
 		return null;
 	}
 
+	/*
+	 * Randomizes players waiting after finishing into queue
+	 */
 	public void addPlayersWaiting(List<User> players) {
 		if(waitList.size() > 0){
 			Random random = new Random();
@@ -169,6 +199,9 @@ public class Queue {
 		return waitList.contains(player);
 	}
 
+	/*
+	 * Adds notification
+	 */
 	public void addNotification(User player, Integer playerCount) {
 		if(notifications.containsKey(playerCount)){
 			if(!notifications.get(playerCount).contains(player)){
@@ -180,12 +213,18 @@ public class Queue {
 		}
 	}
 	
+	/*
+	 * Determines if notifications should be sent
+	 */
 	private void checkNotifications(){
 		if(notifications.containsKey(currentPlayers)){
 			notify(notifications.get(currentPlayers));
 		}
 	}
 
+	/*
+	 * Sends notifications to the list of users
+	 */
 	private void notify(List<User> users) {
 		for(User u : users){
 			Member m = ServerManager.getServer(guildId).getGuild().getMemberById(u.getId());
