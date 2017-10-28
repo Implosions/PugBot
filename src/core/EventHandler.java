@@ -76,7 +76,7 @@ public class EventHandler extends ListenerAdapter {
 				ex.printStackTrace();
 			}
 			// Log input
-			System.out.println("Command input: " + event.getAuthor().toString() + " " + tokens.toString());
+			System.out.println("Command input: " + event.getAuthor().toString() + " " + tokens);
 			
 			String cmd = tokens[0].toLowerCase();
 			String[] args = Arrays.copyOfRange(tokens, 1, tokens.length);
