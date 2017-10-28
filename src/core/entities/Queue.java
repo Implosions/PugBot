@@ -102,7 +102,7 @@ public class Queue {
 		if(ServerManager.getServer(guildId).getSettings().randomizeCaptains()){
 			captainString = String.format("%s%n**Captains:** <@%s> & <@%s>", names, newGame.getCaptains()[0], newGame.getCaptains()[1]);
 		}
-		ServerManager.getServer(guildId).getPugChannel().sendMessage(Functions.createMessage(String.format("Game: %s starting", name), captainString, Color.cyan)).queueAfter(2, TimeUnit.SECONDS);
+		ServerManager.getServer(guildId).getPugChannel().sendMessage(Functions.createMessage(String.format("Game: %s starting", name), captainString, Color.yellow)).queueAfter(2, TimeUnit.SECONDS);
 	}
 
 	/*
