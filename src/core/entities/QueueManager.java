@@ -74,7 +74,7 @@ public class QueueManager {
 	}
 	
 	/*
-	 * Adds user to specified queue with params User, String
+	 * Adds user to specified queue
 	 */
 	public void addPlayerToQueue(User player, String name) {
 		if (doesQueueExist(name)) {
@@ -95,7 +95,7 @@ public class QueueManager {
 	}
 	
 	/*
-	 * Adds user to specified queue with params User, Integer
+	 * Adds user to specified queue
 	 */
 	public void addPlayerToQueue(User player, Integer index) {
 		Integer i = --index;
@@ -117,7 +117,7 @@ public class QueueManager {
 	}
 	
 	/*
-	 * Edits queue with params Integer, String, Integer
+	 * Modifies existing queue
 	 * Does not allow maxPlayers <= currentPlayers
 	 */
 	public void editQueue(Integer index, String newName, Integer maxPlayers) {
@@ -134,9 +134,7 @@ public class QueueManager {
 			throw new DoesNotExistException("Queue");
 		}
 	}
-	/*
-	 * Edits queue with params String, String, Integer
-	 */
+	
 	public void editQueue(String oldName, String newName, Integer maxPlayers) {
 		if (doesQueueExist(oldName)) {
 			Queue q = getQueue(oldName);
@@ -152,7 +150,7 @@ public class QueueManager {
 	}
 	
 	/*
-	 * Removes queue with param Integer
+	 * Removes queue
 	 */
 	public void removeQueue(Integer index) {
 		Integer i = --index;
@@ -163,9 +161,6 @@ public class QueueManager {
 		}
 	}
 
-	/*
-	 * Removes queue with param String
-	 */
 	public void removeQueue(String name) {
 		if (doesQueueExist(name)) {
 			queueList.remove(getQueue(name));
@@ -220,6 +215,9 @@ public class QueueManager {
 		}
 	}
 
+	/*
+	 * Deletes player from all queues
+	 */
 	public void deletePlayer(User player) {
 		if (!isQueueListEmpty()) {
 			if (!isPlayerIngame(player)) {
@@ -235,7 +233,10 @@ public class QueueManager {
 			throw new DoesNotExistException("Queue");
 		}
 	}
-
+	
+	/*
+	 * Deletes player from specified queue
+	 */
 	public void deletePlayer(User player, String name) {
 		if (doesQueueExist(name)) {
 			if (!isPlayerIngame(player)) {
@@ -247,7 +248,7 @@ public class QueueManager {
 			throw new DoesNotExistException("Queue");
 		}
 	}
-
+	
 	public void deletePlayer(User player, Integer index) {
 		Integer i = index;
 		if (doesQueueExist(i)) {
@@ -260,19 +261,28 @@ public class QueueManager {
 			throw new DoesNotExistException("Queue");
 		}
 	}
-
+	
+	/*
+	 * Purges list of players from all queues
+	 */
 	public void purgeQueue(List<User> players) {
 		for (Queue q : queueList) {
 			q.purge(players);
 		}
 	}
-
+	
+	/*
+	 * Purges specified player from all queues
+	 */
 	public void purgeQueue(User player) {
 		for (Queue q : queueList) {
 			q.purge(player);
 		}
 	}
-
+	
+	/*
+	 * Sets the topic of the server's pug channel and saves the queue to file
+	 */
 	public void updateTopic() {
 		try {
 			getServer().getPugChannel().getManager().setTopic(getHeader()).complete();
@@ -283,6 +293,9 @@ public class QueueManager {
 		saveToFile();
 	}
 
+	/*
+	 * Removes player from all queues
+	 */
 	public void remove(String name) {
 		if (!isQueueListEmpty()) {
 			boolean found = false;
@@ -300,6 +313,9 @@ public class QueueManager {
 		}
 	}
 
+	/*
+	 * Removes player from specified queue
+	 */
 	public void remove(String name, Integer index) {
 		Integer i = --index;
 		if (!isQueueListEmpty() && i >= 0 && i < queueList.size()) {
@@ -312,6 +328,9 @@ public class QueueManager {
 		}
 	}
 
+	/*
+	 * Removes player from specified queue
+	 */
 	public void remove(String playerName, String queueName) {
 		if (doesQueueExist(queueName)) {
 			Queue q = getQueue(queueName);
@@ -323,9 +342,13 @@ public class QueueManager {
 		}
 	}
 
+	/*
+	 * Substitutes a player in-game with another player out-of-game
+	 */
 	public void sub(String target, String substitute) {
 		if (!isQueueListEmpty()) {
 			User sub = null;
+			// Match member object to substitute name
 			for (Member m : ServerManager.getServer(guildId).getGuild().getMembers()) {
 				if (m.getEffectiveName().equalsIgnoreCase(substitute)) {
 					sub = m.getUser();
@@ -366,7 +389,10 @@ public class QueueManager {
 	public void addToJustFinished(List<User> players) {
 		justFinished.addAll(players);
 	}
-
+	
+	/*
+	 * Adds players waiting during finish timer to respective queues
+	 */
 	public void timerEnd(List<User> players) {
 		justFinished.removeAll(players);
 		for (Queue q : queueList) {
@@ -385,6 +411,9 @@ public class QueueManager {
 		return false;
 	}
 
+	/*
+	 * Adds a notification for the player in the specified queue at a designated playerCount
+	 */
 	public void addNotification(User player, Integer index, Integer playerCount) {
 		Integer i = --index;
 		if (doesQueueExist(i)) {
@@ -399,6 +428,9 @@ public class QueueManager {
 		}
 	}
 
+	/*
+	 * Adds a notification for the player in the specified queue at a designated playerCount
+	 */
 	public void addNotification(User player, String name, Integer playerCount) {
 		if (doesQueueExist(name)) {
 			Queue q = getQueue(name);
@@ -412,6 +444,9 @@ public class QueueManager {
 		}
 	}
 
+	/*
+	 * Removes all notifications
+	 */
 	public void removeNotification(User user) {
 		if (!isQueueListEmpty()) {
 			for (Queue q : queueList) {
@@ -421,7 +456,10 @@ public class QueueManager {
 			throw new DoesNotExistException("Queue");
 		}
 	}
-
+	
+	/*
+	 * Removes all notifications in a specified queue
+	 */
 	public void removeNotification(User user, Integer index) {
 		Integer i = --index;
 		if (doesQueueExist(i)) {
@@ -439,6 +477,9 @@ public class QueueManager {
 		}
 	}
 
+	/*
+	 * Saves queues, current players in queue, and notifications to file
+	 */
 	public void saveToFile() {
 		try {
 			System.out.println("Saving queue to file...");
@@ -451,36 +492,46 @@ public class QueueManager {
 		}
 	}
 
+	/*
+	 * Encodes queue objects to json
+	 */
 	private String getJSON() {
 		JSONObject root = new JSONObject();
 		JSONArray ja = new JSONArray();
+		
 		for (Queue q : queueList) {
 			JSONObject jQueue = new JSONObject();
 			JSONArray jPlayers = new JSONArray();
 			JSONArray jNotifications = new JSONArray();
+			// Adds name and max players
 			jQueue.put("name", q.getName());
 			jQueue.put("maxplayers", q.getMaxPlayers());
+			// Adds players
 			for (User p : q.getPlayersInQueue()) {
 				jPlayers.put(p.getId());
 			}
 			jQueue.put("inqueue", jPlayers);
-
+			// Encodes notifications
 			q.getNotifications().forEach((i, ul) -> {
 				JSONObject jNotification = new JSONObject();
 				JSONArray jNotifyPlayers = new JSONArray();
+				
 				ul.forEach((u) -> jNotifyPlayers.put(u.getId()));
 				jNotification.put("playercount", String.valueOf(i));
 				jNotification.put("notifyplayers", jNotifyPlayers);
 				jNotifications.put(jNotification);
 			});
 			jQueue.put("notifications", jNotifications);
-
+			// Adds queue to json array
 			ja.put(jQueue);
 		}
 		root.put("queue", ja);
 		return root.toString(4);
 	}
 
+	/*
+	 * Loads queue json from file
+	 */
 	private void loadFromFile() {
 		String s = String.format("%s/%s/%s", "app_data", guildId, "queue.json");
 		if (new File(s).exists()) {
@@ -506,15 +557,21 @@ public class QueueManager {
 
 	}
 
+	/*
+	 * Creates queues, adds players, and adds notifications from json
+	 */
 	private void parseJSON(String input) {
 		JSONObject json = new JSONObject(input);
 		json.getJSONArray("queue").forEach((q) -> {
 			JSONObject jq = new JSONObject(q.toString());
+			// Creates queue
 			createQueue(jq.getString("name"), jq.getInt("maxplayers"));
 			jq.getJSONArray("inqueue").forEach((p) -> {
+				// Adds each player
 				User player = ServerManager.getGuild(guildId).getMemberById(p.toString()).getUser();
 				addPlayerToQueue(player, jq.getString("name"));
 			});
+			// Creates notifications
 			jq.getJSONArray("notifications").forEach((ns) -> {
 				JSONObject n = new JSONObject(ns.toString());
 				n.getJSONArray("notifyplayers")
