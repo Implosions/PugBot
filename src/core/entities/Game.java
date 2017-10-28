@@ -65,6 +65,9 @@ public class Game {
 		return false;
 	}
 
+	/*
+	 * Chooses two random captains from the captainPool
+	 */
 	private void randomizeCaptains() {
 		Random random = new Random();
 		List<User> captainPool = getCaptainPool();
@@ -90,6 +93,9 @@ public class Game {
 		return name;
 	}
 
+	/*
+	 * Adds eligible players to the captainPool
+	 */
 	private List<User> getCaptainPool() {
 		List<User> captainPool = new ArrayList<User>();
 		String games = loadGames();
