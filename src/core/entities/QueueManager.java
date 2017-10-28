@@ -622,4 +622,13 @@ public class QueueManager {
 	public Queue getQueue(Integer index){
 		return queueList.get(--index);
 	}
+	
+	public boolean isPlayerWaiting(User player){
+		for(Queue q : queueList){
+			if(q.isPlayerWaiting(player)){
+				return true;
+			}
+		}
+		return false;
+	}
 }
