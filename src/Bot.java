@@ -8,14 +8,13 @@ import net.dv8tion.jda.core.JDABuilder;
 import okhttp3.OkHttpClient;
 
 // Bot driver
-// TODO: Load HTTP timeout settings from property file
 
 public class Bot{
 	
 	public static void main(String[] args) {
 		try{
 			OkHttpClient.Builder httpBuilder = new OkHttpClient.Builder().readTimeout(60, TimeUnit.SECONDS).connectTimeout(60, TimeUnit.SECONDS).writeTimeout(60, TimeUnit.SECONDS);
-			JDA jda = new JDABuilder(AccountType.BOT).setToken(Tokens.TESTBOT).setHttpClientBuilder(httpBuilder).buildBlocking();
+			JDA jda = new JDABuilder(AccountType.BOT).setToken(Tokens.TOKEN).setHttpClientBuilder(httpBuilder).buildBlocking();
 			jda.setAutoReconnect(true);
 			jda.addEventListener(new EventHandler(jda));
 		}catch(Exception ex){
