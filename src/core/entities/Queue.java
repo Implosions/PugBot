@@ -31,14 +31,16 @@ public class Queue {
 		this.guildId = guildId;
 	}
 
-	/*
+	/**
 	 * Adds player to queue
 	 * Checks to fire notifications
 	 * Pops queue if at max capacity
+	 * 
+	 * @param player the player to be added
 	 */
-	public void add(User name) {
-		if (!playersInQueue.contains(name)) {
-			playersInQueue.add(name);
+	public void add(User player) {
+		if (!playersInQueue.contains(player)) {
+			playersInQueue.add(player);
 			currentPlayers++;
 			checkNotifications();
 			if (currentPlayers == maxPlayers) {
@@ -47,42 +49,82 @@ public class Queue {
 		}
 	}
 
+	/**
+	 * Returns the name of the queue
+	 * 
+	 * @return the name of the queue
+	 */
 	public String getName() {
 		return name;
 	}
 
+	/**
+	 * Sets the name of the queue
+	 * 
+	 * @param s the new queue name
+	 */
 	public void setName(String s) {
 		name = s;
 	}
 
+	/**
+	 * Returns the max capacity of the queue
+	 * 
+	 * @return the number of max players the queue can hold
+	 */
 	public Integer getMaxPlayers() {
 		return maxPlayers;
 	}
 
+	/**
+	 * Sets the max capacity of the queue
+	 * 
+	 * @param num the new maxPlayers value
+	 */
 	public void setMaxPlayers(Integer num) {
 		maxPlayers = num;
 	}
 
+	/**
+	 * Returns the current number of players in queue
+	 * 
+	 * @return
+	 */
 	public Integer getCurrentPlayers() {
 		return currentPlayers;
 	}
 
+	/**
+	 * Get the amount of currently active games for this queue
+	 * 
+	 * @return the number of active games
+	 */
 	public Integer getNumberOfGames() {
 		return games.size();
 	}
 
+	/**
+	 * Returns the List of active games for this queue
+	 * 
+	 * @return List containing the active games
+	 */
 	public List<Game> getGames() {
 		return games;
 	}
 
+	/**
+	 * Returns List of players currently in queue
+	 * 
+	 * @return List of players currently in queue
+	 */
 	public List<User> getPlayersInQueue() {
 		return playersInQueue;
 	}
 
-	/*
-	 * Creates a new game
-	 * Removes players in-game from other queues
-	 * Sends notification to the pug channel and to each player in queue
+	/**
+	 * Creates a new game.
+	 * Removes players in-game from other queues.
+	 * Sends notification to the pug channel and to each player in queue.
 	 */
 	private void popQueue() {
 		String names = "";
@@ -105,8 +147,10 @@ public class Queue {
 		ServerManager.getServer(guildId).getPugChannel().sendMessage(Utils.createMessage(String.format("Game: %s starting", name), captainString, Color.yellow)).queueAfter(2, TimeUnit.SECONDS);
 	}
 
-	/*
+	/**
 	 * Ends game, adds players to justFinished list, starts finish timer
+	 * 
+	 * @param g the game to finish
 	 */
 	public void finish(Game g) {
 		List<User> players = new ArrayList<User>(g.getPlayers());
@@ -117,8 +161,10 @@ public class Queue {
 		timer.start();
 	}
 
-	/*
+	/**
 	 * Removes player from queue or waitList
+	 * 
+	 * @param s the player to remove
 	 */
 	public void delete(User s) {
 		if(playersInQueue.contains(s)){
@@ -129,16 +175,20 @@ public class Queue {
 		}
 	}
 
-	/*
-	 * Removes all players in the list from queue
+	/**
+	 * Removes all players in a list from queue
+	 * 
+	 * @param players List of players to remove from queue
 	 */
 	public void purge(List<User> players) {
 		playersInQueue.removeAll(players);
 		waitList.removeAll(players);
 		currentPlayers = playersInQueue.size();
 	}
-	/*
-	 * Removes specified player from queue
+	/**
+	 * Removes a specific player from queue
+	 * 
+	 * @param player the player to remove from queue
 	 */
 	public void purge(User player){
 		playersInQueue.remove(player);
@@ -146,8 +196,11 @@ public class Queue {
 		currentPlayers = playersInQueue.size();
 	}
 
-	/*
-	 * Returns true if player by String name is in queue
+	/**
+	 * Returns boolean based on if a player is matched to the provided name or not
+	 * 
+	 * @param name the name of the player to check for
+	 * @return true if player matches the name provided
 	 */
 	public boolean containsPlayer(String name) {
 		for (User u : playersInQueue) {
@@ -158,8 +211,11 @@ public class Queue {
 		return false;
 	}
 
-	/*
-	 * Returns user by String name
+	/**
+	 * Returns a User object matching the provided name
+	 * 
+	 * @param name the name to match to a player
+	 * @return User object matching the provided name, null if no matches
 	 */
 	public User getPlayer(String name) {
 		for (User u : playersInQueue) {
@@ -170,8 +226,10 @@ public class Queue {
 		return null;
 	}
 
-	/*
-	 * Randomizes players waiting after finishing into queue
+	/**
+	 * Randomizes players waiting after finishing a game into queue
+	 * 
+	 * @param players the players to allow to add to queue
 	 */
 	public void addPlayersWaiting(List<User> players) {
 		if(waitList.size() > 0){
@@ -189,18 +247,32 @@ public class Queue {
 		}
 	}
 	
+	/**
+	 * Adds a player that has just finished to the wait list
+	 * 
+	 * @param player the player to add to the wait list
+	 */
 	public void addToWaitList(User player){
 		if(!waitList.contains(player)){
 			waitList.add(player);
 		}
 	}
 	
+	/**
+	 * Checks if the specified player is in the wait list
+	 * 
+	 * @param player the player to check
+	 * @return true if the player is in the wait list
+	 */
 	public boolean isPlayerWaiting(User player){
 		return waitList.contains(player);
 	}
 
-	/*
-	 * Adds notification
+	/**
+	 * Adds a notification to alert a player if a playerCount threshold is met in this queue
+	 * 
+	 * @param player the player associated with the notification
+	 * @param playerCount the threshold to alert to player
 	 */
 	public void addNotification(User player, Integer playerCount) {
 		if(notifications.containsKey(playerCount)){
@@ -213,8 +285,8 @@ public class Queue {
 		}
 	}
 	
-	/*
-	 * Determines if notifications should be sent
+	/**
+	 * Checks if notifications should be sent
 	 */
 	private void checkNotifications(){
 		if(notifications.containsKey(currentPlayers)){
@@ -222,8 +294,10 @@ public class Queue {
 		}
 	}
 
-	/*
-	 * Sends notifications to the list of users
+	/**
+	 * Sends alerts to the list of users that have notifications
+	 * 
+	 * @param users the users to send alerts to
 	 */
 	private void notify(List<User> users) {
 		for(User u : users){
@@ -234,12 +308,22 @@ public class Queue {
 		}
 	}
 
-	public void removeNotification(User user) {
+	/**
+	 * Removes all notifications from this queue
+	 * 
+	 * @param player the player to remove notifications for
+	 */
+	public void removeNotification(User player) {
 		for(List<User> list : notifications.values()){
-			list.remove(user);
+			list.remove(player);
 		}
 	}
 	
+	/**
+	 * Returns HashMap containing all notifications in this queue
+	 * 
+	 * @return HashMap of notifications in this queue
+	 */
 	public HashMap<Integer, List<User>> getNotifications(){
 		return notifications;
 	}
