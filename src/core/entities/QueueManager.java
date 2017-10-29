@@ -20,7 +20,6 @@ import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.User;
 import net.dv8tion.jda.core.exceptions.PermissionException;
 
-// QueueManager class; Is the interface between commands and queues on a server
 public class QueueManager {
 	private List<Queue> queueList = new ArrayList<Queue>();
 	private List<User> justFinished = new ArrayList<User>();
@@ -31,8 +30,12 @@ public class QueueManager {
 		loadFromFile();
 	}
 
-	/*
-	 * Creates queue and adds it to queueList
+	/**
+	 * Creates queue and adds it to queueList.
+	 * 
+	 * @param name the name of the queue.
+	 * @param players the amount of players the queue will hold.
+	 * @see Queue
 	 */
 	public void createQueue(String name, Integer players) {
 		if (players > 0) {
@@ -46,9 +49,11 @@ public class QueueManager {
 		}
 	}
 
-	/*
-	 * Adds user to each queue
-	 * Adds user to queue's waitList instead if in justFinished
+	/**
+	 * Adds the player to each queue, if the player has just finished, adds to each queue's waitlist instead.
+	 * 
+	 * @param player the player being added
+	 * @see Queue
 	 */
 	public void addPlayerToQueue(User player) {
 		if (!isQueueListEmpty()) {
@@ -73,8 +78,12 @@ public class QueueManager {
 		}
 	}
 	
-	/*
-	 * Adds user to specified queue
+	/**
+	 * Adds the player to a specific queue, if the player has just finished, adds to that queue's waitlist instead.
+	 * 
+	 * @param player the player being added
+	 * @param name the name of the queue
+	 * @see Queue
 	 */
 	public void addPlayerToQueue(User player, String name) {
 		if (doesQueueExist(name)) {
@@ -94,8 +103,12 @@ public class QueueManager {
 		}
 	}
 	
-	/*
-	 * Adds user to specified queue
+	/**
+	 * Adds the player to a specific queue, if the player has just finished, adds to that queue's waitlist instead.
+	 * 
+	 * @param player the player being added
+	 * @param index the one-based index of the queue
+	 * @see Queue
 	 */
 	public void addPlayerToQueue(User player, Integer index) {
 		Integer i = --index;
@@ -116,9 +129,13 @@ public class QueueManager {
 		}
 	}
 	
-	/*
-	 * Modifies existing queue
-	 * Does not allow maxPlayers <= currentPlayers
+	/**
+	 * Modifies an existing queue with a new name and max players.
+	 * 
+	 * @param index the one-based index of the queue to be modified
+	 * @param newName the new name of the queue
+	 * @param maxPlayers the new amount of players the queue will hold
+	 * @see Queue
 	 */
 	public void editQueue(Integer index, String newName, Integer maxPlayers) {
 		Integer i = --index;
@@ -135,6 +152,14 @@ public class QueueManager {
 		}
 	}
 	
+	/**
+	 * Modifies an existing queue with a new name and max players.
+	 * 
+	 * @param oldName the old name of the queue to be modified
+	 * @param newName the new name of the queue
+	 * @param maxPlayers the new amount of players the queue will hold
+	 * @see Queue
+	 */
 	public void editQueue(String oldName, String newName, Integer maxPlayers) {
 		if (doesQueueExist(oldName)) {
 			Queue q = getQueue(oldName);
@@ -149,8 +174,11 @@ public class QueueManager {
 		}
 	}
 	
-	/*
-	 * Removes queue
+	/**
+	 * Removes a queue from the queue list
+	 * 
+	 * @param index the one-based index of the queue to be removed
+	 * @see Queue
 	 */
 	public void removeQueue(Integer index) {
 		Integer i = --index;
@@ -161,6 +189,12 @@ public class QueueManager {
 		}
 	}
 
+	/**
+	 * Removes a queue from the queue list.
+	 * 
+	 * @param name the name of the queue to be removed
+	 * @see Queue
+	 */
 	public void removeQueue(String name) {
 		if (doesQueueExist(name)) {
 			queueList.remove(getQueue(name));
@@ -169,16 +203,28 @@ public class QueueManager {
 		}
 	}
 	
+	/**
+	 * Returns the queue list.
+	 * 
+	 * @return List containing all the queues
+	 */
 	public List<Queue> getQueueList() {
 		return queueList;
 	}
 
+	/**
+	 * Returns a boolean result based on if the queue list is empty or not.
+	 * 
+	 * @return returns true if empty, false if not empty
+	 */
 	public boolean isQueueListEmpty() {
 		return queueList.isEmpty();
 	}
 	
-	/*
-	 * Returns basic queue information in the format <name> [<playercount>/<maxplayers>]...
+	/**
+	 * Returns a String containing compiled basic queue information.
+	 * 
+	 * @return String containing compiled basic queue information
 	 */
 	public String getHeader() {
 		if (isQueueListEmpty()) {
@@ -197,8 +243,10 @@ public class QueueManager {
 		}
 	}
 	
-	/*
-	 * Finds game that contains player and finishes it
+	/**
+	 * Finds the game the player is in and ends it.
+	 * 
+	 * @param player the user ending the game
 	 */
 	public void finish(User player) {
 		if (isPlayerIngame(player)) {
@@ -215,8 +263,10 @@ public class QueueManager {
 		}
 	}
 
-	/*
-	 * Deletes player from all queues
+	/**
+	 * Deletes the player from all queues.
+	 * 
+	 * @param player the player to be deleted
 	 */
 	public void deletePlayer(User player) {
 		if (!isQueueListEmpty()) {
@@ -233,8 +283,11 @@ public class QueueManager {
 		}
 	}
 	
-	/*
-	 * Deletes player from specified queue
+	/**
+	 * Deletes the player from a specific queue.
+	 * 
+	 * @param player the player to be deleted
+	 * @param name the name of the queue that the player will be deleted from
 	 */
 	public void deletePlayer(User player, String name) {
 		if (doesQueueExist(name)) {
@@ -248,6 +301,12 @@ public class QueueManager {
 		}
 	}
 	
+	/**
+	 * Deletes the player from a specific queue.
+	 * 
+	 * @param player the player to be deleted
+	 * @param index the one-based index of the queue that the player will be deleted from
+	 */
 	public void deletePlayer(User player, Integer index) {
 		Integer i = index;
 		if (doesQueueExist(i)) {
@@ -261,8 +320,10 @@ public class QueueManager {
 		}
 	}
 	
-	/*
-	 * Purges list of players from all queues
+	/**
+	 * Removes a list of players from all queues
+	 * 
+	 * @param players List of User to be removed
 	 */
 	public void purgeQueue(List<User> players) {
 		for (Queue q : queueList) {
@@ -270,8 +331,10 @@ public class QueueManager {
 		}
 	}
 	
-	/*
-	 * Purges specified player from all queues
+	/**
+	 * Removes a specified player from all queues.
+	 * 
+	 * @param player the player to be removed
 	 */
 	public void purgeQueue(User player) {
 		for (Queue q : queueList) {
@@ -279,8 +342,8 @@ public class QueueManager {
 		}
 	}
 	
-	/*
-	 * Sets the topic of the server's pug channel and saves the queue to file
+	/**
+	 * Sets the topic of the server's pug channel and saves the queue to file.
 	 */
 	public void updateTopic() {
 		try {
@@ -292,8 +355,10 @@ public class QueueManager {
 		saveToFile();
 	}
 
-	/*
-	 * Removes player from all queues
+	/**
+	 * Removes a player from all queues.
+	 * 
+	 * @param name the name of the player to be removed
 	 */
 	public void remove(String name) {
 		if (!isQueueListEmpty()) {
@@ -312,8 +377,11 @@ public class QueueManager {
 		}
 	}
 
-	/*
-	 * Removes player from specified queue
+	/**
+	 * Removes a player from a specific queues.
+	 * 
+	 * @param name the name of the player to be removed
+	 * @param index the one-based index of the queue that the player will be removed from
 	 */
 	public void remove(String name, Integer index) {
 		Integer i = --index;
@@ -327,8 +395,11 @@ public class QueueManager {
 		}
 	}
 
-	/*
-	 * Removes player from specified queue
+	/**
+	 * Removes a player from a specific queues.
+	 * 
+	 * @param playerName the name of the player to be removed
+	 * @param queueName the name of the queue that the player will be removed from
 	 */
 	public void remove(String playerName, String queueName) {
 		if (doesQueueExist(queueName)) {
@@ -341,8 +412,11 @@ public class QueueManager {
 		}
 	}
 
-	/*
-	 * Substitutes a player in-game with another player out-of-game
+	/**
+	 * Substitutes a player in-game with another player out-of-game.
+	 * 
+	 * @param target the player that will be substituted
+	 * @param substitute the player that will replace the target
 	 */
 	public void sub(String target, String substitute) {
 		if (!isQueueListEmpty()) {
@@ -374,6 +448,12 @@ public class QueueManager {
 		}
 	}
 
+	/**
+	 * Returns a boolean based on if the player is in-game or not.
+	 * 
+	 * @param player the player to check
+	 * @return true if the player is in-game, false if not
+	 */
 	public boolean isPlayerIngame(User player) {
 		for (Queue q : queueList) {
 			for (Game g : q.getGames()) {
@@ -385,12 +465,20 @@ public class QueueManager {
 		return false;
 	}
 
+	/**
+	 * Adds a list of players to justFinished.
+	 * 
+	 * @param players the players to be added to the list
+	 */
 	public void addToJustFinished(List<User> players) {
 		justFinished.addAll(players);
 	}
 	
-	/*
-	 * Adds players waiting during finish timer to respective queues
+	/**
+	 * Removes a List of players from justFinished after the finish timer ends and.
+	 * then adds them if they are waiting to join a queue.
+	 * 
+	 * @param players the players to be removed from justFinished and added to their respective queues
 	 */
 	public void timerEnd(List<User> players) {
 		justFinished.removeAll(players);
@@ -401,6 +489,12 @@ public class QueueManager {
 		updateTopic();
 	}
 
+	/**
+	 * Checks if a player is currently in a queue or not.
+	 * 
+	 * @param player the player to be checked
+	 * @return true if the player is in a queue, false of not
+	 */
 	public boolean isPlayerInQueue(User player) {
 		for (Queue q : queueList) {
 			if (q.getPlayersInQueue().contains(player)) {
@@ -410,8 +504,13 @@ public class QueueManager {
 		return false;
 	}
 
-	/*
-	 * Adds a notification for the player in the specified queue at a designated playerCount
+	/**
+	 * Adds a notification to a queue.
+	 * A notification sends a message to the user when it has reached the specified threshold.
+	 * 
+	 * @param player the player the notification will be associated with
+	 * @param index the one-based index of the queue the player will be notified for
+	 * @param playerCount the threshold amount of players that will trigger the notification
 	 */
 	public void addNotification(User player, Integer index, Integer playerCount) {
 		Integer i = --index;
@@ -427,8 +526,13 @@ public class QueueManager {
 		}
 	}
 
-	/*
-	 * Adds a notification for the player in the specified queue at a designated playerCount
+	/**
+	 * Adds a notification to a queue.
+	 * A notification sends a message to the user when it has reached the specified threshold.
+	 * 
+	 * @param player the player the notification will be associated with
+	 * @param name the name of the queue the player will be notified for
+	 * @param playerCount the threshold amount of players that will trigger the notification
 	 */
 	public void addNotification(User player, String name, Integer playerCount) {
 		if (doesQueueExist(name)) {
@@ -443,8 +547,10 @@ public class QueueManager {
 		}
 	}
 
-	/*
-	 * Removes all notifications
+	/**
+	 * Removes all notifications associated with the user.
+	 * 
+	 * @param user the user associated with the notifications
 	 */
 	public void removeNotification(User user) {
 		if (!isQueueListEmpty()) {
@@ -456,8 +562,11 @@ public class QueueManager {
 		}
 	}
 	
-	/*
-	 * Removes all notifications in a specified queue
+	/**
+	 * Removes all notifications associated with the user in a specific queue.
+	 * 
+	 * @param user the user associated with the notifications
+	 * @param index the one-based index of the queue
 	 */
 	public void removeNotification(User user, Integer index) {
 		Integer i = --index;
@@ -468,6 +577,12 @@ public class QueueManager {
 		}
 	}
 
+	/**
+	 * Removes all notifications associated with the user in a specific queue.
+	 * 
+	 * @param user the user associated with the notifications
+	 * @param name the name of the queue
+	 */
 	public void removeNotification(User user, String name) {
 		if (doesQueueExist(name)) {
 			getQueue(name).removeNotification(user);
@@ -476,8 +591,8 @@ public class QueueManager {
 		}
 	}
 
-	/*
-	 * Saves queues, current players in queue, and notifications to file
+	/**
+	 * Saves a json format to file representing the queues, players in queue, and notifications.
 	 */
 	public void saveToFile() {
 		try {
@@ -491,8 +606,10 @@ public class QueueManager {
 		}
 	}
 
-	/*
-	 * Encodes queue objects to json
+	/**
+	 * Returns a String containing queue information encoded as json.
+	 * 
+	 * @return a String containing queue information encoded as json.
 	 */
 	private String getJSON() {
 		JSONObject root = new JSONObject();
@@ -528,8 +645,8 @@ public class QueueManager {
 		return root.toString(4);
 	}
 
-	/*
-	 * Loads queue json from file
+	/**
+	 * Loads the server's queue information from a json file.
 	 */
 	private void loadFromFile() {
 		String s = String.format("%s/%s/%s", "app_data", guildId, "queue.json");
@@ -556,8 +673,11 @@ public class QueueManager {
 
 	}
 
-	/*
-	 * Creates queues, adds players, and adds notifications from json
+	/**
+	 * Decodes json representing a previous queue state.
+	 * Creates queues, adds players, and adds notifications.
+	 * 
+	 * @param input the json to be decoded
 	 */
 	private void parseJSON(String input) {
 		JSONObject json = new JSONObject(input);
@@ -581,18 +701,41 @@ public class QueueManager {
 		});
 	}
 
+	/**
+	 * Returns boolean based on if the player has just finished a game or not.
+	 * 
+	 * @param player the player to check
+	 * @return true if the player has just finished, false if not
+	 */
 	public boolean hasPlayerJustFinished(User player) {
 		return justFinished.contains(player);
 	}
 
+	/**
+	 * Gets the id of the guild associated with this instance of QueueManager.
+	 * 
+	 * @return the guild id associated with this QueueManager instance
+	 */
 	public String getId() {
 		return guildId;
 	}
 
+	/**
+	 * Gets the Server object associated with this instance of QueueManager.
+	 * 
+	 * @return the Server instance associated with this QueueManager instance
+	 */
 	public Server getServer() {
 		return ServerManager.getServer(guildId);
 	}
 
+	
+	/**
+	 * Checks if the specified queue exists.
+	 * 
+	 * @param name the name of the queue to check
+	 * @return true if the queue exists
+	 */
 	public boolean doesQueueExist(String name) {
 		for (Queue q : queueList) {
 			if (q.getName().equalsIgnoreCase(name)) {
@@ -602,6 +745,12 @@ public class QueueManager {
 		return false;
 	}
 
+	/**
+	 * Checks if the specified queue exists.
+	 * 
+	 * @param index the one-based index of the queue to check
+	 * @return true if the queue exists
+	 */
 	public boolean doesQueueExist(Integer index) {
 		if (index >= 0 && index < queueList.size()) {
 			return true;
@@ -610,6 +759,12 @@ public class QueueManager {
 		}
 	}
 	
+	/**
+	 * Returns a specific queue.
+	 * 
+	 * @param name the name of the queue to return
+	 * @return Queue object matching the name param, null if no matches
+	 */
 	public Queue getQueue(String name){
 		for(Queue q : queueList){
 			if(q.getName().equalsIgnoreCase(name)){
@@ -619,10 +774,27 @@ public class QueueManager {
 		return null;
 	}
 	
+	/**
+	 * Returns a specific queue.
+	 * 
+	 * @param index the one-based index of the queue to return
+	 * @return Queue object at the specified index, null if no matches
+	 */
 	public Queue getQueue(Integer index){
-		return queueList.get(--index);
+		if(doesQueueExist(--index)){
+			return queueList.get(--index);
+		}else{
+			return null;
+		}
 	}
 	
+	/**
+	 * Returns boolean based on if the player is in a queue's wait list.
+	 * 
+	 * @param player the player to check
+	 * @return true if the player is in a queue's wait list
+	 * @see Queue
+	 */
 	public boolean isPlayerWaiting(User player){
 		for(Queue q : queueList){
 			if(q.isPlayerWaiting(player)){
