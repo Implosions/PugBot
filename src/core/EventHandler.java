@@ -33,7 +33,9 @@ public class EventHandler extends ListenerAdapter {
 	}
 	
 	
-	// Executes commands based on input from discord server
+	/**
+	 * Gets message sent from guild, checks if the message is a command, tokenizes the arguments, and executes the command.
+	 */
 	@Override
 	public void onGuildMessageReceived(GuildMessageReceivedEvent event) {
 		Server server = ServerManager.getServer(event.getGuild().getId());
@@ -108,31 +110,37 @@ public class EventHandler extends ListenerAdapter {
 				}
 			}
 		}
+		// Updates activityList
 		server.updateActivityList(event.getAuthor());
 	}
 	
 	public void onUserOnlineStatusUpdate(UserOnlineStatusUpdateEvent event) {
 		Member m = event.getGuild().getMember(event.getUser());
+		// Passes online status if a player goes offline
 		if(m.getOnlineStatus().equals(OnlineStatus.OFFLINE)){
 			ServerManager.getServer(event.getGuild().getId()).playerDisconnect(m);
 		}
 	}
-
+	
 	public void onGuildJoin(GuildJoinEvent event) {
+		// Adds the new server to the server list
 		ServerManager.addNewServer(event.getGuild());
 		System.out.println(String.format("Joined server: %s", event.getGuild().getName()));
 	}
-
+	
 	public void onGuildLeave(GuildLeaveEvent event) {
+		// Removes the server from the server list
 		ServerManager.removeServer(event.getGuild());
 		System.out.println(String.format("Removed from server: %s", event.getGuild().getName()));
 	}
 
 	public void onGenericMessageReaction(GenericMessageReactionEvent event) {
+		// Updates activity list with the user
 		ServerManager.getServer(event.getGuild().getId()).updateActivityList(event.getUser());
 	}
 	
 	public void onGenericGuild(GenericGuildEvent event){
+		// Updates Server's Guild object with any changes
 		ServerManager.getServer(event.getGuild().getId()).setGuild(event.getGuild());
 	}
 }
