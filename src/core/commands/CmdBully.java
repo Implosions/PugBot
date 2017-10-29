@@ -4,6 +4,7 @@ import java.util.Random;
 import java.util.Scanner;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -83,7 +84,7 @@ public class CmdBully extends Command {
 				
 				reader.close();
 				return bl;
-			} catch (Exception ex) {
+			} catch (IOException ex) {
 				ex.printStackTrace();
 			}
 		}
