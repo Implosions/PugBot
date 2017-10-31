@@ -95,13 +95,7 @@ public class EventHandler extends ListenerAdapter {
 				} else {
 					// Executes command and sends response to proper channel
 					cmdObj.execCommand(server, event.getMember(), args);
-					channel.sendMessage(cmdObj.getResponse()).queue();
-					// Gets message id of response after it is sent
-					try{
-						cmdObj.setLastResponseId(channel.getHistory().retrievePast(1).complete().get(0).getId());
-					}catch(PermissionException ex){
-						ex.printStackTrace();
-					}
+					cmdObj.setLastResponseId(channel.sendMessage(cmdObj.getResponse()).complete().getId());
 				}
 			} else {
 				// Will only respond to invalid commands in the pug channel
@@ -110,7 +104,7 @@ public class EventHandler extends ListenerAdapter {
 				}
 			}
 		}
-		// Updates activityList
+		// Updates Server.activityList
 		server.updateActivityList(event.getAuthor());
 	}
 	
