@@ -308,7 +308,7 @@ public class QueueManager {
 	 * @param index the one-based index of the queue that the player will be deleted from
 	 */
 	public void deletePlayer(User player, Integer index) {
-		Integer i = index;
+		Integer i = --index;
 		if (doesQueueExist(i)) {
 			if (!isPlayerIngame(player)) {
 				queueList.get(i).delete(player);
