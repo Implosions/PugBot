@@ -17,7 +17,7 @@ import net.dv8tion.jda.core.events.guild.GenericGuildEvent;
 import net.dv8tion.jda.core.events.guild.GuildJoinEvent;
 import net.dv8tion.jda.core.events.guild.GuildLeaveEvent;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
-import net.dv8tion.jda.core.events.message.react.GenericMessageReactionEvent;
+import net.dv8tion.jda.core.events.message.guild.react.GenericGuildMessageReactionEvent;
 import net.dv8tion.jda.core.events.user.UserOnlineStatusUpdateEvent;
 import net.dv8tion.jda.core.exceptions.PermissionException;
 import net.dv8tion.jda.core.hooks.ListenerAdapter;
@@ -95,13 +95,7 @@ public class EventHandler extends ListenerAdapter {
 				} else {
 					// Executes command and sends response to proper channel
 					cmdObj.execCommand(server, event.getMember(), args);
-					channel.sendMessage(cmdObj.getResponse()).queue();
-					// Gets message id of response after it is sent
-					try{
-						cmdObj.setLastResponseId(channel.getHistory().retrievePast(1).complete().get(0).getId());
-					}catch(PermissionException ex){
-						ex.printStackTrace();
-					}
+					cmdObj.setLastResponseId(channel.sendMessage(cmdObj.getResponse()).complete().getId());
 				}
 			} else {
 				// Will only respond to invalid commands in the pug channel
@@ -110,7 +104,7 @@ public class EventHandler extends ListenerAdapter {
 				}
 			}
 		}
-		// Updates activityList
+		// Updates Server.activityList
 		server.updateActivityList(event.getAuthor());
 	}
 	
@@ -134,7 +128,7 @@ public class EventHandler extends ListenerAdapter {
 		System.out.println(String.format("Removed from server: %s", event.getGuild().getName()));
 	}
 
-	public void onGenericMessageReaction(GenericMessageReactionEvent event) {
+	public void onGenericGuildMessageReaction(GenericGuildMessageReactionEvent event) {
 		// Updates activity list with the user
 		ServerManager.getServer(event.getGuild().getId()).updateActivityList(event.getUser());
 	}

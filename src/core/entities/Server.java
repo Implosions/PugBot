@@ -5,7 +5,7 @@ import java.text.DecimalFormat;
 import java.util.HashMap;
 
 import core.util.Utils;
-import core.util.TimerTrigger;
+import core.util.Trigger;
 import net.dv8tion.jda.core.OnlineStatus;
 import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.entities.Member;
@@ -55,7 +55,7 @@ public class Server {
 	}
 
 	private void startAFKTimer() {
-		TimerTrigger tt = () -> afkTimerEnd();
+		Trigger tt = () -> afkTimerEnd();
 		Timer afkTimer = new Timer(60, tt);
 		afkTimer.start();
 	}
@@ -77,7 +77,7 @@ public class Server {
 	}
 
 	private void startDcTimer(Member m) {
-		TimerTrigger trigger = () -> dcTimerEnd(m);
+		Trigger trigger = () -> dcTimerEnd(m);
 		Timer timer = new Timer(settings.dcTime(), trigger);
 		timer.start();
 		System.out.println(String.format("User %s has gone offline, starting dc timer", m.getEffectiveName()));

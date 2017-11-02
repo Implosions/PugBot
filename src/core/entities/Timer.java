@@ -1,13 +1,13 @@
 package core.entities;
 
-import core.util.TimerTrigger;
+import core.util.Trigger;
 
 public class Timer extends Thread{
 	
 	private Integer time;
-	private TimerTrigger m;
+	private Trigger m;
 	
-	public Timer(Integer time, TimerTrigger m){
+	public Timer(Integer time, Trigger m){
 		this.time = time * 1000;
 		this.m = m;
 	}
@@ -15,7 +15,7 @@ public class Timer extends Thread{
 	public void run(){
 		try{
 			Thread.sleep(time);
-			m.trigger();
+			m.activate();
 		}catch(InterruptedException ex){
 			ex.printStackTrace();
 		}

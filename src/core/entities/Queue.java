@@ -8,7 +8,7 @@ import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 import core.util.Utils;
-import core.util.TimerTrigger;
+import core.util.Trigger;
 import net.dv8tion.jda.core.OnlineStatus;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.PrivateChannel;
@@ -23,7 +23,7 @@ public class Queue {
 	private List<Game> games = new ArrayList<Game>();;
 	private List<User> waitList = new ArrayList<User>();
 	private HashMap<Integer, List<User>> notifications = new HashMap<Integer, List<User>>();
-	private TimerTrigger t;
+	private Trigger t;
 	
 	public Queue(String name, Integer maxPlayers, String guildId) {
 		this.name = name;

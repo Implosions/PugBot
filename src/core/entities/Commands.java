@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 
+import core.Constants;
 import core.commands.*;
 
 public class Commands {
@@ -17,22 +18,24 @@ public class Commands {
 		cmds = new ArrayList<String>();
 
 		// Commands
-		cmdList.put("createqueue", new CmdCreateQueue());
-		cmdList.put("status", new CmdStatus());
-		cmdList.put("add", new CmdAdd());
-		cmdList.put("finish", new CmdFinish());
-		cmdList.put("del", new CmdDel());
-		cmdList.put("removequeue", new CmdRemoveQueue());
-		cmdList.put("editqueue", new CmdEditQueue());
-		cmdList.put("sub", new CmdSub());
-		cmdList.put("help", new CmdHelp());
-		cmdList.put("remove", new CmdRemove());
-		cmdList.put("bully", new CmdBully());
-		cmdList.put("notify", new CmdNotify());
-		cmdList.put("deletenotification", new CmdDeleteNotification());
-		cmdList.put("terminate", new CmdTerminate());
-		cmdList.put("mumble", new CmdMumble());
-		cmdList.put("loadsettings", new CmdLoadSettings());
+		cmdList.put(Constants.CREATEQUEUE_NAME, new CmdCreateQueue());
+		cmdList.put(Constants.STATUS_NAME, new CmdStatus());
+		cmdList.put(Constants.ADD_NAME, new CmdAdd());
+		cmdList.put(Constants.FINISH_NAME, new CmdFinish());
+		cmdList.put(Constants.DEL_NAME, new CmdDel());
+		cmdList.put(Constants.REMOVEQUEUE_NAME, new CmdRemoveQueue());
+		cmdList.put(Constants.EDITQUEUE_NAME, new CmdEditQueue());
+		cmdList.put(Constants.SUB_NAME, new CmdSub());
+		cmdList.put(Constants.HELP_NAME, new CmdHelp());
+		cmdList.put(Constants.REMOVE_NAME, new CmdRemove());
+		cmdList.put(Constants.BULLY_NAME, new CmdBully());
+		cmdList.put(Constants.NOTIFY_NAME, new CmdNotify());
+		cmdList.put(Constants.DELETENOTIFICATION_NAME, new CmdDeleteNotification());
+		cmdList.put(Constants.TERMINATE_NAME, new CmdTerminate());
+		cmdList.put(Constants.MUMBLE_NAME, new CmdMumble());
+		cmdList.put(Constants.LOADSETTINGS_NAME, new CmdLoadSettings());
+		cmdList.put(Constants.RPS_NAME, new CmdRPS());
+		cmdList.put(Constants.GITHUB_NAME, new CmdGithub());
 		
 		populateLists();
 	}

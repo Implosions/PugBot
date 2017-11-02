@@ -12,6 +12,7 @@ import core.exceptions.DoesNotExistException;
 import core.util.Utils;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.User;
+import net.dv8tion.jda.core.exceptions.ErrorResponseException;
 import net.dv8tion.jda.core.exceptions.PermissionException;
 
 public class CmdStatus extends Command {
@@ -54,7 +55,7 @@ public class CmdStatus extends Command {
 			System.out.println("Completed status request");
 		} catch (DoesNotExistException ex) {
 			this.response = Utils.createMessage("Error!", ex.getMessage(), false);
-		} catch (PermissionException ex){
+		} catch (PermissionException | ErrorResponseException ex){
 			lastResponseId = null;
 			ex.printStackTrace();
 		}
