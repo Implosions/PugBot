@@ -781,8 +781,9 @@ public class QueueManager {
 	 * @return Queue object at the specified index, null if no matches
 	 */
 	public Queue getQueue(Integer index){
-		if(doesQueueExist(--index)){
-			return queueList.get(--index);
+		Integer i = --index;
+		if(doesQueueExist(i)){
+			return queueList.get(i);
 		}else{
 			return null;
 		}
