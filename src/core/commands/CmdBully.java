@@ -17,7 +17,6 @@ import core.util.Utils;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.User;
 
-// TODO: Load actionList from file
 
 public class CmdBully extends Command {
 
