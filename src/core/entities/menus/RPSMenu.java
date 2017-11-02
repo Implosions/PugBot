@@ -1,22 +1,22 @@
 package core.entities.menus;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import core.util.Trigger;
-import net.dv8tion.jda.core.entities.Message;
 import net.dv8tion.jda.core.entities.MessageChannel;
 import net.dv8tion.jda.core.entities.User;
 import net.dv8tion.jda.core.events.message.priv.react.PrivateMessageReactionAddEvent;
+import net.dv8tion.jda.core.hooks.ListenerAdapter;
 
-public class RPSMenu extends PrivateMenu{
-	private Turn turns[] = new Turn[2];
-	private List<Message> statusMessageList = new ArrayList<Message>();
+public class RPSMenu extends ListenerAdapter{
+	
+	private final String CHECKMARK = "\u2705";
+	private Trigger trigger;
+	private Turn turns[];
+	private Menu menus[];
 	
 	public RPSMenu(User p1, User p2, Trigger trigger){
-		this.turns[0] = new Turn(p1);
-		this.turns[1] = new Turn(p2);
 		this.trigger = trigger;
+		this.turns = new Turn[]{new Turn(p1), new Turn(p2)};
+		this.menus = new Menu[]{new Menu(p1.openPrivateChannel().complete()), new Menu(p2.openPrivateChannel().complete())};
 		createMenuItems();
 		p1.getJDA().addEventListener(this);
 	}
@@ -28,8 +28,10 @@ public class RPSMenu extends PrivateMenu{
 	}
 	
 	public void onPrivateMessageReactionAdd(PrivateMessageReactionAddEvent event){
-		if(event.getReaction().getEmote().getName().equals("\u2705") && !event.getUser().isBot()){
-			MenuItem mi = getMenuItem(event.getMessageId());
+		if(event.getReaction().getEmote().getName().equals(CHECKMARK) && !event.getUser().isBot()){
+
+			MenuItem mi = getMenu(event.getChannel()).getMenuItem(event.getMessageId());
+			
 			if(mi != null){
 				RPS rps = null;
 				switch (mi.getText()){
@@ -37,31 +39,43 @@ public class RPSMenu extends PrivateMenu{
 				case "Paper": rps = RPS.PAPER; break;
 				case "Scissors": rps = RPS.SCISSORS; break;
 				}
-				Integer i = 0;
-				if(event.getUser() != turns[i].getPlayer()){
-					i++;
-				}
-				turns[i].setRPS(rps);
-				statusMessageList.get(i).editMessage("Waiting for opponent").complete();
+				getTurn(event.getUser()).setRPS(rps);
+				getMenu(event.getChannel()).editStatusMessage("Waiting for opponent...");
 				check();
 			}
 		}
 	}
 	
-	protected void createMenuItems(){
-		for(User u : new User[]{turns[0].getPlayer(), turns[1].getPlayer()}){
-			MessageChannel c = u.openPrivateChannel().complete();
-			statusMessageList.add(c.sendMessage("Make your selection:").complete());
-			menuItemList.add(new MenuItem(c, "Rock", "\u2705"));
-			menuItemList.add(new MenuItem(c, "Paper", "\u2705"));
-			menuItemList.add(new MenuItem(c, "Scissors", "\u2705"));
+	private void createMenuItems(){
+		for(Menu m : menus){
+			m.createStatusMessage("Make your selection:");
+			m.createMenuItem("Rock", CHECKMARK);
+			m.createMenuItem("Paper", CHECKMARK);
+			m.createMenuItem("Scissors", CHECKMARK);
 		}
 	}
 	
-	@Override
+	private Menu getMenu(MessageChannel c){
+		for(Menu m : menus){
+			if(m.getChannel().equals(c)){
+				return m;
+			}
+		}
+		return null;
+	}
+	
+	private Turn getTurn(User u){
+		for(Turn t : turns){
+			if(t.getPlayer().equals(u)){
+				return t;
+			}
+		}
+		return null;
+	}
+	
 	public void complete() {
-		for(MenuItem m : menuItemList){
-			m.remove();
+		for(Menu m : menus){
+			m.delete();
 		}
 		turns[0].getPlayer().getJDA().removeEventListener(this);
 		trigger.activate();
@@ -82,17 +96,17 @@ public class RPSMenu extends PrivateMenu{
 	private void gameTie(){
 		turns[0].clear();
 		turns[1].clear();
-		for(Message m : statusMessageList){
-			m.editMessage("You have tied with your opponent").complete();
+		for(Menu m : menus){
+			m.editStatusMessage("You have tied with your opponent, choose again");
 		}
 	}
 	
 	private void gameWin(User u){
-		for(Message m : statusMessageList){
+		for(Menu m : menus){
 			if(m.getChannel().equals(u.openPrivateChannel().complete())){
-				m.editMessage("You have won!").complete();
+				m.editStatusMessage("You have won!");
 			}else{
-				m.editMessage("You have lost!").complete();
+				m.editStatusMessage("You have lost!");
 			}
 		}
 		complete();
