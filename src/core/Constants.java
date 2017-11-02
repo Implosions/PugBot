@@ -72,4 +72,8 @@ public class Constants {
 	public final static String RPS_HELP = "!rps <opponent>";
 	public final static String RPS_DESC = "Challenges a player to a rock paper scissors duel";
 	
+	public final static String GITHUB_NAME = "github";
+	public final static String GITHUB_HELP = "!github";
+	public final static String GITHUB_DESC = "Returns the github repo location";
+	
 }
