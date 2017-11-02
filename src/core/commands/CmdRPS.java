@@ -15,7 +15,7 @@ public class CmdRPS extends Command{
 	
 	public CmdRPS(){
 		this.name = Constants.RPS_NAME;
-		this.description = Constants.RPS_NAME;
+		this.description = Constants.RPS_DESC;
 		this.helpMsg = Constants.RPS_HELP;
 		this.pugCommand = false;
 	}
