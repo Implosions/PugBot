@@ -2,6 +2,7 @@ package core.commands;
 
 import core.Constants;
 import core.entities.Server;
+import core.entities.Timer;
 import core.entities.menus.RPSMenu;
 import core.exceptions.BadArgumentsException;
 import core.exceptions.DoesNotExistException;
@@ -32,7 +33,9 @@ public class CmdRPS extends Command{
 				}
 				if(u != null && !u.isBot()){
 					Trigger t = () -> System.out.println("RPS completed");
-					new RPSMenu(member.getUser(), u, t);
+					RPSMenu rps = new RPSMenu(member.getUser(), u, t);
+					t = () -> {if(!rps.finished()){rps.complete();}};
+					new Timer(180, t).start();
 				}else{
 					throw new DoesNotExistException("User: " + args[0]);
 				}
@@ -41,6 +44,7 @@ public class CmdRPS extends Command{
 				throw new BadArgumentsException();
 			}
 			this.response = Utils.createMessage("`Challenge sent`");
+			System.out.println("RPS challenge sent");
 		}catch(BadArgumentsException | DoesNotExistException ex){
 			this.response = Utils.createMessage("Error!", ex.getMessage(), false);
 		}

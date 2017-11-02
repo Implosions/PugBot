@@ -46,8 +46,12 @@ public class Menu {
 		return channel;
 	}
 	
-	public void delete(){
+	public void deleteMenuItems(){
 		menuItemList.forEach((mi) -> mi.remove());
 		menuItemList.clear();
+	}
+	
+	public void deleteStatusMessage(){
+		statusMessage.delete().complete();
 	}
 }

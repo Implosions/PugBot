@@ -12,6 +12,7 @@ public class RPSMenu extends ListenerAdapter{
 	private Trigger trigger;
 	private Turn turns[];
 	private Menu menus[];
+	private boolean finished = false;
 	
 	public RPSMenu(User p1, User p2, Trigger trigger){
 		this.trigger = trigger;
@@ -73,12 +74,23 @@ public class RPSMenu extends ListenerAdapter{
 		return null;
 	}
 	
+	public boolean finished(){
+		return finished;
+	}
+	
 	public void complete() {
 		for(Menu m : menus){
-			m.delete();
+			m.deleteMenuItems();
 		}
 		turns[0].getPlayer().getJDA().removeEventListener(this);
-		trigger.activate();
+		
+		if(finished){
+			trigger.activate();
+		}else{
+			for(Menu m : menus){
+				m.deleteStatusMessage();
+			}
+		}
 	}
 	
 	private void check(){
@@ -102,6 +114,7 @@ public class RPSMenu extends ListenerAdapter{
 	}
 	
 	private void gameWin(User u){
+		finished = true;
 		for(Menu m : menus){
 			if(m.getChannel().equals(u.openPrivateChannel().complete())){
 				m.editStatusMessage("You have won!");
