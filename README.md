@@ -9,4 +9,5 @@ BullyBot is a multi-featured pug bot for the Discord application made using the 
 
 ## Aknowledgements
 Bullybot uses the [JDA library](https://github.com/DV8FromTheWorld/JDA) to utilize Discord's API.
+
 BullyBot is based on the IRC pug bot [Xenia](https://github.com/xzanth/pugbot) by [Xzanth](https://github.com/xzanth)
