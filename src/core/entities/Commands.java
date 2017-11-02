@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 
+import core.Constants;
 import core.commands.*;
 
 public class Commands {
@@ -33,6 +34,7 @@ public class Commands {
 		cmdList.put("terminate", new CmdTerminate());
 		cmdList.put("mumble", new CmdMumble());
 		cmdList.put("loadsettings", new CmdLoadSettings());
+		cmdList.put(Constants.RPS_NAME, new CmdRPS());
 		
 		populateLists();
 	}

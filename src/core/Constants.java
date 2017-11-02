@@ -68,4 +68,8 @@ public class Constants {
 	public final static String LOADSETTINGS_HELP = "!loadsettings";
 	public final static String LOADSETTINGS_DESC = "Loads settings from file";
 	
+	public final static String RPS_NAME = "rps";
+	public final static String RPS_HELP = "!rps <opponent>";
+	public final static String RPS_DESC = "Challenges a player to a rock paper scissors duel";
+	
 }

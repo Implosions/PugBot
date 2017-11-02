@@ -4,7 +4,7 @@ import net.dv8tion.jda.core.entities.Message;
 import net.dv8tion.jda.core.entities.MessageChannel;
 
 public class MenuItem {
-	private Message message;
+	private String id;
 	private MessageChannel channel;
 	private String text;
 	private String[] buttons;
@@ -24,14 +24,15 @@ public class MenuItem {
 	}
 	
 	private void build(){
-		message = channel.sendMessage(text).complete();
+		Message m = channel.sendMessage(text).complete();
+		id = m.getId();
 		for(String b : buttons){
-			message.addReaction(b).complete();
+			m.addReaction(b).complete();
 		}
 	}
 	
 	public void remove(){
-		message.delete().complete();
+		channel.getMessageById(id).complete().delete().complete();
 	}
 	
 	public MessageChannel getChannel(){
@@ -40,5 +41,9 @@ public class MenuItem {
 	
 	public String getText(){
 		return text;
+	}
+	
+	public String getId(){
+		return id;
 	}
 }
