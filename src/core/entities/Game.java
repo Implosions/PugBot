@@ -5,7 +5,9 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Random;
@@ -13,6 +15,9 @@ import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import core.entities.menus.RPSMenu;
+import core.entities.menus.TeamPickerMenu;
+import core.util.Trigger;
 import core.util.Utils;
 import net.dv8tion.jda.core.entities.User;
 
@@ -21,7 +26,10 @@ public class Game {
 	private String name;
 	private Long timestamp;
 	private List<User> players;
-	private String[] captains = new String[] { "", "" };
+	private User[] captains = new User[] { null, null };
+	private RPSMenu rps = null;
+	private TeamPickerMenu pickMenu = null;
+	private Status status = Status.PICKING;
 
 	public Game(String id, String name, List<User> players) {
 		this.guildId = id;
@@ -32,6 +40,11 @@ public class Game {
 			randomizeCaptains();
 		}
 		logGame();
+	}
+	
+	public enum Status{
+		PICKING,
+		PLAYING;
 	}
 
 	public List<User> getPlayers() {
@@ -71,26 +84,43 @@ public class Game {
 	private void randomizeCaptains() {
 		Random random = new Random();
 		List<User> captainPool = getCaptainPool();
-		if (players.size() == 1) {
-			captains[0] = captainPool.get(0).getId();
-			captains[1] = captainPool.get(0).getId();
-			return;
-		}
-		captains[0] = captainPool.get(random.nextInt(captainPool.size())).getId();
-		while (captains[1].isEmpty()) {
+		captains[0] = captainPool.get(random.nextInt(captainPool.size()));
+		while (captains[1] == null) {
 			Integer i = random.nextInt(captainPool.size());
 			if (!captainPool.get(i).getId().equals(captains[0])) {
-				captains[1] = captainPool.get(i).getId();
+				captains[1] = captainPool.get(i);
 			}
 		}
+		createRPSMenu();
 	}
 
-	public String[] getCaptains() {
+	public User[] getCaptains() {
 		return captains;
 	}
 
 	public String getName() {
 		return name;
+	}
+	
+	public Status getStatus(){
+		return status;
+	}
+	
+	private void setStatus(Status status){
+		this.status = status;
+	}
+	
+	public void createRPSMenu(){
+		Trigger trigger = () -> createPickMenu();
+		rps = new RPSMenu(captains[0], captains[1], trigger);
+	}
+	
+	public void createPickMenu(){
+		List<User> nonCaptainPlayers = new ArrayList<User>(players);
+		nonCaptainPlayers.removeAll(Arrays.asList(captains));
+		captains = rps.getResult();
+		Trigger trigger = () -> setStatus(Status.PLAYING);
+		pickMenu = new TeamPickerMenu(captains, nonCaptainPlayers, trigger);
 	}
 
 	/*

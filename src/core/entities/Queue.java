@@ -142,9 +142,9 @@ public class Queue {
 		ServerManager.getServer(guildId).getQueueManager().purgeQueue(players);
 		String captainString = "";
 		if(ServerManager.getServer(guildId).getSettings().randomizeCaptains()){
-			captainString = String.format("%s%n**Captains:** <@%s> & <@%s>", names, newGame.getCaptains()[0], newGame.getCaptains()[1]);
+			captainString = String.format("%s%n**Captains:** <@%s> & <@%s>", names, newGame.getCaptains()[0].getId(), newGame.getCaptains()[1].getId());
 		}
-		ServerManager.getServer(guildId).getPugChannel().sendMessage(Utils.createMessage(String.format("Game: %s starting", name), captainString, Color.yellow)).queueAfter(2, TimeUnit.SECONDS);
+		ServerManager.getServer(guildId).getPugChannel().sendMessage(Utils.createMessage(String.format("Game: %s starting", name), captainString, Color.YELLOW)).queueAfter(2, TimeUnit.SECONDS);
 	}
 
 	/**

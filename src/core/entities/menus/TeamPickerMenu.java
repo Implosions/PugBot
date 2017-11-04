@@ -17,10 +17,12 @@ public class TeamPickerMenu extends ListenerAdapter{
 	private Team[] teams;
 	private List<User> playerPool;
 	private Trigger trigger;
+	private Integer turnCount = 1;
+	private boolean finished = false;
 	
 	public TeamPickerMenu(User[] captains, List<User> players, Trigger trigger){
 		this.menus = new Menu[]{new Menu(captains[0].openPrivateChannel().complete()), new Menu(captains[1].openPrivateChannel().complete())};
-		this.teams = new Team[]{new Team(captains[0]), new Team(captains[0])};
+		this.teams = new Team[]{new Team(captains[0]), new Team(captains[1])};
 		this.playerPool = players;
 		this.trigger = trigger;
 		
@@ -28,24 +30,33 @@ public class TeamPickerMenu extends ListenerAdapter{
 		captains[1].getJDA().addEventListener(this);
 	}
 	
-	private enum Status{
-		PICKING,
-		WAITING;
-	}
-	
 	public void onPrivateMessageReactionAdd(PrivateMessageReactionAddEvent event){
-		if((event.getReaction().getEmote().getName().equals(CHECKMARK) || event.getReaction().getEmote().equals(X)) && !event.getUser().isBot()){
+		if((event.getReaction().getEmote().getName().equals(CHECKMARK) || event.getReaction().getEmote().equals(X)) 
+				&& !event.getUser().isBot()){
 			MenuItem mi = getMenu(event.getChannel()).getMenuItem(event.getMessageId());
 			
 			if(mi != null){
-				if(mi.getText().equals("Take first pick?")){
+				String text = mi.getText();
+				if(text.equals("Take first pick?")){
 					if(event.getReaction().getEmote().equals(X)){
 						teams = new Team[]{teams[1], teams[0]};
 					}
-					mi.remove();
-					teams[0].status = Status.PICKING;
-					teams[1].status = Status.WAITING;
+					getMenu(event.getChannel()).deleteMenuItem(mi);
+					teams[0].picking = true;
+					teams[1].picking = false;
 					createMenuItems();
+				}else{
+					User player = getPlayer(text);
+					if(player != null){
+						Team t = getTeam(event.getUser());
+						if(t.picking){
+							t.members.add(player);
+							for(Menu m : menus){
+								m.deleteMenuItem(m.getMenuItemByText(text));
+							}
+							nextTurn();
+						}
+					}
 				}
 			}
 		}
@@ -66,20 +77,57 @@ public class TeamPickerMenu extends ListenerAdapter{
 	}
 	
 	public void complete(){
-		
+		teams[0].getCaptain().getJDA().removeEventListener(this);
+		if(finished){
+			trigger.activate();
+			String s = String.format("Teams picked:%nRED - %s%nBLUE - %s", teams[0].toString(), teams[1].toString());
+			for(Menu m : menus){
+				m.editStatusMessage(s);
+			}
+			for(User p : playerPool){
+				p.openPrivateChannel().complete().sendMessage(s).complete();
+			}
+		}else{
+			for(Menu m : menus){
+				m.deleteStatusMessage();
+				m.deleteMenuItems();
+			}
+		}
 	}
 	
 	private void pick(){
 		for(Team t : teams){
 			Menu m = getMenu(t.getCaptain().openPrivateChannel().complete());
-			String s = String.format("%s%n%s%n", teams[0].toString(), teams[1].toString());
-			if(t.status == Status.PICKING){
+			String s = String.format("Teams:%n%s%n%s%n", teams[0].toString(), teams[1].toString());
+			if(t.picking){
 				s += "Your turn to pick:";
 			}else{
 				s += "Waiting for your opponent to pick...";
 			}
 			m.editStatusMessage(s);
 		}
+	}
+	
+	private void nextTurn(){
+		turnCount++;
+		if (turnCount <= playerPool.size()) {
+			for (Team t : teams) {
+				t.picking = !t.picking;
+			}
+			pick();
+		}else{
+			finished = true;
+			complete();
+		}
+	}
+	
+	private User getPlayer(String name){
+		for(User player : playerPool){
+			if(player.getName().equals(name)){
+				return player;
+			}
+		}
+		return null;
 	}
 	
 	private Menu getMenu(MessageChannel c){
@@ -91,10 +139,23 @@ public class TeamPickerMenu extends ListenerAdapter{
 		return null;
 	}
 	
+	private Team getTeam(User captain){
+		for(Team t : teams){
+			if(t.getCaptain().equals(captain)){
+				return t;
+			}
+		}
+		return null;
+	}
+	
+	public boolean finished(){
+		return finished;
+	}
+	
 	private class Team {
 		private User captain;
 		public List<User> members = new ArrayList<User>();
-		public Status status = null;
+		public boolean picking;
 		
 		public Team(User captain){
 			this.captain = captain;
@@ -105,11 +166,13 @@ public class TeamPickerMenu extends ListenerAdapter{
 		}
 		
 		public String toString(){
-			String names = null;
-			for(User m : members){
-				names += m.getName() + ", ";
+			String names = "";
+			if(members.size() > 0){
+				for(User m : members){
+					names += m.getName() + ", ";
+				}
+				names = names.substring(0, names.length() - 2);
 			}
-			names = names.substring(0, names.lastIndexOf(","));
 			return String.format("%s: %s", captain.getName(), names);
 		}
 	}

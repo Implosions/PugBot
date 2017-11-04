@@ -13,6 +13,7 @@ public class RPSMenu extends ListenerAdapter{
 	private Turn turns[];
 	private Menu menus[];
 	private boolean finished = false;
+	private User[] result = new User[2];
 	
 	public RPSMenu(User p1, User p2, Trigger trigger){
 		this.trigger = trigger;
@@ -99,8 +100,14 @@ public class RPSMenu extends ListenerAdapter{
 			
 			switch(result){
 			case 0: gameTie(); break;
-			case 1: gameWin(turns[0].getPlayer()); break;
-			case -1: gameWin(turns[1].getPlayer()); break;
+			case 1: gameWin(turns[0].getPlayer());
+					this.result[0] = turns[0].getPlayer();
+					this.result[1]= turns [1].getPlayer();
+					break;
+			case -1: gameWin(turns[1].getPlayer());
+					this.result[1] = turns[1].getPlayer();
+					this.result[0]= turns [0].getPlayer();
+					break;
 			}
 		}
 	}
@@ -123,6 +130,10 @@ public class RPSMenu extends ListenerAdapter{
 			}
 		}
 		complete();
+	}
+	
+	public User[] getResult(){
+		return this.result;
 	}
 	
 	private class Turn {
