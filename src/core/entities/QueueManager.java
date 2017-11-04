@@ -38,7 +38,7 @@ public class QueueManager {
 	 * @see Queue
 	 */
 	public void createQueue(String name, Integer players) {
-		if (players > 0) {
+		if (players > 1) {
 			if (!doesQueueExist(name)) {
 				queueList.add(new Queue(name, players, guildId));
 			} else {
