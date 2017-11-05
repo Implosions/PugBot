@@ -31,19 +31,19 @@ public class TeamPickerMenu extends ListenerAdapter{
 	}
 	
 	public void onPrivateMessageReactionAdd(PrivateMessageReactionAddEvent event){
-		if((event.getReaction().getEmote().getName().equals(CHECKMARK) || event.getReaction().getEmote().equals(X)) 
+		if((event.getReaction().getEmote().getName().equals(CHECKMARK) || event.getReaction().getEmote().getName().equals(X)) 
 				&& !event.getUser().isBot()){
 			MenuItem mi = getMenu(event.getChannel()).getMenuItem(event.getMessageId());
 			
 			if(mi != null){
 				String text = mi.getText();
 				if(text.equals("Take first pick?")){
-					if(event.getReaction().getEmote().equals(X)){
-						teams = new Team[]{teams[1], teams[0]};
+					if(event.getReaction().getEmote().getName().equals(X)){
+						teams[1].picking = true;
+					}else{
+						teams[0].picking = true;
 					}
 					getMenu(event.getChannel()).deleteMenuItem(mi);
-					teams[0].picking = true;
-					teams[1].picking = false;
 					createMenuItems();
 				}else{
 					User player = getPlayer(text);
@@ -155,7 +155,7 @@ public class TeamPickerMenu extends ListenerAdapter{
 	private class Team {
 		private User captain;
 		public List<User> members = new ArrayList<User>();
-		public boolean picking;
+		public boolean picking = false;
 		
 		public Team(User captain){
 			this.captain = captain;

@@ -100,14 +100,8 @@ public class RPSMenu extends ListenerAdapter{
 			
 			switch(result){
 			case 0: gameTie(); break;
-			case 1: gameWin(turns[0].getPlayer());
-					this.result[0] = turns[0].getPlayer();
-					this.result[1]= turns [1].getPlayer();
-					break;
-			case -1: gameWin(turns[1].getPlayer());
-					this.result[1] = turns[1].getPlayer();
-					this.result[0]= turns [0].getPlayer();
-					break;
+			case 1: gameWin(turns[0].getPlayer()); break;
+			case -1: gameWin(turns[1].getPlayer()); break;
 			}
 		}
 	}
@@ -122,6 +116,15 @@ public class RPSMenu extends ListenerAdapter{
 	
 	private void gameWin(User u){
 		finished = true;
+		
+		// Super spaghetti, need to fix
+		result[0] = u;
+		if(u != turns[0].getPlayer()){
+			result[1] = turns[0].getPlayer();
+		}else{
+			result[1] = turns[1].getPlayer();
+		}
+		
 		for(Menu m : menus){
 			if(m.getChannel().equals(u.openPrivateChannel().complete())){
 				m.editStatusMessage("You have won!");

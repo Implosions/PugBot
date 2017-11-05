@@ -87,11 +87,13 @@ public class Game {
 		captains[0] = captainPool.get(random.nextInt(captainPool.size()));
 		while (captains[1] == null) {
 			Integer i = random.nextInt(captainPool.size());
-			if (!captainPool.get(i).getId().equals(captains[0])) {
+			if (!captainPool.get(i).equals(captains[0])) {
 				captains[1] = captainPool.get(i);
 			}
 		}
-		createRPSMenu();
+		if(players.size() > 2){
+			createRPSMenu();
+		}
 	}
 
 	public User[] getCaptains() {
