@@ -5,7 +5,6 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -123,6 +122,17 @@ public class Game {
 		captains = rps.getResult();
 		Trigger trigger = () -> setStatus(Status.PLAYING);
 		pickMenu = new TeamPickerMenu(captains, nonCaptainPlayers, trigger);
+	}
+	
+	public void subCaptain(User sub, User target){
+		for(Integer i = 0;i < 2;i++){
+			if(captains[i] == target){
+				captains[i] = sub;
+			}
+		}
+		rps.complete();
+		pickMenu.complete();
+		createRPSMenu();
 	}
 
 	/*
