@@ -8,6 +8,7 @@ import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 import core.util.Utils;
+import core.entities.Game.Status;
 import core.util.Trigger;
 import net.dv8tion.jda.core.OnlineStatus;
 import net.dv8tion.jda.core.entities.Member;
@@ -155,6 +156,9 @@ public class Queue {
 	public void finish(Game g) {
 		List<User> players = new ArrayList<User>(g.getPlayers());
 		ServerManager.getServer(guildId).getQueueManager().addToJustFinished(players);
+		if(g.getStatus() == Status.PICKING){
+			g.removeMenus();
+		}
 		games.remove(g);
 		t = () -> ServerManager.getServer(guildId).getQueueManager().timerEnd(players);
 		Timer timer = new Timer(ServerManager.getServer(guildId).getSettings().finishTime(), t);

@@ -159,6 +159,15 @@ public class Game {
 		}
 	}
 	
+	public void removeMenus(){
+		if(rps != null && !rps.finished()){
+			rps.complete();
+		}
+		if(pickMenu != null && !pickMenu.finished()){
+			pickMenu.complete();
+		}
+	}
+	
 	public void subCaptain(User sub, User target){
 		for(Integer i = 0;i < 2;i++){
 			if(captains[i] == target){
