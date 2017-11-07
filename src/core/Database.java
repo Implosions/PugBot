@@ -70,10 +70,10 @@ public class Database {
 		}
 	}
 	
-	public static void insertDiscordServer(Integer id, String name){
+	public static void insertDiscordServer(Long id, String name){
 		try{
 			PreparedStatement pStatement = conn.prepareStatement("INSERT OR IGNORE INTO DiscordServer VALUES(?, ?)");
-			pStatement.setInt(1, id);
+			pStatement.setLong(1, id);
 			pStatement.setString(2, name);
 			
 			pStatement.execute();
@@ -82,10 +82,10 @@ public class Database {
 		}
 	}
 	
-	public static void insertPlayer(Integer id, String name){
+	public static void insertPlayer(Long id, String name){
 		try{
 			PreparedStatement pStatement = conn.prepareStatement("INSERT OR IGNORE INTO Player VALUES(?, ?)");
-			pStatement.setInt(1, id);
+			pStatement.setLong(1, id);
 			pStatement.setString(2, name);
 			
 			pStatement.execute();
@@ -94,11 +94,11 @@ public class Database {
 		}
 	}
 	
-	public static void insertQueue(Integer serverId, String Name){
+	public static void insertQueue(Long serverId, String Name){
 		try{
 			PreparedStatement pStatement = conn.prepareStatement("INSERT OR IGNORE INTO Queue VALUES(?, ?)");
 			pStatement.setString(1, Name);
-			pStatement.setInt(2, serverId);
+			pStatement.setLong(2, serverId);
 			
 			pStatement.execute();
 		}catch(SQLException ex){
@@ -106,12 +106,12 @@ public class Database {
 		}
 	}
 	
-	public static void insertGame(Long timestamp, String queueName, Integer serverId){
+	public static void insertGame(Long timestamp, String queueName, Long serverId){
 		try{
 			PreparedStatement pStatement = conn.prepareStatement("INSERT OR IGNORE INTO Game VALUES(?, ?, ?)");
 			pStatement.setLong(1, timestamp);
 			pStatement.setString(2, queueName);
-			pStatement.setInt(3, serverId);
+			pStatement.setLong(3, serverId);
 			
 			pStatement.execute();
 		}catch(SQLException ex){
@@ -119,12 +119,12 @@ public class Database {
 		}
 	}
 	
-	public static void insertPlayerGame(Integer playerId, Long timestamp, Integer serverId){
+	public static void insertPlayerGame(Long playerId, Long timestamp, Long serverId){
 		try{
 			PreparedStatement pStatement = conn.prepareStatement("INSERT OR IGNORE INTO PlayerGame (playerId, timestamp, serverId) VALUES(?, ?, ?)");
-			pStatement.setInt(1, playerId);
+			pStatement.setLong(1, playerId);
 			pStatement.setLong(2, timestamp);
-			pStatement.setInt(3, serverId);
+			pStatement.setLong(3, serverId);
 			
 			pStatement.execute();
 		}catch(SQLException ex){
@@ -132,14 +132,14 @@ public class Database {
 		}
 	}
 	
-	public static void updatePlayerGamePickOrder(Integer playerId, Long timestamp, Integer serverId, Integer pickOrder){
+	public static void updatePlayerGamePickOrder(Long playerId, Long timestamp, Long serverId, Integer pickOrder){
 		try{
 			PreparedStatement pStatement = conn.prepareStatement("UPDATE PlayerGame SET pickOrder = ? "
 					+ "WHERE playerId = ? AND timestamp = ? AND serverId = ?");
 			pStatement.setInt(1, pickOrder);
-			pStatement.setInt(2, playerId);
+			pStatement.setLong(2, playerId);
 			pStatement.setLong(3, timestamp);
-			pStatement.setInt(4, serverId);
+			pStatement.setLong(4, serverId);
 			
 			pStatement.execute();
 		}catch(SQLException ex){
@@ -147,7 +147,7 @@ public class Database {
 		}
 	}
 	
-	public static void updatePlayerGameCaptain(Integer playerId, Long timestamp, Integer serverId, boolean captain){
+	public static void updatePlayerGameCaptain(Long playerId, Long timestamp, Long serverId, boolean captain){
 		Integer captainInt = 0;
 		if(captain){
 			captainInt = 1;
@@ -157,9 +157,9 @@ public class Database {
 					+ "WHERE playerId = ? AND timestamp = ? AND serverId = ?");
 			
 			pStatement.setInt(1, captainInt);
-			pStatement.setInt(2, playerId);
+			pStatement.setLong(2, playerId);
 			pStatement.setLong(3, timestamp);
-			pStatement.setInt(4, serverId);
+			pStatement.setLong(4, serverId);
 			
 			pStatement.execute();
 		}catch(SQLException ex){
