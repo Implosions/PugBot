@@ -19,6 +19,7 @@ public class Settings {
 	private Integer finishTime = 60;
 	private Integer minNumberOfGames = 5;
 	private boolean randomizeCaptains = true;
+	private boolean snakePick = false;
 	
 	
 	public Settings(String id){
@@ -41,6 +42,7 @@ public class Settings {
 			dcTime = Integer.valueOf(p.getProperty("dctime", dcTime.toString()));
 			finishTime = Integer.valueOf(p.getProperty("finishtime", finishTime.toString()));
 			randomizeCaptains = Boolean.valueOf(p.getProperty("randomizecaptains", String.valueOf(randomizeCaptains)));
+			snakePick = Boolean.valueOf(p.getProperty("snakepick", String.valueOf(snakePick)));
 			is.close();
 		}catch(IOException ex){
 			ex.printStackTrace();
@@ -61,6 +63,7 @@ public class Settings {
 			p.setProperty("dctime", dcTime.toString());
 			p.setProperty("finishtime", finishTime.toString());
 			p.setProperty("randomizecaptains", String.valueOf(randomizeCaptains));
+			p.setProperty("snakepick", String.valueOf(snakePick));
 			p.store(os, null);
 			os.close();
 		}catch(IOException ex){
@@ -94,5 +97,9 @@ public class Settings {
 	
 	public Integer minNumberOfGames(){
 		return minNumberOfGames;
+	}
+	
+	public boolean snakePick(){
+		return snakePick();
 	}
 }

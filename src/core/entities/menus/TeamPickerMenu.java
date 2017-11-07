@@ -19,12 +19,14 @@ public class TeamPickerMenu extends ListenerAdapter{
 	private Trigger trigger;
 	private Integer turnCount = 1;
 	private boolean finished = false;
+	private boolean snake;
 	
-	public TeamPickerMenu(User[] captains, List<User> players, Trigger trigger){
+	public TeamPickerMenu(User[] captains, List<User> players, Trigger trigger, boolean snake){
 		this.menus = new Menu[]{new Menu(captains[0].openPrivateChannel().complete()), new Menu(captains[1].openPrivateChannel().complete())};
 		this.teams = new Team[]{new Team(captains[0]), new Team(captains[1])};
 		this.playerPool = players;
 		this.trigger = trigger;
+		this.snake = snake;
 		
 		chooseOrder();
 		captains[1].getJDA().addEventListener(this);
@@ -111,8 +113,10 @@ public class TeamPickerMenu extends ListenerAdapter{
 	private void nextTurn(){
 		turnCount++;
 		if (turnCount <= playerPool.size()) {
-			for (Team t : teams) {
-				t.picking = !t.picking;
+			if(!(playerPool.size() > 9 && snake && turnCount == playerPool.size() - 2)){
+				for (Team t : teams) {
+					t.picking = !t.picking;
+				}
 			}
 			pick();
 		}else{

@@ -121,7 +121,7 @@ public class Game {
 		nonCaptainPlayers.removeAll(Arrays.asList(captains));
 		captains = rps.getResult();
 		Trigger trigger = () -> setStatus(Status.PLAYING);
-		pickMenu = new TeamPickerMenu(captains, nonCaptainPlayers, trigger);
+		pickMenu = new TeamPickerMenu(captains, nonCaptainPlayers, trigger, ServerManager.getServer(guildId).getSettings().snakePick());
 	}
 	
 	public void subCaptain(User sub, User target){
