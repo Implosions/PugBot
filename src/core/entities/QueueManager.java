@@ -460,8 +460,8 @@ public class QueueManager {
 	 * @param target the captain to be replaced
 	 */
 	public void subCaptain(User sub, User target){
-		if(!isPlayerIngame(sub)){
-			if(!isPlayerIngame(target)){
+		if(isPlayerIngame(sub)){
+			if(isPlayerIngame(target)){
 				Game g = getPlayersGame(sub);
 				if(g.getStatus() == Status.PICKING){
 					if (g.getCaptains()[0] == target || g.getCaptains()[1] == target) {

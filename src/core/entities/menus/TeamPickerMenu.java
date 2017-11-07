@@ -16,7 +16,7 @@ public class TeamPickerMenu extends ListenerAdapter{
 	private Menu[] menus;
 	private Team[] teams;
 	private List<User> playerPool;
-	private List<String> pickOrder;
+	private List<String> pickOrder = new ArrayList<String>();
 	private Trigger trigger;
 	private Integer turnCount = 1;
 	private boolean finished = false;
@@ -115,11 +115,12 @@ public class TeamPickerMenu extends ListenerAdapter{
 	private void nextTurn(){
 		turnCount++;
 		if (turnCount <= playerPool.size()) {
-			if(!(playerPool.size() > 9 && snake && turnCount == playerPool.size() - 2)){
+			if(!(playerPool.size() > 7 && snake && turnCount == playerPool.size() - 1)){
 				for (Team t : teams) {
 					t.picking = !t.picking;
 				}
 			}
+			System.out.println(snake);
 			pick();
 		}else{
 			finished = true;
@@ -159,7 +160,9 @@ public class TeamPickerMenu extends ListenerAdapter{
 	}
 	
 	public String[] getPickOrder(){
-		return (String[])pickOrder.toArray();
+		String[] s = new String[pickOrder.size()];
+		pickOrder.toArray(s);
+		return s;
 	}
 	
 	private class Team {

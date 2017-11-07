@@ -100,6 +100,6 @@ public class Settings {
 	}
 	
 	public boolean snakePick(){
-		return snakePick();
+		return snakePick;
 	}
 }

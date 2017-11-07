@@ -174,8 +174,7 @@ public class Game {
 				captains[i] = sub;
 			}
 		}
-		rps.complete();
-		pickMenu.complete();
+		removeMenus();
 		createRPSMenu();
 	}
 
