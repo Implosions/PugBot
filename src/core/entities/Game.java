@@ -144,7 +144,9 @@ public class Game {
 		
 		// Update captains
 		for(User c : captains){
-			Database.updatePlayerGameCaptain(c.getIdLong(), timestamp, Long.valueOf(guildId), true);
+			if(c != null){
+				Database.updatePlayerGameCaptain(c.getIdLong(), timestamp, Long.valueOf(guildId), true);
+			}
 		}
 		
 		// Add player pick order
