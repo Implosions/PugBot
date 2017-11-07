@@ -9,7 +9,7 @@ public class Database {
 	public Database(){
 		try{
 			Class.forName("org.sqlite.JDBC");
-			conn = DriverManager.getConnection("jdbc:sqlite:app_data/test.db");
+			conn = DriverManager.getConnection("jdbc:sqlite:app_data/bullybot.db");
 			createTables();
 		}catch(Exception ex){
 			ex.printStackTrace();
