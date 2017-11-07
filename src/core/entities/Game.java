@@ -137,6 +137,18 @@ public class Game {
 		for(User u : players){
 			Database.insertPlayerGame(u.getIdLong(), timestamp, Long.valueOf(guildId));
 		}
+		
+		// Update captains
+		for(User c : captains){
+			Database.updatePlayerGameCaptain(c.getIdLong(), timestamp, Long.valueOf(guildId), true);
+		}
+		
+		// Add player pick order
+		Integer count = 1;
+		for(String id : pickMenu.getPickOrder()){
+			Database.updatePlayerGamePickOrder(Long.valueOf(id), timestamp, Long.valueOf(guildId), count);
+			count++;
+		}
 	}
 	
 	public void subCaptain(User sub, User target){

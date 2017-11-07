@@ -16,6 +16,7 @@ public class TeamPickerMenu extends ListenerAdapter{
 	private Menu[] menus;
 	private Team[] teams;
 	private List<User> playerPool;
+	private List<String> pickOrder;
 	private Trigger trigger;
 	private Integer turnCount = 1;
 	private boolean finished = false;
@@ -154,6 +155,10 @@ public class TeamPickerMenu extends ListenerAdapter{
 	
 	public boolean finished(){
 		return finished;
+	}
+	
+	public String[] getPickOrder(){
+		return (String[])pickOrder.toArray();
 	}
 	
 	private class Team {
