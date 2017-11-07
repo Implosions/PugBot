@@ -54,6 +54,7 @@ public class TeamPickerMenu extends ListenerAdapter{
 						Team t = getTeam(event.getUser());
 						if(t.picking){
 							t.members.add(player);
+							pickOrder.add(player.getId());
 							for(Menu m : menus){
 								m.deleteMenuItem(m.getMenuItemByText(text));
 							}
