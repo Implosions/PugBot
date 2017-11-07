@@ -150,10 +150,12 @@ public class Game {
 		}
 		
 		// Add player pick order
-		Integer count = 1;
-		for(String id : pickMenu.getPickOrder()){
-			Database.updatePlayerGamePickOrder(Long.valueOf(id), timestamp, Long.valueOf(guildId), count);
-			count++;
+		if(pickMenu != null){
+			Integer count = 1;
+			for (String id : pickMenu.getPickOrder()) {
+				Database.updatePlayerGamePickOrder(Long.valueOf(id), timestamp, Long.valueOf(guildId), count);
+				count++;
+			}
 		}
 	}
 	
