@@ -26,6 +26,15 @@ public class Menu {
 		return null;
 	}
 	
+	public MenuItem getMenuItemByText(String text){
+		for(MenuItem m : menuItemList){
+			if (m.getText().equals(text)){
+				return m;
+			}
+		}
+		return null;
+	}
+	
 	public void createMenuItem(String text, String[] buttons){
 		menuItemList.add(new MenuItem(channel, text, buttons));
 	}
@@ -49,6 +58,11 @@ public class Menu {
 	public void deleteMenuItems(){
 		menuItemList.forEach((mi) -> mi.remove());
 		menuItemList.clear();
+	}
+	
+	public void deleteMenuItem(MenuItem mi){
+		mi.remove();
+		menuItemList.remove(mi);
 	}
 	
 	public void deleteStatusMessage(){

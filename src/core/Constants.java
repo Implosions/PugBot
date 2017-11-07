@@ -76,4 +76,8 @@ public class Constants {
 	public final static String GITHUB_HELP = "!github";
 	public final static String GITHUB_DESC = "Returns the github repo location";
 	
+	public final static String SUBCAPTAIN_NAME = "subcaptain";
+	public final static String SUBCAPTAIN_HELP = "!subcaptain <captain>";
+	public final static String SUBCAPTAIN_DESC = "Replaces a captain with yourself";
+	
 }

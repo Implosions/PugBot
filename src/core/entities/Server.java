@@ -5,6 +5,7 @@ import java.text.DecimalFormat;
 import java.util.HashMap;
 
 import core.util.Utils;
+import core.Database;
 import core.util.Trigger;
 import net.dv8tion.jda.core.OnlineStatus;
 import net.dv8tion.jda.core.entities.Guild;
@@ -30,6 +31,14 @@ public class Server {
 		cmds = new Commands();
 		settings = new Settings(id);
 		qm.getQueueList().forEach((q) -> q.getPlayersInQueue().forEach((u) -> updateActivityList(u)));
+		
+		// Insert guild into database
+		Database.insertDiscordServer(guild.getIdLong(), guild.getName());
+		// Insert members into database
+		for(Member m : guild.getMembers()){
+			Database.insertPlayer(m.getUser().getIdLong(), m.getEffectiveName());
+		}
+		
 		startAFKTimer();
 	}
 

@@ -16,6 +16,7 @@ import net.dv8tion.jda.core.entities.User;
 import net.dv8tion.jda.core.events.guild.GenericGuildEvent;
 import net.dv8tion.jda.core.events.guild.GuildJoinEvent;
 import net.dv8tion.jda.core.events.guild.GuildLeaveEvent;
+import net.dv8tion.jda.core.events.guild.member.GuildMemberJoinEvent;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.core.events.message.guild.react.GenericGuildMessageReactionEvent;
 import net.dv8tion.jda.core.events.user.UserOnlineStatusUpdateEvent;
@@ -136,5 +137,10 @@ public class EventHandler extends ListenerAdapter {
 	public void onGenericGuild(GenericGuildEvent event){
 		// Updates Server's Guild object with any changes
 		ServerManager.getServer(event.getGuild().getId()).setGuild(event.getGuild());
+	}
+	
+	public void onGuildMemberJoin(GuildMemberJoinEvent event){
+		// Inserts new player into database
+		Database.insertPlayer(event.getUser().getIdLong(), event.getMember().getEffectiveName());
 	}
 }

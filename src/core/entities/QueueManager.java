@@ -12,6 +12,8 @@ import java.util.Scanner;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import core.Database;
+import core.entities.Game.Status;
 import core.exceptions.BadArgumentsException;
 import core.exceptions.DoesNotExistException;
 import core.exceptions.DuplicateEntryException;
@@ -38,9 +40,12 @@ public class QueueManager {
 	 * @see Queue
 	 */
 	public void createQueue(String name, Integer players) {
-		if (players > 0) {
+		if (players > 1) {
 			if (!doesQueueExist(name)) {
 				queueList.add(new Queue(name, players, guildId));
+				
+				// Insert queue into database
+				Database.insertQueue(Long.valueOf(guildId), name);
 			} else {
 				throw new DuplicateEntryException("A queue with the same name already exists");
 			}
@@ -447,6 +452,37 @@ public class QueueManager {
 			throw new DoesNotExistException("Queue");
 		}
 	}
+	
+	/**
+	 * Substitutes a captain of a game with a player in that game
+	 * 
+	 * @param sub the substitute player
+	 * @param target the captain to be replaced
+	 */
+	public void subCaptain(User sub, User target){
+		if(isPlayerIngame(sub)){
+			if(isPlayerIngame(target)){
+				Game g = getPlayersGame(sub);
+				if(g.getStatus() == Status.PICKING){
+					if (g.getCaptains()[0] == target || g.getCaptains()[1] == target) {
+						if(g.getCaptains()[0] != sub && g.getCaptains()[1] != sub){
+							g.subCaptain(sub, target);
+						}else{
+							throw new InvalidUseException("You are already a captain");
+						}
+					} else {
+						throw new InvalidUseException(target + " is not in your game");
+					}
+				}else{
+					throw new InvalidUseException("Game is already being played");
+				}
+			}else{
+				throw new InvalidUseException(target.getName() + " is not in-game");
+			}
+		}else{
+			throw new InvalidUseException("You are not in-game");
+		}
+	}
 
 	/**
 	 * Returns a boolean based on if the player is in-game or not.
@@ -463,6 +499,17 @@ public class QueueManager {
 			}
 		}
 		return false;
+	}
+	
+	public Game getPlayersGame(User player){
+		for (Queue q : queueList) {
+			for (Game g : q.getGames()) {
+				if (g.getPlayers().contains(player)) {
+					return g;
+				}
+			}
+		}
+		return null;
 	}
 
 	/**

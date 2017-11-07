@@ -6,6 +6,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Random;
@@ -13,6 +14,10 @@ import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import core.Database;
+import core.entities.menus.RPSMenu;
+import core.entities.menus.TeamPickerMenu;
+import core.util.Trigger;
 import core.util.Utils;
 import net.dv8tion.jda.core.entities.User;
 
@@ -21,17 +26,31 @@ public class Game {
 	private String name;
 	private Long timestamp;
 	private List<User> players;
-	private String[] captains = new String[] { "", "" };
+	private User[] captains = new User[] { null, null };
+	private RPSMenu rps = null;
+	private TeamPickerMenu pickMenu = null;
+	private Status status = Status.PICKING;
 
 	public Game(String id, String name, List<User> players) {
 		this.guildId = id;
 		this.name = name;
 		this.timestamp = System.currentTimeMillis();
 		this.players = new ArrayList<User>(players);
+		
+		// Insert game into database
+		Database.insertGame(timestamp, name, Long.valueOf(guildId));
+		
 		if (ServerManager.getServer(guildId).getSettings().randomizeCaptains()) {
 			randomizeCaptains();
+		}else{
+			pickingComplete();
 		}
 		logGame();
+	}
+	
+	public enum Status{
+		PICKING,
+		PLAYING;
 	}
 
 	public List<User> getPlayers() {
@@ -71,26 +90,92 @@ public class Game {
 	private void randomizeCaptains() {
 		Random random = new Random();
 		List<User> captainPool = getCaptainPool();
-		if (players.size() == 1) {
-			captains[0] = captainPool.get(0).getId();
-			captains[1] = captainPool.get(0).getId();
-			return;
-		}
-		captains[0] = captainPool.get(random.nextInt(captainPool.size())).getId();
-		while (captains[1].isEmpty()) {
+		captains[0] = captainPool.get(random.nextInt(captainPool.size()));
+		while (captains[1] == null) {
 			Integer i = random.nextInt(captainPool.size());
-			if (!captainPool.get(i).getId().equals(captains[0])) {
-				captains[1] = captainPool.get(i).getId();
+			if (!captainPool.get(i).equals(captains[0])) {
+				captains[1] = captainPool.get(i);
 			}
+		}
+		if(players.size() > 2){
+			createRPSMenu();
+		}else{
+			pickingComplete();
 		}
 	}
 
-	public String[] getCaptains() {
+	public User[] getCaptains() {
 		return captains;
 	}
 
 	public String getName() {
 		return name;
+	}
+	
+	public Status getStatus(){
+		return status;
+	}
+	
+	private void setStatus(Status status){
+		this.status = status;
+	}
+	
+	public void createRPSMenu(){
+		Trigger trigger = () -> createPickMenu();
+		rps = new RPSMenu(captains[0], captains[1], trigger);
+	}
+	
+	public void createPickMenu(){
+		List<User> nonCaptainPlayers = new ArrayList<User>(players);
+		nonCaptainPlayers.removeAll(Arrays.asList(captains));
+		captains = rps.getResult();
+		Trigger trigger = () -> pickingComplete();
+		pickMenu = new TeamPickerMenu(captains, nonCaptainPlayers, trigger, ServerManager.getServer(guildId).getSettings().snakePick());
+	}
+	
+	private void pickingComplete(){
+		setStatus(Status.PLAYING);
+		
+		
+		// Insert players in game into database
+		for(User u : players){
+			Database.insertPlayerGame(u.getIdLong(), timestamp, Long.valueOf(guildId));
+		}
+		
+		// Update captains
+		for(User c : captains){
+			if(c != null){
+				Database.updatePlayerGameCaptain(c.getIdLong(), timestamp, Long.valueOf(guildId), true);
+			}
+		}
+		
+		// Add player pick order
+		if(pickMenu != null){
+			Integer count = 1;
+			for (String id : pickMenu.getPickOrder()) {
+				Database.updatePlayerGamePickOrder(Long.valueOf(id), timestamp, Long.valueOf(guildId), count);
+				count++;
+			}
+		}
+	}
+	
+	public void removeMenus(){
+		if(rps != null && !rps.finished()){
+			rps.complete();
+		}
+		if(pickMenu != null && !pickMenu.finished()){
+			pickMenu.complete();
+		}
+	}
+	
+	public void subCaptain(User sub, User target){
+		for(Integer i = 0;i < 2;i++){
+			if(captains[i] == target){
+				captains[i] = sub;
+			}
+		}
+		removeMenus();
+		createRPSMenu();
 	}
 
 	/*

@@ -8,6 +8,7 @@ import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 import core.util.Utils;
+import core.entities.Game.Status;
 import core.util.Trigger;
 import net.dv8tion.jda.core.OnlineStatus;
 import net.dv8tion.jda.core.entities.Member;
@@ -142,9 +143,9 @@ public class Queue {
 		ServerManager.getServer(guildId).getQueueManager().purgeQueue(players);
 		String captainString = "";
 		if(ServerManager.getServer(guildId).getSettings().randomizeCaptains()){
-			captainString = String.format("%s%n**Captains:** <@%s> & <@%s>", names, newGame.getCaptains()[0], newGame.getCaptains()[1]);
+			captainString = String.format("%s%n**Captains:** <@%s> & <@%s>", names, newGame.getCaptains()[0].getId(), newGame.getCaptains()[1].getId());
 		}
-		ServerManager.getServer(guildId).getPugChannel().sendMessage(Utils.createMessage(String.format("Game: %s starting", name), captainString, Color.yellow)).queueAfter(2, TimeUnit.SECONDS);
+		ServerManager.getServer(guildId).getPugChannel().sendMessage(Utils.createMessage(String.format("Game: %s starting", name), captainString, Color.YELLOW)).queueAfter(2, TimeUnit.SECONDS);
 	}
 
 	/**
@@ -155,6 +156,9 @@ public class Queue {
 	public void finish(Game g) {
 		List<User> players = new ArrayList<User>(g.getPlayers());
 		ServerManager.getServer(guildId).getQueueManager().addToJustFinished(players);
+		if(g.getStatus() == Status.PICKING){
+			g.removeMenus();
+		}
 		games.remove(g);
 		t = () -> ServerManager.getServer(guildId).getQueueManager().timerEnd(players);
 		Timer timer = new Timer(ServerManager.getServer(guildId).getSettings().finishTime(), t);

@@ -13,6 +13,7 @@ public class RPSMenu extends ListenerAdapter{
 	private Turn turns[];
 	private Menu menus[];
 	private boolean finished = false;
+	private User[] result = new User[2];
 	
 	public RPSMenu(User p1, User p2, Trigger trigger){
 		this.trigger = trigger;
@@ -115,6 +116,15 @@ public class RPSMenu extends ListenerAdapter{
 	
 	private void gameWin(User u){
 		finished = true;
+		
+		// Super spaghetti, need to fix
+		result[0] = u;
+		if(u != turns[0].getPlayer()){
+			result[1] = turns[0].getPlayer();
+		}else{
+			result[1] = turns[1].getPlayer();
+		}
+		
 		for(Menu m : menus){
 			if(m.getChannel().equals(u.openPrivateChannel().complete())){
 				m.editStatusMessage("You have won!");
@@ -123,6 +133,10 @@ public class RPSMenu extends ListenerAdapter{
 			}
 		}
 		complete();
+	}
+	
+	public User[] getResult(){
+		return this.result;
 	}
 	
 	private class Turn {
