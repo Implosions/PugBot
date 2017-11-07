@@ -42,6 +42,8 @@ public class Game {
 		
 		if (ServerManager.getServer(guildId).getSettings().randomizeCaptains()) {
 			randomizeCaptains();
+		}else{
+			pickingComplete();
 		}
 		logGame();
 	}
@@ -97,6 +99,8 @@ public class Game {
 		}
 		if(players.size() > 2){
 			createRPSMenu();
+		}else{
+			pickingComplete();
 		}
 	}
 
