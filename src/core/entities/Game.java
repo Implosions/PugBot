@@ -14,6 +14,7 @@ import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import core.Database;
 import core.entities.menus.RPSMenu;
 import core.entities.menus.TeamPickerMenu;
 import core.util.Trigger;
@@ -35,6 +36,10 @@ public class Game {
 		this.name = name;
 		this.timestamp = System.currentTimeMillis();
 		this.players = new ArrayList<User>(players);
+		
+		// Insert game into database
+		Database.insertGame(timestamp, name, Long.valueOf(guildId));
+		
 		if (ServerManager.getServer(guildId).getSettings().randomizeCaptains()) {
 			randomizeCaptains();
 		}
@@ -120,8 +125,18 @@ public class Game {
 		List<User> nonCaptainPlayers = new ArrayList<User>(players);
 		nonCaptainPlayers.removeAll(Arrays.asList(captains));
 		captains = rps.getResult();
-		Trigger trigger = () -> setStatus(Status.PLAYING);
+		Trigger trigger = () -> pickingComplete();
 		pickMenu = new TeamPickerMenu(captains, nonCaptainPlayers, trigger, ServerManager.getServer(guildId).getSettings().snakePick());
+	}
+	
+	private void pickingComplete(){
+		setStatus(Status.PLAYING);
+		
+		
+		// Insert players in game into database
+		for(User u : players){
+			Database.insertPlayerGame(u.getIdLong(), timestamp, Long.valueOf(guildId));
+		}
 	}
 	
 	public void subCaptain(User sub, User target){

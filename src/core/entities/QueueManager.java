@@ -12,6 +12,7 @@ import java.util.Scanner;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import core.Database;
 import core.entities.Game.Status;
 import core.exceptions.BadArgumentsException;
 import core.exceptions.DoesNotExistException;
@@ -42,6 +43,9 @@ public class QueueManager {
 		if (players > 1) {
 			if (!doesQueueExist(name)) {
 				queueList.add(new Queue(name, players, guildId));
+				
+				// Insert queue into database
+				Database.insertQueue(Long.valueOf(guildId), name);
 			} else {
 				throw new DuplicateEntryException("A queue with the same name already exists");
 			}
