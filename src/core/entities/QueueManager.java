@@ -277,7 +277,6 @@ public class QueueManager {
 		if (!isQueueListEmpty()) {
 			if (!isPlayerIngame(player)) {
 				for (Queue q : queueList) {
-					System.out.println("test");
 					q.delete(player);
 				}
 			} else {

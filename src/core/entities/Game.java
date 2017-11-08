@@ -38,7 +38,7 @@ public class Game {
 		this.players = new ArrayList<User>(players);
 		
 		// Insert game into database
-		Database.insertGame(timestamp, name, Long.valueOf(guildId));
+		Database.insertGame(timestamp / 1000, name, Long.valueOf(guildId));
 		
 		if (ServerManager.getServer(guildId).getSettings().randomizeCaptains()) {
 			randomizeCaptains();
@@ -53,14 +53,26 @@ public class Game {
 		PLAYING;
 	}
 
+	/**
+	 * @return the list of players in this game
+	 */
 	public List<User> getPlayers() {
 		return players;
 	}
 
+	/**
+	 * @return the start time of this game in milliseconds
+	 */
 	public Long getTimestamp() {
 		return timestamp;
 	}
 
+	/**
+	 * Checks if a player matching a specific name exists in this game
+	 * 
+	 * @param name the name of the player
+	 * @return the player matching the name
+	 */
 	public User getPlayer(String name) {
 		for (User u : players) {
 			if (u.getName().equalsIgnoreCase(name)) {
@@ -70,11 +82,23 @@ public class Game {
 		return null;
 	}
 	
+	/**
+	 * Substitutes one player in game with one out of game
+	 * 
+	 * @param target the player to replace
+	 * @param substitute the player that will replace the target
+	 */
 	public void sub(User target, User substitute){
 		players.remove(target);
 		players.add(substitute);
 	}
 
+	/**
+	 * Checks if a player by the specified name is in this game
+	 * 
+	 * @param name the name of the player
+	 * @return true if the player is in this game
+	 */
 	public boolean containsPlayer(String name) {
 		for (User u : players) {
 			if (u.getName().equalsIgnoreCase(name)) {
@@ -84,8 +108,9 @@ public class Game {
 		return false;
 	}
 
-	/*
+	/**
 	 * Chooses two random captains from the captainPool
+	 * Creates the rps menu if there are more than 2 players
 	 */
 	private void randomizeCaptains() {
 		Random random = new Random();
@@ -104,27 +129,47 @@ public class Game {
 		}
 	}
 
+	/**
+	 * @return array of captains
+	 */
 	public User[] getCaptains() {
 		return captains;
 	}
 
+	/**
+	 * @return the name of the queue that this game is from
+	 */
 	public String getName() {
 		return name;
 	}
 	
+	/**
+	 * @return the current status of this game
+	 */
 	public Status getStatus(){
 		return status;
 	}
 	
+	/**
+	 * Sets the game's status
+	 * 
+	 * @param status the status to change to
+	 */
 	private void setStatus(Status status){
 		this.status = status;
 	}
 	
+	/**
+	 * Creates a new RPSMenu
+	 */
 	public void createRPSMenu(){
 		Trigger trigger = () -> createPickMenu();
 		rps = new RPSMenu(captains[0], captains[1], trigger);
 	}
 	
+	/**
+	 * Creates a new TeamPickerMenu
+	 */
 	public void createPickMenu(){
 		List<User> nonCaptainPlayers = new ArrayList<User>(players);
 		nonCaptainPlayers.removeAll(Arrays.asList(captains));
@@ -133,19 +178,22 @@ public class Game {
 		pickMenu = new TeamPickerMenu(captains, nonCaptainPlayers, trigger, ServerManager.getServer(guildId).getSettings().snakePick());
 	}
 	
+	/**
+	 * Inserts information into the database
+	 */
 	private void pickingComplete(){
 		setStatus(Status.PLAYING);
 		
 		
 		// Insert players in game into database
 		for(User u : players){
-			Database.insertPlayerGame(u.getIdLong(), timestamp, Long.valueOf(guildId));
+			Database.insertPlayerGame(u.getIdLong(), timestamp / 1000, Long.valueOf(guildId));
 		}
 		
 		// Update captains
 		for(User c : captains){
 			if(c != null){
-				Database.updatePlayerGameCaptain(c.getIdLong(), timestamp, Long.valueOf(guildId), true);
+				Database.updatePlayerGameCaptain(c.getIdLong(), timestamp / 1000, Long.valueOf(guildId), true);
 			}
 		}
 		
@@ -153,12 +201,15 @@ public class Game {
 		if(pickMenu != null){
 			Integer count = 1;
 			for (String id : pickMenu.getPickOrder()) {
-				Database.updatePlayerGamePickOrder(Long.valueOf(id), timestamp, Long.valueOf(guildId), count);
+				Database.updatePlayerGamePickOrder(Long.valueOf(id), timestamp / 1000, Long.valueOf(guildId), count);
 				count++;
 			}
 		}
 	}
 	
+	/**
+	 * Removes all menus
+	 */
 	public void removeMenus(){
 		if(rps != null && !rps.finished()){
 			rps.complete();
@@ -168,6 +219,12 @@ public class Game {
 		}
 	}
 	
+	/**
+	 * Substitutes one non-captain player for a captain
+	 * 
+	 * @param sub the player replacing a captain
+	 * @param target the captain to be replaced
+	 */
 	public void subCaptain(User sub, User target){
 		for(Integer i = 0;i < 2;i++){
 			if(captains[i] == target){
@@ -178,8 +235,9 @@ public class Game {
 		createRPSMenu();
 	}
 
-	/*
+	/**
 	 * Adds eligible players to the captainPool
+	 * Returns players of not enough eligible players
 	 */
 	private List<User> getCaptainPool() {
 		List<User> captainPool = new ArrayList<User>();

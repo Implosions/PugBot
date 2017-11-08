@@ -62,7 +62,7 @@ public class Server {
 		}
 		return guild.getDefaultChannel();
 	}
-
+	
 	private void startAFKTimer() {
 		Trigger tt = () -> afkTimerEnd();
 		Timer afkTimer = new Timer(60, tt);
@@ -80,6 +80,7 @@ public class Server {
 				qm.updateTopic();
 				System.out.println(s);
 			}
+			activityList.remove(u);
 		});
 
 		startAFKTimer();

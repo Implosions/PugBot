@@ -41,14 +41,29 @@ public class Commands {
 		populateLists();
 	}
 
+	/**
+	 * Checks if a command is valid
+	 * 
+	 * @param cmd the name of the command to check
+	 * @return returns true if valid
+	 */
 	public boolean validateCommand(String cmd) {
 		return cmdList.containsKey(cmd);
 	}
 
+	/**
+	 * Returns the command object of a command
+	 * 
+	 * @param cmd the name of the command
+	 * @return the command object
+	 */
 	public Command getCommandObj(String cmd) {
 		return cmdList.get(cmd);
 	}
 	
+	/**
+	 * Populates and sorts the cmds and adminCmds lists
+	 */
 	private void populateLists(){
 		for(Command cmd : cmdList.values()){
 			if(cmd.getAdminRequired()){
@@ -61,10 +76,15 @@ public class Commands {
 		Collections.sort(cmds, String.CASE_INSENSITIVE_ORDER);
 	}
 	
+	/**
+	 * @return the list of admin commands
+	 */
 	public ArrayList<String> getAdminCmds(){
 		return adminCmds;
 	}
-	
+	/**
+	 * @return the list of regular commands
+	 */
 	public  ArrayList<String> getCmds(){
 		return cmds;
 	}

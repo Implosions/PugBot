@@ -15,7 +15,9 @@ public class Database {
 			ex.printStackTrace();
 		}
 	}
-	
+	/**
+	 * Creates database tables if they do not already exist
+	 */
 	private void createTables(){
 		try{
 			Statement statement = conn.createStatement();
@@ -70,6 +72,12 @@ public class Database {
 		}
 	}
 	
+	/**
+	 * Inserts a new record into the DiscordServer table
+	 * 
+	 * @param id the id of the server
+	 * @param name the name of the server
+	 */
 	public static void insertDiscordServer(Long id, String name){
 		try{
 			PreparedStatement pStatement = conn.prepareStatement("INSERT OR IGNORE INTO DiscordServer VALUES(?, ?)");
@@ -82,6 +90,12 @@ public class Database {
 		}
 	}
 	
+	/**
+	 * Insert a user into the Player table
+	 * 
+	 * @param id the id of the user
+	 * @param name the name of the user
+	 */
 	public static void insertPlayer(Long id, String name){
 		try{
 			PreparedStatement pStatement = conn.prepareStatement("INSERT OR IGNORE INTO Player VALUES(?, ?)");
@@ -94,6 +108,12 @@ public class Database {
 		}
 	}
 	
+	/**
+	 * Insert a queue into the Queue table
+	 * 
+	 * @param serverId the id of the server
+	 * @param Name the name of the queue
+	 */
 	public static void insertQueue(Long serverId, String Name){
 		try{
 			PreparedStatement pStatement = conn.prepareStatement("INSERT OR IGNORE INTO Queue VALUES(?, ?)");
@@ -106,6 +126,13 @@ public class Database {
 		}
 	}
 	
+	/**
+	 * Insert a game into the Game table 
+	 * 
+	 * @param timestamp the start time of the game
+	 * @param queueName the name of the queue
+	 * @param serverId the server id
+	 */
 	public static void insertGame(Long timestamp, String queueName, Long serverId){
 		try{
 			PreparedStatement pStatement = conn.prepareStatement("INSERT OR IGNORE INTO Game VALUES(?, ?, ?)");
@@ -119,6 +146,13 @@ public class Database {
 		}
 	}
 	
+	/**
+	 * Inserts a new record into the PlayerGame table
+	 * 
+	 * @param playerId the id of the player
+	 * @param timestamp the time of the game start
+	 * @param serverId the id of the server
+	 */
 	public static void insertPlayerGame(Long playerId, Long timestamp, Long serverId){
 		try{
 			PreparedStatement pStatement = conn.prepareStatement("INSERT OR IGNORE INTO PlayerGame (playerId, timestamp, serverId) VALUES(?, ?, ?)");
@@ -132,6 +166,14 @@ public class Database {
 		}
 	}
 	
+	/**
+	 * Updates a PlayerGame record with a new pickOrder
+	 * 
+	 * @param playerId the id of the player
+	 * @param timestamp the time of the game start
+	 * @param serverId the id of the server
+	 * @param pickOrder the pick order of the player
+	 */
 	public static void updatePlayerGamePickOrder(Long playerId, Long timestamp, Long serverId, Integer pickOrder){
 		try{
 			PreparedStatement pStatement = conn.prepareStatement("UPDATE PlayerGame SET pickOrder = ? "
@@ -147,6 +189,14 @@ public class Database {
 		}
 	}
 	
+	/**
+	 * Updates a record in PlayerGame with captain information
+	 * 
+	 * @param playerId the id of the player
+	 * @param timestamp the time of the game start
+	 * @param serverId the id of the server
+	 * @param captain true if the player is a captain
+	 */
 	public static void updatePlayerGameCaptain(Long playerId, Long timestamp, Long serverId, boolean captain){
 		Integer captainInt = 0;
 		if(captain){
