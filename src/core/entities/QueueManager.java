@@ -13,7 +13,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import core.Database;
-import core.entities.Game.Status;
+import core.entities.Game.GameStatus;
 import core.exceptions.BadArgumentsException;
 import core.exceptions.DoesNotExistException;
 import core.exceptions.DuplicateEntryException;
@@ -462,7 +462,7 @@ public class QueueManager {
 		if(isPlayerIngame(sub)){
 			if(isPlayerIngame(target)){
 				Game g = getPlayersGame(sub);
-				if(g.getStatus() == Status.PICKING){
+				if(g.getStatus() == GameStatus.PICKING){
 					if (g.getCaptains()[0] == target || g.getCaptains()[1] == target) {
 						if(g.getCaptains()[0] != sub && g.getCaptains()[1] != sub){
 							g.subCaptain(sub, target);
@@ -470,7 +470,7 @@ public class QueueManager {
 							throw new InvalidUseException("You are already a captain");
 						}
 					} else {
-						throw new InvalidUseException(target + " is not in your game");
+						throw new InvalidUseException(target.getName() + " is not a captain in your game");
 					}
 				}else{
 					throw new InvalidUseException("Game is already being played");
