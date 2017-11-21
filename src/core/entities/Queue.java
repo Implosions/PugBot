@@ -8,7 +8,8 @@ import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 import core.util.Utils;
-import core.entities.Game.Status;
+import core.commands.CmdPugServers;
+import core.entities.Game.GameStatus;
 import core.util.Trigger;
 import net.dv8tion.jda.core.OnlineStatus;
 import net.dv8tion.jda.core.entities.Member;
@@ -130,22 +131,24 @@ public class Queue {
 	private void popQueue() {
 		String names = "";
 		List<User> players = new ArrayList<User>(playersInQueue);
-		Game newGame = new Game(guildId, name, players);
-		games.add(newGame);
 		
 		for(User u : players){
 			names += u.getName() + ", ";
 			PrivateChannel c = u.openPrivateChannel().complete();
-			c.sendMessage(String.format("`Your game: [%s] has started!`", name)).queue();
+			c.sendMessage(String.format("`Your game: %s has started!`", name)).queue();
+			c.sendMessage(Utils.createMessage(null, new CmdPugServers().getServers(guildId, null), true)).queue();
 		}
 		names = names.substring(0, names.lastIndexOf(","));
+		
+		Game newGame = new Game(guildId, name, players);
+		games.add(newGame);
 		
 		ServerManager.getServer(guildId).getQueueManager().purgeQueue(players);
 		String captainString = "";
 		if(ServerManager.getServer(guildId).getSettings().randomizeCaptains()){
-			captainString = String.format("%s%n**Captains:** <@%s> & <@%s>", names, newGame.getCaptains()[0].getId(), newGame.getCaptains()[1].getId());
+			captainString = String.format("**Captains:** <@%s> & <@%s>", newGame.getCaptains()[0].getId(), newGame.getCaptains()[1].getId());
 		}
-		ServerManager.getServer(guildId).getPugChannel().sendMessage(Utils.createMessage(String.format("Game: %s starting", name), captainString, Color.YELLOW)).queueAfter(2, TimeUnit.SECONDS);
+		ServerManager.getServer(guildId).getPugChannel().sendMessage(Utils.createMessage(String.format("Game: %s starting%n", name), String.format("%s%n%s", names, captainString), Color.YELLOW)).queueAfter(2, TimeUnit.SECONDS);
 	}
 
 	/**
@@ -156,7 +159,7 @@ public class Queue {
 	public void finish(Game g) {
 		List<User> players = new ArrayList<User>(g.getPlayers());
 		ServerManager.getServer(guildId).getQueueManager().addToJustFinished(players);
-		if(g.getStatus() == Status.PICKING){
+		if(g.getStatus() == GameStatus.PICKING){
 			g.removeMenus();
 		}
 		games.remove(g);
