@@ -1,24 +1,14 @@
 package core.entities;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 import java.util.Random;
-import java.util.Scanner;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import core.Database;
 import core.entities.menus.RPSMenu;
 import core.entities.menus.TeamPickerMenu;
 import core.util.Trigger;
-import core.util.Utils;
 import net.dv8tion.jda.core.entities.User;
 
 public class Game {
@@ -29,7 +19,7 @@ public class Game {
 	private User[] captains = new User[] { null, null };
 	private RPSMenu rps = null;
 	private TeamPickerMenu pickMenu = null;
-	private Status status = Status.PICKING;
+	private GameStatus status = GameStatus.PICKING;
 
 	public Game(String id, String name, List<User> players) {
 		this.guildId = id;
@@ -38,17 +28,16 @@ public class Game {
 		this.players = new ArrayList<User>(players);
 		
 		// Insert game into database
-		Database.insertGame(timestamp / 1000, name, Long.valueOf(guildId));
+		Database.insertGame(timestamp, name, Long.valueOf(guildId));
 		
 		if (ServerManager.getServer(guildId).getSettings().randomizeCaptains()) {
 			randomizeCaptains();
 		}else{
 			pickingComplete();
 		}
-		logGame();
 	}
 	
-	public enum Status{
+	public enum GameStatus{
 		PICKING,
 		PLAYING;
 	}
@@ -91,6 +80,11 @@ public class Game {
 	public void sub(User target, User substitute){
 		players.remove(target);
 		players.add(substitute);
+		for(User c : captains){
+			if(c == target){
+				subCaptain(substitute, target);
+			}
+		}
 	}
 
 	/**
@@ -123,7 +117,12 @@ public class Game {
 			}
 		}
 		if(players.size() > 2){
-			createRPSMenu();
+			// Create RPS menu on a new thread
+			new Thread(new Runnable(){
+				public void run(){
+					createRPSMenu();
+				}
+			}).start();
 		}else{
 			pickingComplete();
 		}
@@ -146,7 +145,7 @@ public class Game {
 	/**
 	 * @return the current status of this game
 	 */
-	public Status getStatus(){
+	public GameStatus getStatus(){
 		return status;
 	}
 	
@@ -155,7 +154,7 @@ public class Game {
 	 * 
 	 * @param status the status to change to
 	 */
-	private void setStatus(Status status){
+	private void setStatus(GameStatus status){
 		this.status = status;
 	}
 	
@@ -182,18 +181,18 @@ public class Game {
 	 * Inserts information into the database
 	 */
 	private void pickingComplete(){
-		setStatus(Status.PLAYING);
+		setStatus(GameStatus.PLAYING);
 		
 		
 		// Insert players in game into database
 		for(User u : players){
-			Database.insertPlayerGame(u.getIdLong(), timestamp / 1000, Long.valueOf(guildId));
+			Database.insertPlayerGame(u.getIdLong(), timestamp, Long.valueOf(guildId));
 		}
 		
 		// Update captains
 		for(User c : captains){
 			if(c != null){
-				Database.updatePlayerGameCaptain(c.getIdLong(), timestamp / 1000, Long.valueOf(guildId), true);
+				Database.updatePlayerGameCaptain(c.getIdLong(), timestamp, Long.valueOf(guildId), true);
 			}
 		}
 		
@@ -201,7 +200,7 @@ public class Game {
 		if(pickMenu != null){
 			Integer count = 1;
 			for (String id : pickMenu.getPickOrder()) {
-				Database.updatePlayerGamePickOrder(Long.valueOf(id), timestamp / 1000, Long.valueOf(guildId), count);
+				Database.updatePlayerGamePickOrder(Long.valueOf(id), timestamp, Long.valueOf(guildId), count);
 				count++;
 			}
 		}
@@ -241,60 +240,18 @@ public class Game {
 	 */
 	private List<User> getCaptainPool() {
 		List<User> captainPool = new ArrayList<User>();
-		String games = loadGames();
 		Integer minGames = ServerManager.getServer(guildId).getSettings().minNumberOfGames();
-		if (games != null) {
-			for (User u : players) {
-				Integer count = 0;
-				Matcher m = Pattern.compile(u.getId()).matcher(games);
-				while (m.find()) {
-					count++;
-				}
-				if (count >= minGames) {
-					captainPool.add(u);
-				}
-			}
-			if (captainPool.size() >= 2) {
-				return captainPool;
+		
+		for(User p : players){
+			if(Database.queryGetTotalGamesPlayed(p.getIdLong()) >= minGames){
+				captainPool.add(p);
 			}
 		}
-		return players;
-	}
-
-	private void logGame() {
-		String s = String.format("%s/%s/%s", "app_data", guildId, "games.txt");
-		Utils.createFile(s);
-		try {
-			System.out.println("Logging game to file...");
-			PrintWriter writer = new PrintWriter(new FileOutputStream(s, true));
-			writer.format("%s %s %3$tk:%3$tM:%3$tS %3$tD%n", name, players.toString(), new Date(timestamp));
-			writer.close();
-			System.out.println("Game logged");
-		} catch (IOException ex) {
-			ex.printStackTrace();
-		}
-	}
-
-	private String loadGames() {
-		String s = String.format("%s/%s/%s", "app_data", guildId, "games.txt");
-		if (new File(s).exists()) {
-			try {
-				Scanner reader = new Scanner(new FileInputStream(s));
-				String games = "";
-
-				while (reader.hasNextLine()) {
-					games += reader.nextLine();
-				}
-				reader.close();
-
-				return games;
-
-			} catch (IOException ex) {
-				ex.printStackTrace();
-				return null;
-			}
-		} else {
-			return null;
+		
+		if(captainPool.size() > 1){
+			return captainPool;
+		}else{
+			return players;
 		}
 	}
 }
