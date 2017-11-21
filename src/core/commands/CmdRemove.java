@@ -42,7 +42,7 @@ public class CmdRemove extends Command {
 			}
 			qm.updateTopic();
 			this.response = Utils.createMessage(String.format("%s removed from queue", args[0]), qm.getHeader(), true);
-			System.out.println(successMsg);
+			System.out.println(success());
 		} catch (BadArgumentsException | DoesNotExistException | InvalidUseException ex) {
 			this.response = Utils.createMessage("Error!", ex.getMessage(), false);
 		}

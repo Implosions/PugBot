@@ -34,7 +34,7 @@ public class CmdRemoveQueue extends Command {
 			}
 			qm.updateTopic();
 			this.response = Utils.createMessage(String.format("Queue %s removed", args[0]), qm.getHeader(), true);
-			System.out.println(successMsg);
+			System.out.println(success());
 		} catch (DoesNotExistException | BadArgumentsException ex) {
 			this.response = Utils.createMessage("Error!", ex.getMessage(), false);
 		}

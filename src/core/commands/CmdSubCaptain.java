@@ -37,6 +37,7 @@ public class CmdSubCaptain extends Command{
 				throw new BadArgumentsException();
 			}
 			this.response = Utils.createMessage(String.format("`%s is now a captain`", member.getEffectiveName()));
+			System.out.println(success());
 		}catch(BadArgumentsException | InvalidUseException | DoesNotExistException ex){
 			this.response = Utils.createMessage("Error!", ex.getMessage(), false);
 		}

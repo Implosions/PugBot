@@ -37,7 +37,7 @@ public class CmdAdd extends Command{
 			}else{
 				this.response = Utils.createMessage(String.format("%s added to queue", member.getEffectiveName()), qm.getHeader(), true);
 			}
-			System.out.println(successMsg);
+			System.out.println(success());
 		}catch(DoesNotExistException | InvalidUseException ex){
 			this.response = Utils.createMessage("Error!", ex.getMessage(), false);
 		}

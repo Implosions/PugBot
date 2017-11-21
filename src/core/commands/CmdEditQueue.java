@@ -36,7 +36,7 @@ public class CmdEditQueue extends Command{
 			}
 			qm.updateTopic();
 			this.response = Utils.createMessage(String.format("Queue %s edited", args[0]), qm.getHeader(), true);
-			System.out.println(successMsg);
+			System.out.println(success());
 		}catch(BadArgumentsException | DoesNotExistException ex){
 			this.response = Utils.createMessage("Error!", ex.getMessage(), false);
 		}

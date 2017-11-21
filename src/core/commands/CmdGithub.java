@@ -17,6 +17,7 @@ public class CmdGithub extends Command{
 	@Override
 	public void execCommand(Server server, Member member, String[] args) {
 		this.response = Utils.createMessage("https://github.com/Implosions/BullyBot");
+		System.out.println(success());
 	}
 
 }

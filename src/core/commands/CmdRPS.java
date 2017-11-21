@@ -44,7 +44,7 @@ public class CmdRPS extends Command{
 				throw new BadArgumentsException();
 			}
 			this.response = Utils.createMessage("`Challenge sent`");
-			System.out.println("RPS challenge sent");
+			System.out.println(success());
 		}catch(BadArgumentsException | DoesNotExistException ex){
 			this.response = Utils.createMessage("Error!", ex.getMessage(), false);
 		}

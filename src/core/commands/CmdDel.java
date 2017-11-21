@@ -38,7 +38,7 @@ public class CmdDel extends Command {
 			qm.updateTopic();
 			this.response = Utils.createMessage(String.format("%s deleted from queue", member.getEffectiveName()),
 					qm.getHeader(), true);
-			System.out.println(successMsg);
+			System.out.println(success());
 		} catch (DoesNotExistException | InvalidUseException ex) {
 			this.response = Utils.createMessage("Error!", ex.getMessage(), false);
 		}

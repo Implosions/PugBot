@@ -28,7 +28,7 @@ public class CmdSub extends Command{
 			}
 			qm.updateTopic();
 			this.response = Utils.createMessage(String.format("%s has been subbed with %s", args[0], args[1]), "", true);
-			System.out.println(successMsg);
+			System.out.println(success());
 		}catch(DoesNotExistException | BadArgumentsException | InvalidUseException ex){
 			this.response = Utils.createMessage("Error!", ex.getMessage(), false);
 		}

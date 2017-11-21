@@ -65,7 +65,7 @@ public class CmdBully extends Command {
 			} else {
 				throw new BadArgumentsException();
 			}
-			System.out.println(successMsg);
+			System.out.println(success());
 		} catch (BadArgumentsException | DoesNotExistException ex) {
 			this.response = Utils.createMessage("Error!", ex.getMessage(), false);
 		}

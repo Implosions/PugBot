@@ -16,6 +16,7 @@ public class CmdMumble extends Command{
 	@Override
 	public void execCommand(Server server, Member member, String[] args) {
 		this.response = Utils.createMessage("", server.getSettings().mumble(), true);
+		System.out.println(success());
 	}
 
 }

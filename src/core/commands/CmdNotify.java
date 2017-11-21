@@ -36,7 +36,7 @@ public class CmdNotify extends Command{
 				throw new BadArgumentsException();
 			}
 			this.response = Utils.createMessage("Notification added", "", true);
-			System.out.println(successMsg);
+			System.out.println(success());
 			qm.saveToFile();
 		}catch(BadArgumentsException | DoesNotExistException ex){
 			this.response = Utils.createMessage("Error!", ex.getMessage(), false);

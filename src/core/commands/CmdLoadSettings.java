@@ -19,6 +19,7 @@ public class CmdLoadSettings extends Command{
 	public void execCommand(Server server, Member member, String[] args) {
 		server.getSettings().loadSettingsFile();
 		this.response = Utils.createMessage("`Settings loaded`");
+		System.out.println(success());
 	}
 
 }

@@ -52,7 +52,7 @@ public class CmdStatus extends Command {
 			if(lastResponseId != null){
 				qm.getServer().getPugChannel().deleteMessageById(lastResponseId).complete();
 			}
-			System.out.println("Completed status request");
+			System.out.println(success());
 		} catch (DoesNotExistException ex) {
 			this.response = Utils.createMessage("Error!", ex.getMessage(), false);
 		} catch (PermissionException | ErrorResponseException ex){

@@ -32,7 +32,7 @@ public class CmdCreateQueue extends Command {
 			}
 			qm.updateTopic();
 			this.response = Utils.createMessage(String.format("Queue %s created", args[0]), qm.getHeader(), true);
-			System.out.println(successMsg);
+			System.out.println(success());
 		} catch (BadArgumentsException | DuplicateEntryException ex) {
 			this.response = Utils.createMessage("Error!", ex.getMessage(), false);
 		}

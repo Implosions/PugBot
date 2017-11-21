@@ -27,6 +27,7 @@ public class CmdHelp extends Command{
 					this.response = Utils.createMessage(cmds.getCommandObj(args[0]).help());
 				}
 			}
+			System.out.println(success());
 		}catch(Exception ex){
 			this.response = Utils.createMessage("Error!", ex.getMessage(), false);
 		}

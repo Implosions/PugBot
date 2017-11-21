@@ -22,7 +22,7 @@ public class CmdFinish extends Command{
 			qm.finish(member.getUser());
 			qm.updateTopic();
 			this.response = Utils.createMessage("Game finished", qm.getHeader(), true);
-			System.out.println(successMsg);
+			System.out.println(success());
 		}catch(InvalidUseException ex){
 			this.response = Utils.createMessage("Error!", ex.getMessage(), false);
 		}

@@ -9,7 +9,6 @@ import net.dv8tion.jda.core.entities.Message;
 public abstract class Command {
 	protected String name;
 	protected String helpMsg;
-	protected String successMsg = "Command " + name + " completed.";
 	protected String description;
 	protected Message response;
 	protected String lastResponseId = null;
@@ -49,5 +48,9 @@ public abstract class Command {
 	
 	public void setLastResponseId(String id){
 		lastResponseId = id;
+	}
+	
+	protected String success(){
+		return "Command " + name + " completed";
 	}
 }
