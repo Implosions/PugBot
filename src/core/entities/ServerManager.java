@@ -3,7 +3,6 @@ package core.entities;
 import java.util.ArrayList;
 import java.util.List;
 
-import core.Database;
 import core.util.Utils;
 import net.dv8tion.jda.core.entities.Guild;
 
@@ -30,9 +29,7 @@ public class ServerManager {
 	
 	public static void addNewServer(Guild guild){
 		servers.add(new Server(guild));
-		
-		// Insert new server into database
-		Database.insertDiscordServer(guild.getIdLong(), guild.getName());
+		servers.get(servers.size() - 1).getQueueManager().updateTopic();
 	}
 	
 	public static void removeServer(Guild guild){
