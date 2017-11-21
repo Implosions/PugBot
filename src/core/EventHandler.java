@@ -41,7 +41,7 @@ public class EventHandler extends ListenerAdapter {
 	public void onGuildMessageReceived(GuildMessageReceivedEvent event) {
 		Server server = ServerManager.getServer(event.getGuild().getId());
 		String message = event.getMessage().getContent();
-		if (message.startsWith("!") && message.length() > 1 && !event.getAuthor().isBot()) {
+		if (server != null && message.startsWith("!") && message.length() > 1 && !event.getAuthor().isBot()) {
 			MessageChannel channel = event.getChannel();
 			
 			// Command spam check
