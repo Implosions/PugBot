@@ -10,7 +10,7 @@ public class Menu {
 	
 	private List<MenuItem> menuItemList = new ArrayList<MenuItem>();
 	private MessageChannel channel;
-	private Message statusMessage;
+	private Message statusMessage = null;
 	
 	
 	public Menu(MessageChannel c){
@@ -66,6 +66,8 @@ public class Menu {
 	}
 	
 	public void deleteStatusMessage(){
-		statusMessage.delete().complete();
+		if(statusMessage != null){
+			statusMessage.delete().complete();
+		}
 	}
 }
