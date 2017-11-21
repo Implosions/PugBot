@@ -67,6 +67,19 @@ public class Database {
 					+ "FOREIGN KEY (timestamp) REFERENCES Game(timestamp)"
 					+ ")");
 			
+			statement.executeUpdate("CREATE TABLE IF NOT EXISTS "
+					+ "PugServer("
+					+ "serverId INTEGER NOT NULL, "
+					+ "ip VARCHAR(20) NOT NULL, "
+					+ "port INTEGER, "
+					+ "name VARCHAR(30), "
+					+ "password VARCHAR(30), "
+					+ "region VARCHAR(10), "
+					+ "gameId INTEGER NOT NULL, "
+					+ "PRIMARY KEY (ip, serverId), "
+					+ "FOREIGN KEY (serverId) REFERENCES DiscordServer(id)"
+					+ ")");
+			
 		}catch(Exception ex){
 			ex.printStackTrace();
 		}
@@ -136,7 +149,7 @@ public class Database {
 	public static void insertGame(Long timestamp, String queueName, Long serverId){
 		try{
 			PreparedStatement pStatement = conn.prepareStatement("INSERT OR IGNORE INTO Game VALUES(?, ?, ?)");
-			pStatement.setLong(1, timestamp);
+			pStatement.setLong(1, timestamp / 1000);
 			pStatement.setString(2, queueName);
 			pStatement.setLong(3, serverId);
 			
@@ -157,7 +170,7 @@ public class Database {
 		try{
 			PreparedStatement pStatement = conn.prepareStatement("INSERT OR IGNORE INTO PlayerGame (playerId, timestamp, serverId) VALUES(?, ?, ?)");
 			pStatement.setLong(1, playerId);
-			pStatement.setLong(2, timestamp);
+			pStatement.setLong(2, timestamp / 1000);
 			pStatement.setLong(3, serverId);
 			
 			pStatement.execute();
@@ -180,7 +193,7 @@ public class Database {
 					+ "WHERE playerId = ? AND timestamp = ? AND serverId = ?");
 			pStatement.setInt(1, pickOrder);
 			pStatement.setLong(2, playerId);
-			pStatement.setLong(3, timestamp);
+			pStatement.setLong(3, timestamp / 1000);
 			pStatement.setLong(4, serverId);
 			
 			pStatement.execute();
@@ -208,12 +221,57 @@ public class Database {
 			
 			pStatement.setInt(1, captainInt);
 			pStatement.setLong(2, playerId);
-			pStatement.setLong(3, timestamp);
+			pStatement.setLong(3, timestamp / 1000);
 			pStatement.setLong(4, serverId);
 			
 			pStatement.execute();
 		}catch(SQLException ex){
 			ex.printStackTrace();
 		}
+	}
+	
+	public static Integer queryGetTotalGamesPlayed(Long playerId){
+		try{
+			PreparedStatement pStatement = conn.prepareStatement("SELECT count(playerId) FROM PlayerGame "
+				+ "WHERE playerId = ?");
+			
+			pStatement.setLong(1, playerId);
+			pStatement.setQueryTimeout(10);
+			return pStatement.executeQuery().getInt(1);
+		}catch(SQLException ex){
+			ex.printStackTrace();
+		}
+		return 0;
+	}
+	
+	public static ResultSet queryGetPugServers(Long serverId, String region){
+		try{
+			PreparedStatement pStatement = conn.prepareStatement("SELECT * FROM PugServer "
+				+ "WHERE serverId = ? AND region = ?");
+			
+			pStatement.setLong(1, serverId);
+			pStatement.setString(2, region);
+			
+			pStatement.setQueryTimeout(10);
+			return pStatement.executeQuery();
+		}catch(SQLException ex){
+			ex.printStackTrace();
+		}
+		return null;
+	}
+	
+	public static ResultSet queryGetPugServers(Long serverId){
+		try{
+			PreparedStatement pStatement = conn.prepareStatement("SELECT * FROM PugServer "
+				+ "WHERE serverId = ?");
+			
+			pStatement.setLong(1, serverId);
+			
+			pStatement.setQueryTimeout(10);
+			return pStatement.executeQuery();
+		}catch(SQLException ex){
+			ex.printStackTrace();
+		}
+		return null;
 	}
 }
