@@ -31,6 +31,7 @@ public class TeamPickerMenu extends ListenerAdapter{
 		
 		chooseOrder();
 		captains[1].getJDA().addEventListener(this);
+		System.out.println("Pick menu created");
 	}
 	
 	public void onPrivateMessageReactionAdd(PrivateMessageReactionAddEvent event){
@@ -120,7 +121,6 @@ public class TeamPickerMenu extends ListenerAdapter{
 					t.picking = !t.picking;
 				}
 			}
-			System.out.println(snake);
 			pick();
 		}else{
 			finished = true;
