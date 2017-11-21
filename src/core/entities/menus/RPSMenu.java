@@ -21,6 +21,7 @@ public class RPSMenu extends ListenerAdapter{
 		this.menus = new Menu[]{new Menu(p1.openPrivateChannel().complete()), new Menu(p2.openPrivateChannel().complete())};
 		createMenuItems();
 		p1.getJDA().addEventListener(this);
+		System.out.println("RPS menu created");
 	}
 	
 	public enum RPS{
