@@ -80,7 +80,6 @@ public class Server {
 				qm.updateTopic();
 				System.out.println(s);
 			}
-			activityList.remove(u);
 		});
 
 		startAFKTimer();
