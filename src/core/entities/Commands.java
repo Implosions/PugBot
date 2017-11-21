@@ -37,6 +37,8 @@ public class Commands {
 		cmdList.put(Constants.RPS_NAME, new CmdRPS());
 		cmdList.put(Constants.GITHUB_NAME, new CmdGithub());
 		cmdList.put(Constants.SUBCAPTAIN_NAME, new CmdSubCaptain());
+		cmdList.put(Constants.RESTART_NAME, new CmdRestart());
+		cmdList.put(Constants.PUGSERVERS_NAME, new CmdPugServers());
 		
 		populateLists();
 	}

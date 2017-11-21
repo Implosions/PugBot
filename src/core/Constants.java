@@ -80,4 +80,11 @@ public class Constants {
 	public final static String SUBCAPTAIN_HELP = "!subcaptain <captain>";
 	public final static String SUBCAPTAIN_DESC = "Replaces a captain with yourself";
 	
+	public final static String RESTART_NAME = "restart";
+	public final static String RESTART_HELP = "!restart";
+	public final static String RESTART_DESC = "restarts server instance";
+	
+	public final static String PUGSERVERS_NAME = "pugservers";
+	public final static String PUGSERVERS_HELP = "!pugservers | !pugservers <region>";
+	public final static String PUGSERVERS_DESC = "creates a list of pug servers";
 }
