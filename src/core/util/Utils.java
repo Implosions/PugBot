@@ -30,10 +30,10 @@ public class Utils {
 			color = Color.red;
 		}
 		if(title != null && !title.isEmpty()){
-			embed.append(String.format("`%s`", title.replace("`", "")));
+			embed.append(String.format("`%s`", title.replaceAll("`", "")));
 		}
 		if(description != null && !description.isEmpty()){
-			embed.setEmbed(new EmbedBuilder().setDescription(description.replace("`", "")).setColor(color).build());
+			embed.setEmbed(new EmbedBuilder().setDescription(description.replaceAll("`", "")).setColor(color).build());
 		}
 		
 		return embed.build();
@@ -44,10 +44,10 @@ public class Utils {
 	public static Message createMessage(String title, String description, Color color){
 		MessageBuilder embed = new MessageBuilder();
 		if(title != null && !title.isEmpty()){
-			embed.append(String.format("`%s`", title.replace("`", "")));
+			embed.append(String.format("`%s`", title.replaceAll("`", "")));
 		}
 		if(description != null && !description.isEmpty()){
-			embed.setEmbed(new EmbedBuilder().setDescription(description.replace("`", "")).setColor(color).build());
+			embed.setEmbed(new EmbedBuilder().setDescription(description.replaceAll("`", "")).setColor(color).build());
 		}
 		return embed.build();
 	}
