@@ -8,6 +8,7 @@ import java.util.Random;
 import core.Database;
 import core.entities.menus.RPSMenu;
 import core.entities.menus.TeamPickerMenu;
+import core.util.MatchMaker;
 import core.util.Trigger;
 import net.dv8tion.jda.core.entities.User;
 
@@ -109,13 +110,11 @@ public class Game {
 	private void randomizeCaptains() {
 		Random random = new Random();
 		List<User> captainPool = getCaptainPool();
+		
 		captains[0] = captainPool.get(random.nextInt(captainPool.size()));
-		while (captains[1] == null) {
-			Integer i = random.nextInt(captainPool.size());
-			if (!captainPool.get(i).equals(captains[0])) {
-				captains[1] = captainPool.get(i);
-			}
-		}
+		
+		captains[1] = new MatchMaker(guildId, players).getMatch(captains[0]);
+		
 		if(players.size() > 2){
 			// Create RPS menu on a new thread
 			new Thread(new Runnable(){
