@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import core.util.Trigger;
+import net.dv8tion.jda.core.entities.Message;
 import net.dv8tion.jda.core.entities.MessageChannel;
 import net.dv8tion.jda.core.entities.User;
 import net.dv8tion.jda.core.events.message.priv.react.PrivateMessageReactionAddEvent;
@@ -59,6 +60,12 @@ public class TeamPickerMenu extends ListenerAdapter{
 							for(Menu m : menus){
 								m.deleteMenuItem(m.getMenuItemByText(text));
 							}
+							// more spaghetti
+							for(Team team : teams){
+								if(!team.picking){
+									team.newUpdateMessage(text);
+								}
+							}
 							nextTurn();
 						}
 					}
@@ -89,6 +96,7 @@ public class TeamPickerMenu extends ListenerAdapter{
 			for(Menu m : menus){
 				m.editStatusMessage(s);
 			}
+
 			for(User p : playerPool){
 				p.openPrivateChannel().complete().sendMessage(s).complete();
 			}
@@ -169,6 +177,7 @@ public class TeamPickerMenu extends ListenerAdapter{
 		private User captain;
 		public List<User> members = new ArrayList<User>();
 		public boolean picking = false;
+		private Message lastUpdateMessage = null;
 		
 		public Team(User captain){
 			this.captain = captain;
@@ -187,6 +196,13 @@ public class TeamPickerMenu extends ListenerAdapter{
 				names = names.substring(0, names.length() - 2);
 			}
 			return String.format("%s: %s", captain.getName(), names);
+		}
+		
+		public void newUpdateMessage(String playerName){
+			if(lastUpdateMessage != null){
+				lastUpdateMessage.delete().complete();
+			}
+			lastUpdateMessage = captain.openPrivateChannel().complete().sendMessage(String.format("Your opponent picked: %s", playerName)).complete();
 		}
 	}
 }

@@ -1,6 +1,7 @@
 package core.entities.menus;
 
 import core.util.Trigger;
+import net.dv8tion.jda.core.entities.Message;
 import net.dv8tion.jda.core.entities.MessageChannel;
 import net.dv8tion.jda.core.entities.User;
 import net.dv8tion.jda.core.events.message.priv.react.PrivateMessageReactionAddEvent;
@@ -16,6 +17,9 @@ public class RPSMenu extends ListenerAdapter{
 	private User[] result = new User[2];
 	
 	public RPSMenu(User p1, User p2, Trigger trigger){
+		String message = "Rock, Paper, Scissors!\nYou are facing %s";
+		p1.openPrivateChannel().complete().sendMessage(String.format(message, p2.getName())).complete();
+		p2.openPrivateChannel().complete().sendMessage(String.format(message, p1.getName())).complete();
 		this.trigger = trigger;
 		this.turns = new Turn[]{new Turn(p1), new Turn(p2)};
 		this.menus = new Menu[]{new Menu(p1.openPrivateChannel().complete()), new Menu(p2.openPrivateChannel().complete())};
@@ -99,6 +103,9 @@ public class RPSMenu extends ListenerAdapter{
 		if(turns[0].ready() && turns[1].ready()){
 			Integer result = turns[0].compare(turns[1]);
 			
+			turns[0].newUpdateMessage(turns[0].rps, turns[1].rps);
+			turns[1].newUpdateMessage(turns[1].rps, turns[0].rps);
+			
 			switch(result){
 			case 0: gameTie(); break;
 			case 1: gameWin(turns[0].getPlayer()); break;
@@ -143,6 +150,7 @@ public class RPSMenu extends ListenerAdapter{
 	private class Turn {
 		private User player;
 		private RPS rps = null;
+		private Message lastUpdateMessage = null;
 		
 		public Turn(User player){
 			this.player = player;
@@ -174,6 +182,13 @@ public class RPSMenu extends ListenerAdapter{
 			case SCISSORS: return opponent.rps == RPS.PAPER ? 1 : -1;
 			}
 			return null;
+		}
+		
+		public void newUpdateMessage(RPS p1Turn, RPS p2Turn){
+			if(lastUpdateMessage != null){
+				lastUpdateMessage.delete().complete();
+			}
+			lastUpdateMessage = player.openPrivateChannel().complete().sendMessage(String.format("You chose %s%nYour opponent chose %s", p1Turn.toString(), p2Turn.toString())).complete();
 		}
 	}
 }
