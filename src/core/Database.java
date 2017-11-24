@@ -274,4 +274,25 @@ public class Database {
 		}
 		return null;
 	}
+	
+	public static double queryGetPickOrderDiff(Long serverId, Long p1, Long p2){
+		try{
+			PreparedStatement pStatement = conn.prepareStatement("SELECT avg(p2.pickOrder - p1.pickOrder) "
+					+ "FROM (select * from playergame where playerid = ? AND serverId = ?) AS p1 "
+					+ "JOIN (select * from playergame where playerid = ? AND serverId = ?) AS p2 "
+					+ "ON p1.timestamp = p2.timestamp "
+					+ "WHERE p1.captain = 0 AND p2.captain = 0 AND p1.pickorder > 0 AND p2.pickorder > 0");
+			
+			pStatement.setLong(1, p1);
+			pStatement.setLong(3, p2);
+			pStatement.setLong(2, serverId);
+			pStatement.setLong(4, serverId);
+			pStatement.setQueryTimeout(10);
+			
+			return pStatement.executeQuery().getDouble(1);
+		}catch(SQLException ex){
+			ex.printStackTrace();
+		}
+		return 0;
+	}
 }
