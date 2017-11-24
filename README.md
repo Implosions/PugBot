@@ -11,5 +11,5 @@ BullyBot is a multi-featured pug bot for the Discord application made using the 
 - [JDA](https://github.com/DV8FromTheWorld/JDA) (and its dependencies)
 - [SQLite JDBC driver](https://github.com/xerial/sqlite-jdbc)
 
-## Aknowledgements
+## Acknowledgements
 BullyBot is based on the IRC pug bot [Xenia](https://github.com/xzanth/pugbot) by [Xzanth](https://github.com/xzanth)
