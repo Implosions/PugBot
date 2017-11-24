@@ -14,6 +14,7 @@ import core.util.Trigger;
 import net.dv8tion.jda.core.OnlineStatus;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.PrivateChannel;
+import net.dv8tion.jda.core.entities.TextChannel;
 import net.dv8tion.jda.core.entities.User;
 
 public class Queue {
@@ -131,12 +132,12 @@ public class Queue {
 	private void popQueue() {
 		String names = "";
 		List<User> players = new ArrayList<User>(playersInQueue);
+		TextChannel pugChannel = ServerManager.getServer(guildId).getPugChannel();
 		
 		for(User u : players){
 			names += u.getName() + ", ";
 			PrivateChannel c = u.openPrivateChannel().complete();
 			c.sendMessage(String.format("`Your game: %s has started!`", name)).queue();
-			c.sendMessage(Utils.createMessage(null, new CmdPugServers().getServers(guildId, null), true)).queue();
 		}
 		names = names.substring(0, names.lastIndexOf(","));
 		
@@ -148,7 +149,13 @@ public class Queue {
 		if(ServerManager.getServer(guildId).getSettings().randomizeCaptains()){
 			captainString = String.format("**Captains:** <@%s> & <@%s>", newGame.getCaptains()[0].getId(), newGame.getCaptains()[1].getId());
 		}
-		ServerManager.getServer(guildId).getPugChannel().sendMessage(Utils.createMessage(String.format("Game: %s starting%n", name), String.format("%s%n%s", names, captainString), Color.YELLOW)).queueAfter(2, TimeUnit.SECONDS);
+		
+		pugChannel.sendMessage(Utils.createMessage(String.format("Game: %s starting%n", name), String.format("%s%n%s", names, captainString), Color.YELLOW)).queueAfter(2, TimeUnit.SECONDS);
+		
+		String servers = new CmdPugServers().getServers(guildId, null);
+		if(!servers.equals("N/A")){
+			pugChannel.sendMessage(Utils.createMessage("`Pug servers:`", servers, true)).queueAfter(2, TimeUnit.SECONDS);
+		}
 	}
 
 	/**
