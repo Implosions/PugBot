@@ -113,7 +113,7 @@ public class Game {
 		
 		captains[0] = captainPool.get(random.nextInt(captainPool.size()));
 		
-		captains[1] = new MatchMaker(guildId, players).getMatch(captains[0]);
+		captains[1] = new MatchMaker(guildId, captainPool).getMatch(captains[0]);
 		
 		if(players.size() > 2){
 			// Create RPS menu on a new thread
