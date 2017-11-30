@@ -26,13 +26,10 @@ public class MatchMaker {
 				if(r != ranking){
 					Double pickDiff = Database.queryGetPickOrderDiff(Long.valueOf(guildId), ranking.player.getIdLong(), r.player.getIdLong());
 
-					if(pickDiff > 0){
-						score += pickDiff;
-					}
+					score += pickDiff;
 				}
 			}
-			
-			ranking.score = (int)(score * 100);
+			ranking.score = (int)(score);
 		}
 	}
 	
@@ -43,7 +40,7 @@ public class MatchMaker {
 		for(Ranking r : rankings){
 			if(r != captainRanking){
 				if(closestMatch != null){
-					if(captainRanking.getDifference(r) > r.score){
+					if(captainRanking.getDifference(r) < captainRanking.getDifference(closestMatch)){
 						closestMatch = r;
 					}
 				}else{
