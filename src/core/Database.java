@@ -278,6 +278,7 @@ public class Database {
 	public static double queryGetPickOrderDiff(Long serverId, Long p1, Long p2){
 		try{
 			PreparedStatement pStatement = conn.prepareStatement("SELECT avg(p2.pickOrder - p1.pickOrder) "
+					+ "+ (select avg(playerCount) FROM (SELECT count(timestamp) as playerCount from playergame where timestamp = p1.timestamp AND timestamp = p2.timestamp group by timestamp)) "
 					+ "FROM (select * from playergame where playerid = ? AND serverId = ?) AS p1 "
 					+ "JOIN (select * from playergame where playerid = ? AND serverId = ?) AS p2 "
 					+ "ON p1.timestamp = p2.timestamp "
