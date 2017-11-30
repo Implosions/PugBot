@@ -31,6 +31,7 @@ public class EventHandler extends ListenerAdapter {
 	public EventHandler(JDA jda) {
 		new ServerManager(jda.getGuilds());
 		Utils.loadAdminList();
+		Utils.loadBanList();
 	}
 	
 	

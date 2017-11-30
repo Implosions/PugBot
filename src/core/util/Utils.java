@@ -17,6 +17,7 @@ import net.dv8tion.jda.core.entities.Message;
 
 public class Utils {
 	private static ArrayList<String> admins = new ArrayList<String>();
+	private static ArrayList<String> banList = new ArrayList<String>();
 	
 	/*
 	 * Creates standard response message
@@ -124,5 +125,30 @@ public class Utils {
 				ex.printStackTrace();
 			}
 		}
+	}
+	
+	public static void loadBanList(){
+		if (new File("app_data/banlist.txt").exists()) {
+			try {
+				System.out.println("Loading ban list...");
+				Scanner reader = new Scanner(new FileInputStream("app_data/banlist.txt"));
+
+				while (reader.hasNextLine()) {
+					String id = reader.next();
+					if (Pattern.matches("\\d{15,}", id)){
+						banList.add(id);
+					}
+				}
+				
+				reader.close();
+				System.out.println("Ban list loaded");
+			} catch (Exception ex) {
+				ex.printStackTrace();
+			}
+		}
+	}
+	
+	public static boolean isBanned(String id){
+		return banList.contains(id);
 	}
 }
