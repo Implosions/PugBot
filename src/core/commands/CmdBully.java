@@ -20,8 +20,8 @@ import net.dv8tion.jda.core.entities.User;
 
 public class CmdBully extends Command {
 
+	private final Integer COOLDOWN_TIME_MINUTES = 5;
 	private List<String> actionList = getActionList();
-	
 	private Random random = new Random();
 	private HashMap<User, Long> cooldownCollection = new HashMap<User, Long>();
 
@@ -46,10 +46,11 @@ public class CmdBully extends Command {
 				}
 				if (u != null) {
 					// Check invoker is not on cooldown
-					if (!cooldownCollection.containsKey(member.getUser()) || System.currentTimeMillis() - (60000 * 30) >= cooldownCollection.get(member.getUser())) {
+					if (!cooldownCollection.containsKey(member.getUser()) || System.currentTimeMillis() - (60000 * COOLDOWN_TIME_MINUTES) >= cooldownCollection.get(member.getUser())) {
 						if (u.getId().equals(Constants.OWNER_ID)) {
 							u = member.getUser();
 						}
+						// Create message with random string in actionList
 						this.response = Utils.createMessage(String.format(actionList.get(random.nextInt(actionList.size())), u.getId()));
 						// Put user in cooldownCollection
 						if(!member.getUser().getId().equals(Constants.OWNER_ID)){
@@ -57,7 +58,7 @@ public class CmdBully extends Command {
 						}
 					} else {
 						this.response = Utils.createMessage("Your bullying is on cooldown", String.format("Time remaining: %d Minutes",
-								30 - ((System.currentTimeMillis() - cooldownCollection.get(member.getUser())) / 60000)), false);
+								COOLDOWN_TIME_MINUTES - ((System.currentTimeMillis() - cooldownCollection.get(member.getUser())) / 60000)), false);
 					}
 				} else {
 					throw new DoesNotExistException("User");
