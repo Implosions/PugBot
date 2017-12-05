@@ -143,4 +143,13 @@ public class Server {
 	public boolean isBanned(Member m){
 		return banList.contains(m.getUser().getId());
 	}
+	
+	public Member getMember(String player){
+		for(Member m : guild.getMembers()){
+			if(m.getEffectiveName().equalsIgnoreCase(player) || m.getUser().getId().equals(player)){
+				return m;
+			}
+		}
+		return null;
+	}
 }
