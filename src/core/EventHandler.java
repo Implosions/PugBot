@@ -24,14 +24,11 @@ import net.dv8tion.jda.core.exceptions.PermissionException;
 import net.dv8tion.jda.core.hooks.ListenerAdapter;
 
 // EventHandler class
-// TODO: move admin list to Server
 
 public class EventHandler extends ListenerAdapter {
 
 	public EventHandler(JDA jda) {
 		new ServerManager(jda.getGuilds());
-		Utils.loadAdminList();
-		Utils.loadBanList();
 	}
 	
 	
@@ -43,7 +40,9 @@ public class EventHandler extends ListenerAdapter {
 		Server server = ServerManager.getServer(event.getGuild().getId());
 		String message = event.getMessage().getContent();
 		if (server != null && message.startsWith("!") && message.length() > 1 && !event.getAuthor().isBot()) {
-			if(Utils.isBanned(event.getAuthor().getId())){
+			
+			// Check if member is banned, return if true
+			if(server.isBanned(event.getMember())){
 				return;
 			}
 			
@@ -96,7 +95,7 @@ public class EventHandler extends ListenerAdapter {
 				}else if(cmdObj.getPugCommand()){
 					channel = server.getPugChannel();
 				}
-				if (cmdObj.getAdminRequired() && !Utils.isAdmin(event.getMember())) {
+				if (cmdObj.getAdminRequired() && !server.isAdmin(event.getMember())) {
 					channel.sendMessage(Utils.createMessage("Error!", "Admin required", false)).queue();
 				} else {
 					// Executes command and sends response to proper channel

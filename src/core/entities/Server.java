@@ -3,11 +3,14 @@ package core.entities;
 import java.awt.Color;
 import java.text.DecimalFormat;
 import java.util.HashMap;
+import java.util.List;
 
 import core.util.Utils;
+import core.Constants;
 import core.Database;
 import core.util.Trigger;
 import net.dv8tion.jda.core.OnlineStatus;
+import net.dv8tion.jda.core.Permission;
 import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.TextChannel;
@@ -20,6 +23,8 @@ public class Server {
 	private Settings settings;
 	private QueueManager qm;
 	private HashMap<User, Long> activityList = new HashMap<User, Long>();
+	private List<String> banList;
+	private List<String> adminList;
 	
 	public Commands cmds;
 
@@ -37,7 +42,11 @@ public class Server {
 		// Insert members into database
 		for(Member m : guild.getMembers()){
 			Database.insertPlayer(m.getUser().getIdLong(), m.getEffectiveName());
+			Database.insertPlayerServer(guild.getIdLong(), m.getUser().getIdLong());
 		}
+		
+		banList = Database.queryGetBanList(guild.getIdLong());
+		adminList = Database.queryGetAdminList(guild.getIdLong());
 		
 		startAFKTimer();
 	}
@@ -120,5 +129,18 @@ public class Server {
 	
 	public void setGuild(Guild guild){
 		this.guild = guild;
+	}
+	
+	public boolean isAdmin(Member m){
+		if(adminList.contains(m.getUser().getId()) 
+				|| m.hasPermission(Permission.KICK_MEMBERS) 
+				|| m.getUser().getId().equals(Constants.OWNER_ID)){
+			return true;
+		}
+		return false;
+	}
+	
+	public boolean isBanned(Member m){
+		return banList.contains(m.getUser().getId());
 	}
 }
