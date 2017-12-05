@@ -1,7 +1,6 @@
 package core;
 
 import java.util.Arrays;
-import java.util.regex.Pattern;
 
 import core.commands.Command;
 import core.entities.Server;
@@ -71,16 +70,7 @@ public class EventHandler extends ListenerAdapter {
 			}
 			
 			String[] tokens = message.substring(1).split(" ");
-			// Replaces user id's with names after being tokenized
-			try {
-				for(Integer i = 0;i < tokens.length;i++){
-					if (Pattern.matches("\\d{15,}", tokens[i])) {
-						tokens[i] = event.getGuild().getMemberById(tokens[i]).getEffectiveName();
-					}
-				}
-			} catch (NumberFormatException ex) {
-				ex.printStackTrace();
-			}
+			
 			// Log input
 			System.out.println("Command input: " + event.getAuthor().toString() + " " + Arrays.toString(tokens));
 			
