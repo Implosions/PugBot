@@ -37,13 +37,8 @@ public class CmdBully extends Command {
 		try {
 			if (args.length == 1) {
 				// Match user to given name
-				User u = null;
-				for (Member m : member.getGuild().getMembers()) {
-					if (m.getUser().getName().equalsIgnoreCase(args[0]) ||  m.getEffectiveName().equalsIgnoreCase(args[0])) {
-						u = m.getUser();
-						break;
-					}
-				}
+				User u = server.getMember(args[0]).getUser();
+				
 				if (u != null) {
 					// Check invoker is not on cooldown
 					if (!cooldownCollection.containsKey(member.getUser()) || System.currentTimeMillis() - (60000 * COOLDOWN_TIME_MINUTES) >= cooldownCollection.get(member.getUser())) {

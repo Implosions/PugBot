@@ -9,7 +9,6 @@ import core.exceptions.DoesNotExistException;
 import core.util.Trigger;
 import core.util.Utils;
 import net.dv8tion.jda.core.entities.Member;
-import net.dv8tion.jda.core.entities.User;
 
 public class CmdRPS extends Command{
 	
@@ -24,16 +23,10 @@ public class CmdRPS extends Command{
 	public void execCommand(Server server, Member member, String[] args) {
 		try{
 			if(args.length == 1){
-				User u = null;
-				for (Member m : member.getGuild().getMembers()) {
-					if (m.getEffectiveName().equalsIgnoreCase(args[0])) {
-						u = m.getUser();
-						break;
-					}
-				}
-				if(u != null && !u.isBot()){
+				Member m = server.getMember(args[0]);
+				if(m != null && !m.getUser().isBot()){
 					Trigger t = () -> System.out.println("RPS completed");
-					RPSMenu rps = new RPSMenu(member.getUser(), u, t);
+					RPSMenu rps = new RPSMenu(member.getUser(), m.getUser(), t);
 					t = () -> {if(!rps.finished()){rps.complete();}};
 					new Timer(180, t).start();
 				}else{

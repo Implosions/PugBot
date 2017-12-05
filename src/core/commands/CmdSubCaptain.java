@@ -7,7 +7,6 @@ import core.exceptions.DoesNotExistException;
 import core.exceptions.InvalidUseException;
 import core.util.Utils;
 import net.dv8tion.jda.core.entities.Member;
-import net.dv8tion.jda.core.entities.User;
 
 public class CmdSubCaptain extends Command{
 
@@ -21,15 +20,10 @@ public class CmdSubCaptain extends Command{
 	public void execCommand(Server server, Member member, String[] args) {
 		try{
 			if(args.length == 1){
-				User target = null;
-				for (Member m : server.getGuild().getMembers()) {
-					if (m.getEffectiveName().equalsIgnoreCase(args[0])) {
-						target = m.getUser();
-						break;
-					}
-				}
+				Member target = server.getMember(args[0]);
+
 				if(target != null){
-					server.getQueueManager().subCaptain(member.getUser(), target);
+					server.getQueueManager().subCaptain(member.getUser(), target.getUser());
 				}else{
 					throw new DoesNotExistException(args[0]);
 				}

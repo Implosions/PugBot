@@ -24,24 +24,31 @@ public class CmdRemove extends Command {
 	public void execCommand(Server server, Member member, String[] args) {
 		QueueManager qm = server.getQueueManager();
 		try {
+			String pName;
 			if (args.length > 0) {
-				if (args.length == 1) {
-					qm.remove(args[0]);
-				} else {
-					for (String s : Arrays.copyOfRange(args, 1, args.length)) {
-						try {
-							qm.remove(args[0], Integer.valueOf(s));
-						} catch (NumberFormatException ex) {
-							qm.remove(args[0], s);
+				Member m = server.getMember(args[0]);
+
+				if (m != null) {
+					pName = m.getEffectiveName();
+					if (args.length == 1) {
+						qm.remove(m.getUser());
+					} else {
+						for (String s : Arrays.copyOfRange(args, 1, args.length)) {
+							try {
+								qm.remove(m.getUser(), Integer.valueOf(s));
+							} catch (NumberFormatException ex) {
+								qm.remove(m.getUser(), s);
+							}
 						}
 					}
+				}else{
+					throw new BadArgumentsException(args[0] + " does not exist");
 				}
-
 			} else {
 				throw new BadArgumentsException();
 			}
 			qm.updateTopic();
-			this.response = Utils.createMessage(String.format("%s removed from queue", args[0]), qm.getHeader(), true);
+			this.response = Utils.createMessage(String.format("%s removed from queue", pName), qm.getHeader(), true);
 			System.out.println(success());
 		} catch (BadArgumentsException | DoesNotExistException | InvalidUseException ex) {
 			this.response = Utils.createMessage("Error!", ex.getMessage(), false);
