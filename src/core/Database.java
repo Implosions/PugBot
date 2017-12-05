@@ -1,6 +1,8 @@
 package core;
 
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Database {
 	
@@ -80,6 +82,16 @@ public class Database {
 					+ "FOREIGN KEY (serverId) REFERENCES DiscordServer(id)"
 					+ ")");
 			
+			statement.executeUpdate("CREATE TABLE IF NOT EXISTS "
+					+ "PlayerServer("
+					+ "serverId INTEGER NOT NULL, "
+					+ "playerId INTEGER NOT NULL, "
+					+ "admin INTEGER NOT NULL, "
+					+ "banned INTEGER NOT NULL, "
+					+ "PRIMARY KEY (serverId, playerId), "
+					+ "FOREIGN KEY (serverId) REFERENCES DiscordServer(id), "
+					+ "FOREIGN KEY (playerId) REFERENCES Player(id)"
+					+ ")");
 		}catch(Exception ex){
 			ex.printStackTrace();
 		}
@@ -230,6 +242,10 @@ public class Database {
 		}
 	}
 	
+	/**
+	 * @param playerId the id of the player
+	 * @return the number of games the player has participated in
+	 */
 	public static Integer queryGetTotalGamesPlayed(Long playerId){
 		try{
 			PreparedStatement pStatement = conn.prepareStatement("SELECT count(playerId) FROM PlayerGame "
@@ -244,6 +260,11 @@ public class Database {
 		return 0;
 	}
 	
+	/**
+	 * @param serverId the discord server
+	 * @param region the pug server region
+	 * @return the ResultSet containing the pug server information
+	 */
 	public static ResultSet queryGetPugServers(Long serverId, String region){
 		try{
 			PreparedStatement pStatement = conn.prepareStatement("SELECT * FROM PugServer "
@@ -260,6 +281,10 @@ public class Database {
 		return null;
 	}
 	
+	/**
+	 * @param serverId the discord server
+	 * @return the resultset containing all of the pug servers
+	 */
 	public static ResultSet queryGetPugServers(Long serverId){
 		try{
 			PreparedStatement pStatement = conn.prepareStatement("SELECT * FROM PugServer "
@@ -275,6 +300,12 @@ public class Database {
 		return null;
 	}
 	
+	/**
+	 * @param serverId the discord server
+	 * @param p1 the first player to compare
+	 * @param p2 the second player to compare
+	 * @return number representing the difference in pick order + the avg size of games played
+	 */
 	public static double queryGetPickOrderDiff(Long serverId, Long p1, Long p2){
 		try{
 			PreparedStatement pStatement = conn.prepareStatement("SELECT avg(p2.pickOrder - p1.pickOrder) "
@@ -295,5 +326,125 @@ public class Database {
 			ex.printStackTrace();
 		}
 		return 0;
+	}
+	
+	public static void insertPlayerServer(Long serverId, Long playerId){
+		try{
+			PreparedStatement pStatement = conn.prepareStatement("INSERT OR IGNORE INTO PlayerServer VALUES(?, ?, ?, ?)");
+			pStatement.setLong(1, serverId);
+			pStatement.setLong(2, playerId);
+			pStatement.setInt(3, 0);
+			pStatement.setInt(4, 0);
+			
+			pStatement.execute();
+		}catch(SQLException ex){
+			ex.printStackTrace();
+		}
+	}
+	
+	/**
+	 * @param serverId the discord server
+	 * @return List of user ids that have admin privileges
+	 */
+	public static List<String> queryGetAdminList(Long serverId){
+		List<String> admins = new ArrayList<String>();
+		try{
+			PreparedStatement pStatement = conn.prepareStatement("SELECT playerId FROM PlayerServer "
+				+ "WHERE serverId = ? AND admin = 1");
+			
+			pStatement.setLong(1, serverId);
+			pStatement.setQueryTimeout(10);
+			
+			ResultSet rs = pStatement.executeQuery();
+			
+			while(rs.next()){
+				admins.add(rs.getString(1));
+			}
+			
+			rs.close();
+		}catch(SQLException ex){
+			ex.printStackTrace();
+		}
+		return admins;
+	}
+	
+	/**
+	 * @param serverId the discord server
+	 * @return List of user ids that are currently banned from using the bot
+	 */
+	public static List<String> queryGetBanList(Long serverId){
+		List<String> bans = new ArrayList<String>();
+		try{
+			PreparedStatement pStatement = conn.prepareStatement("SELECT playerId FROM PlayerServer "
+				+ "WHERE serverId = ? AND banned = 1");
+			
+			pStatement.setLong(1, serverId);
+			pStatement.setQueryTimeout(10);
+			
+			ResultSet rs = pStatement.executeQuery();
+			
+			while(rs.next()){
+				bans.add(rs.getString(1));
+			}
+			
+			rs.close();
+		}catch(SQLException ex){
+			ex.printStackTrace();
+		}
+		return bans;
+	}
+	
+	/**
+	 * @param serverId the discord server
+	 * @param playerId the player to update
+	 * @param newStatus the new value to set, true = admin
+	 */
+	public static void updateAdminStatus(Long serverId, Long playerId, boolean newStatus){
+		Integer value;
+		
+		if(newStatus){
+			value = 1;
+		}else{
+			value = 0;
+		}
+		
+		try{
+			PreparedStatement pStatement = conn.prepareStatement("UPDATE PlayerServer SET admin = ? "
+					+ "WHERE serverId = ? AND playerrId = ?");
+			pStatement.setInt(1, value);
+			pStatement.setLong(2, serverId);
+			pStatement.setLong(1, playerId);
+			
+			pStatement.execute();
+		}catch(SQLException ex){
+			ex.printStackTrace();
+		}
+	}
+	
+	/**
+	 * @param serverId the discord server
+	 * @param playerId the player to update
+	 * @param newStatus the new value to set, true = banned
+	 */
+	public static void updateBanStatus(Long serverId, Long playerId, boolean newStatus){
+		Integer value;
+		
+		if(newStatus){
+			value = 1;
+		}else{
+			value = 0;
+		}
+		
+		try{
+			PreparedStatement pStatement = conn.prepareStatement("UPDATE PlayerServer SET banned = ? "
+					+ "WHERE serverId = ? AND playerrId = ?");
+			pStatement.setInt(1, value);
+			pStatement.setLong(2, serverId);
+			pStatement.setLong(1, playerId);
+			
+			pStatement.execute();
+		}catch(SQLException ex){
+			ex.printStackTrace();
+		}
 	}
 }
