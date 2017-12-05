@@ -20,6 +20,7 @@ public class CmdRestart extends Command{
 		ServerManager.removeServer(server.getGuild());
 		ServerManager.addNewServer(server.getGuild());
 		this.response = Utils.createMessage("`Server instance restarted`");
+		System.out.println(success());
 	}
 
 }
