@@ -18,7 +18,6 @@ import core.exceptions.BadArgumentsException;
 import core.exceptions.DoesNotExistException;
 import core.exceptions.DuplicateEntryException;
 import core.exceptions.InvalidUseException;
-import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.User;
 import net.dv8tion.jda.core.exceptions.PermissionException;
 
@@ -362,19 +361,12 @@ public class QueueManager {
 	/**
 	 * Removes a player from all queues.
 	 * 
-	 * @param name the name of the player to be removed
+	 * @param player the player to be removed
 	 */
-	public void remove(String name) {
+	public void remove(User player) {
 		if (!isQueueListEmpty()) {
-			boolean found = false;
 			for (Queue q : queueList) {
-				if (q.containsPlayer(name)) {
-					q.delete(q.getPlayer(name));
-					found = true;
-				}
-			}
-			if (!found) {
-				throw new InvalidUseException(name + " not found in queue");
+				q.delete(player);
 			}
 		} else {
 			throw new DoesNotExistException("Queue");
@@ -387,13 +379,9 @@ public class QueueManager {
 	 * @param name the name of the player to be removed
 	 * @param index the one-based index of the queue that the player will be removed from
 	 */
-	public void remove(String name, Integer index) {
-		Integer i = --index;
-		if (doesQueueExist(i)) {
-			Queue q = queueList.get(i);
-			if (q.containsPlayer(name)) {
-				q.delete(q.getPlayer(name));
-			}
+	public void remove(User player, Integer index) {
+		if (doesQueueExist(index)) {
+			queueList.get(index - 1).delete(player);
 		} else {
 			throw new DoesNotExistException("Queue");
 		}
@@ -402,15 +390,12 @@ public class QueueManager {
 	/**
 	 * Removes a player from a specific queues.
 	 * 
-	 * @param playerName the name of the player to be removed
+	 * @param player the player to be removed
 	 * @param queueName the name of the queue that the player will be removed from
 	 */
-	public void remove(String playerName, String queueName) {
+	public void remove(User player, String queueName) {
 		if (doesQueueExist(queueName)) {
-			Queue q = getQueue(queueName);
-			if (q.containsPlayer(playerName)) {
-				q.delete(q.getPlayer(playerName));
-			}
+			getQueue(queueName).delete(player);
 		} else {
 			throw new DoesNotExistException("Queue");
 		}
@@ -422,31 +407,21 @@ public class QueueManager {
 	 * @param target the player that will be substituted
 	 * @param substitute the player that will replace the target
 	 */
-	public void sub(String target, String substitute) {
+	public void sub(User target, User substitute) {
 		if (!isQueueListEmpty()) {
-			User sub = null;
-			// Match member object to substitute name
-			for (Member m : ServerManager.getServer(guildId).getGuild().getMembers()) {
-				if (m.getEffectiveName().equalsIgnoreCase(substitute)) {
-					sub = m.getUser();
-					break;
-				}
-			}
-			if (sub == null) {
-				throw new DoesNotExistException("Substitute player");
-			} else if (isPlayerIngame(sub)) {
-				throw new InvalidUseException(sub.getName() + " is already in-game");
+			if (isPlayerIngame(substitute)) {
+				throw new InvalidUseException(substitute.getName() + " is already in-game");
 			}
 			for (Queue q : queueList) {
 				for (Game g : q.getGames()) {
-					if (g.containsPlayer(target)) {
-						g.sub(g.getPlayer(target), sub);
-						purgeQueue(sub);
+					if (g.getPlayers().contains(target)) {
+						g.sub(target, substitute);
+						purgeQueue(substitute);
 						return;
 					}
 				}
 			}
-			throw new InvalidUseException(target + " is not in-game");
+			throw new InvalidUseException(target.getName() + " is not in-game");
 		} else {
 			throw new DoesNotExistException("Queue");
 		}
