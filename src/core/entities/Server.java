@@ -152,4 +152,35 @@ public class Server {
 		}
 		return null;
 	}
+	
+	public void banUser(String playerId){
+		if(!banList.contains(playerId)){
+			banList.add(playerId);
+		}
+		Database.updateBanStatus(guild.getIdLong(), Long.valueOf(playerId), true);
+	}
+	
+	public void unbanUser(String playerId){
+		banList.remove(playerId);
+		Database.updateBanStatus(guild.getIdLong(), Long.valueOf(playerId), false);
+	}
+	
+	public void unbanAll(){
+		for(String s : banList){
+			Database.updateBanStatus(guild.getIdLong(), Long.valueOf(s), false);
+		}
+		banList.clear();
+	}
+	
+	public void addAdmin(String playerId){
+		if(!adminList.contains(playerId)){
+			adminList.add(playerId);
+		}
+		Database.updateAdminStatus(guild.getIdLong(), Long.valueOf(playerId), true);
+	}
+	
+	public void removeAdmin(String playerId){
+		adminList.remove(playerId);
+		Database.updateAdminStatus(guild.getIdLong(), Long.valueOf(playerId), false);
+	}
 }
