@@ -87,4 +87,20 @@ public class Constants {
 	public final static String PUGSERVERS_NAME = "pugservers";
 	public final static String PUGSERVERS_HELP = "!pugservers | !pugservers <region>";
 	public final static String PUGSERVERS_DESC = "creates a list of pug servers";
+	
+	public final static String BAN_NAME = "ban";
+	public final static String BAN_HELP = "!ban <name>";
+	public final static String BAN_DESC = "bans a user from interacting with the bot";
+	
+	public final static String UNBAN_NAME = "unban";
+	public final static String UNBAN_HELP = "!unban <name>";
+	public final static String UNBAN_DESC = "unbans a user";
+	
+	public final static String ADDADMIN_NAME = "addadmin";
+	public final static String ADDADMIN_HELP = "!addadmin <name>";
+	public final static String ADDADMIN_DESC = "gives a user bot admin privileges";
+	
+	public final static String REMOVEADMIN_NAME = "removeadmin";
+	public final static String REMOVEADMIN_HELP = "!removeadmin <name>";
+	public final static String REMOVEADMIN_DESC = "removes a user's admin privileges";
 }
