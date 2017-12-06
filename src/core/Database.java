@@ -410,7 +410,7 @@ public class Database {
 		
 		try{
 			PreparedStatement pStatement = conn.prepareStatement("UPDATE PlayerServer SET admin = ? "
-					+ "WHERE serverId = ? AND playerrId = ?");
+					+ "WHERE serverId = ? AND playerId = ?");
 			pStatement.setInt(1, value);
 			pStatement.setLong(2, serverId);
 			pStatement.setLong(1, playerId);
@@ -437,7 +437,7 @@ public class Database {
 		
 		try{
 			PreparedStatement pStatement = conn.prepareStatement("UPDATE PlayerServer SET banned = ? "
-					+ "WHERE serverId = ? AND playerrId = ?");
+					+ "WHERE serverId = ? AND playerId = ?");
 			pStatement.setInt(1, value);
 			pStatement.setLong(2, serverId);
 			pStatement.setLong(1, playerId);
