@@ -43,6 +43,11 @@ public class MenuItem {
 		return text;
 	}
 	
+	public void setText(String newText){
+		text = newText;
+		channel.getMessageById(id).complete().editMessage(newText).complete();
+	}
+	
 	public String getId(){
 		return id;
 	}
