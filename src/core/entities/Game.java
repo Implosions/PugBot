@@ -81,6 +81,11 @@ public class Game {
 	public void sub(User target, User substitute){
 		players.remove(target);
 		players.add(substitute);
+		
+		if(pickMenu != null && !pickMenu.finished()){
+			pickMenu.sub(target, substitute);
+		}
+		
 		for(User c : captains){
 			if(c == target){
 				subCaptain(substitute, target);
