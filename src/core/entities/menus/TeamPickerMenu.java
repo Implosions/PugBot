@@ -173,6 +173,18 @@ public class TeamPickerMenu extends ListenerAdapter{
 		return s;
 	}
 	
+	public void sub(User target, User substitute){
+		playerPool.remove(target);
+		playerPool.add(substitute);
+		
+		for(Menu m : menus){
+			MenuItem mi = m.getMenuItemByText(target.getName());
+			if(mi != null){
+				mi.setText(substitute.getName());
+			}
+		}
+	}
+	
 	private class Team {
 		private User captain;
 		public List<User> members = new ArrayList<User>();
