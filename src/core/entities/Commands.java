@@ -38,7 +38,7 @@ public class Commands {
 		cmdList.put(Constants.GITHUB_NAME, new CmdGithub());
 		cmdList.put(Constants.SUBCAPTAIN_NAME, new CmdSubCaptain());
 		cmdList.put(Constants.RESTART_NAME, new CmdRestart());
-		cmdList.put(Constants.PUGSERVERS_NAME, new CmdPugServers());
+		//cmdList.put(Constants.PUGSERVERS_NAME, new CmdPugServers());
 		cmdList.put(Constants.BAN_NAME, new CmdBan());
 		cmdList.put(Constants.UNBAN_NAME, new CmdUnban());
 		cmdList.put(Constants.ADDADMIN_NAME, new CmdAddAdmin());
