@@ -22,6 +22,7 @@ public class TeamPickerMenu extends ListenerAdapter{
 	private Integer turnCount = 1;
 	private boolean finished = false;
 	private boolean snake;
+	private String pickedTeamsString = null;
 	
 	public TeamPickerMenu(User[] captains, List<User> players, Trigger trigger, boolean snake){
 		this.menus = new Menu[]{new Menu(captains[0].openPrivateChannel().complete()), new Menu(captains[1].openPrivateChannel().complete())};
@@ -91,14 +92,15 @@ public class TeamPickerMenu extends ListenerAdapter{
 	public void complete(){
 		teams[0].getCaptain().getJDA().removeEventListener(this);
 		if(finished){
+			pickedTeamsString = String.format("Teams picked:%nRED - %s%nBLUE - %s", teams[0].toString(), teams[1].toString());
 			trigger.activate();
-			String s = String.format("Teams picked:%nRED - %s%nBLUE - %s", teams[0].toString(), teams[1].toString());
+			
 			for(Menu m : menus){
-				m.editStatusMessage(s);
+				m.editStatusMessage(pickedTeamsString);
 			}
 
 			for(User p : playerPool){
-				p.openPrivateChannel().complete().sendMessage(s).complete();
+				p.openPrivateChannel().complete().sendMessage(pickedTeamsString).complete();
 			}
 		}else{
 			for(Menu m : menus){
@@ -183,6 +185,10 @@ public class TeamPickerMenu extends ListenerAdapter{
 				mi.setText(substitute.getName());
 			}
 		}
+	}
+	
+	public String getPickedTeamsString(){
+		return pickedTeamsString;
 	}
 	
 	private class Team {
