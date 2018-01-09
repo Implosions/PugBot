@@ -8,7 +8,6 @@ import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 import core.util.Utils;
-import core.commands.CmdPugServers;
 import core.entities.Game.GameStatus;
 import core.util.Trigger;
 import net.dv8tion.jda.core.OnlineStatus;
@@ -134,6 +133,7 @@ public class Queue {
 		List<User> players = new ArrayList<User>(playersInQueue);
 		TextChannel pugChannel = ServerManager.getServer(guildId).getPugChannel();
 		
+		// Send alert to players and compile their names
 		for(User u : players){
 			names += u.getName() + ", ";
 			PrivateChannel c = u.openPrivateChannel().complete();
@@ -141,21 +141,26 @@ public class Queue {
 		}
 		names = names.substring(0, names.lastIndexOf(","));
 		
+		// Create Game and add to the list of active games
 		Game newGame = new Game(guildId, name, players);
 		games.add(newGame);
 		
+		// Remove players from all other queues
 		ServerManager.getServer(guildId).getQueueManager().purgeQueue(players);
+		
+		// Generate captain string
 		String captainString = "";
 		if(ServerManager.getServer(guildId).getSettings().randomizeCaptains()){
 			captainString = String.format("**Captains:** <@%s> & <@%s>", newGame.getCaptains()[0].getId(), newGame.getCaptains()[1].getId());
 		}
 		
+		// Send game start message to pug channel
 		pugChannel.sendMessage(Utils.createMessage(String.format("Game: %s starting%n", name), String.format("%s%n%s", names, captainString), Color.YELLOW)).queueAfter(2, TimeUnit.SECONDS);
 		
-		String servers = new CmdPugServers().getServers(guildId, null);
+		/*String servers = new CmdPugServers().getServers(guildId, null);
 		if(!servers.equals("N/A")){
 			pugChannel.sendMessage(Utils.createMessage("`Pug servers:`", servers, true)).queueAfter(2, TimeUnit.SECONDS);
-		}
+		}*/
 	}
 
 	/**
