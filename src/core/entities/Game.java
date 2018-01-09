@@ -10,6 +10,7 @@ import core.entities.menus.RPSMenu;
 import core.entities.menus.TeamPickerMenu;
 import core.util.MatchMaker;
 import core.util.Trigger;
+import core.util.Utils;
 import net.dv8tion.jda.core.entities.User;
 
 public class Game {
@@ -82,14 +83,16 @@ public class Game {
 		players.remove(target);
 		players.add(substitute);
 		
-		if(pickMenu != null && !pickMenu.finished()){
-			pickMenu.sub(target, substitute);
-		}
-		
-		for(User c : captains){
-			if(c == target){
+		// If the target is a captain and the picking has not started or has not finished yet call subCaptain
+		for(User c : captains) {
+			if (c == target && (pickMenu == null || pickMenu != null && !pickMenu.finished())) {
 				subCaptain(substitute, target);
 			}
+		}
+		
+		// If picking has not finished yet substitute the target in the pickMenu
+		if(pickMenu != null && !pickMenu.finished()){
+			pickMenu.sub(target, substitute);
 		}
 	}
 
@@ -200,12 +203,19 @@ public class Game {
 			}
 		}
 		
-		// Add player pick order
+		// Add player pick order to database
 		if(pickMenu != null){
 			Integer count = 1;
 			for (String id : pickMenu.getPickOrder()) {
 				Database.updatePlayerGamePickOrder(Long.valueOf(id), timestamp, Long.valueOf(guildId), count);
 				count++;
+			}
+			
+			// Post teams to pug channel
+			if(true){
+				String s = String.format("`Game: %s`", name);
+				ServerManager.getServer(guildId).getPugChannel()
+				.sendMessage(Utils.createMessage(s, pickMenu.getPickedTeamsString(), true)).queue();
 			}
 		}
 	}
