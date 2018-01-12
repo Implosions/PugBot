@@ -3,6 +3,7 @@ package core.entities.menus;
 import java.util.ArrayList;
 import java.util.List;
 
+import core.entities.menus.Menu.MenuStatus;
 import core.util.Trigger;
 import net.dv8tion.jda.core.entities.Message;
 import net.dv8tion.jda.core.entities.MessageChannel;
@@ -56,17 +57,8 @@ public class TeamPickerMenu extends ListenerAdapter{
 					if(player != null){
 						Team t = getTeam(event.getUser());
 						if(t.picking){
-							t.members.add(player);
-							pickOrder.add(player.getId());
-							for(Menu m : menus){
-								m.deleteMenuItem(m.getMenuItemByText(text));
-							}
-							// more spaghetti
-							for(Team team : teams){
-								if(!team.picking){
-									team.newUpdateMessage(text);
-								}
-							}
+							pickPlayer(t, player);
+							
 							nextTurn();
 						}
 					}
@@ -104,6 +96,7 @@ public class TeamPickerMenu extends ListenerAdapter{
 			}
 		}else{
 			for(Menu m : menus){
+				m.changeMenuStatus(MenuStatus.ABORTED);
 				m.deleteStatusMessage();
 				m.deleteMenuItems();
 			}
@@ -135,6 +128,20 @@ public class TeamPickerMenu extends ListenerAdapter{
 		}else{
 			finished = true;
 			complete();
+		}
+	}
+	
+	private void pickPlayer(Team t, User player){
+		t.members.add(player);
+		pickOrder.add(player.getId());
+		for(Menu m : menus){
+			m.deleteMenuItem(m.getMenuItemByText(player.getName()));
+		}
+		// more spaghetti
+		for(Team team : teams){
+			if(!team.picking){
+				team.newUpdateMessage(player.getName());
+			}
 		}
 	}
 	

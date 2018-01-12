@@ -1,5 +1,6 @@
 package core.entities.menus;
 
+import core.entities.menus.Menu.MenuStatus;
 import core.util.Trigger;
 import net.dv8tion.jda.core.entities.Message;
 import net.dv8tion.jda.core.entities.MessageChannel;
@@ -59,6 +60,7 @@ public class RPSMenu extends ListenerAdapter{
 			m.createMenuItem("Rock", CHECKMARK);
 			m.createMenuItem("Paper", CHECKMARK);
 			m.createMenuItem("Scissors", CHECKMARK);
+			m.changeMenuStatus(MenuStatus.COMPLETE);
 		}
 	}
 	
@@ -86,6 +88,7 @@ public class RPSMenu extends ListenerAdapter{
 	
 	public void complete() {
 		for(Menu m : menus){
+			m.changeMenuStatus(MenuStatus.ABORTED);
 			m.deleteMenuItems();
 		}
 		turns[0].getPlayer().getJDA().removeEventListener(this);
