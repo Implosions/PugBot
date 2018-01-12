@@ -44,7 +44,7 @@ public class Settings {
 			finishTime = Integer.valueOf(p.getProperty("finishtime", finishTime.toString()));
 			randomizeCaptains = Boolean.valueOf(p.getProperty("randomizecaptains", String.valueOf(randomizeCaptains)));
 			snakePick = Boolean.valueOf(p.getProperty("snakepick", String.valueOf(snakePick)));
-			snakePick = Boolean.valueOf(p.getProperty("postteams", String.valueOf(postTeams)));
+			postTeams = Boolean.valueOf(p.getProperty("postteams", String.valueOf(postTeams)));
 			is.close();
 		}catch(IOException ex){
 			ex.printStackTrace();
