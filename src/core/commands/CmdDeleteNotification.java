@@ -27,7 +27,7 @@ public class CmdDeleteNotification extends Command{
 					try{
 						qm.removeNotification(member.getUser(), Integer.valueOf(args[0]));
 					}catch(NumberFormatException ex){
-						qm.removeNotification(member.getUser(), args[1]);
+						qm.removeNotification(member.getUser(), args[0]);
 					}
 				}
 			}else{
