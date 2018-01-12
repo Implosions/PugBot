@@ -22,9 +22,16 @@ public class CmdSub extends Command{
 		String targName, subName;
 		QueueManager qm = server.getQueueManager();
 		try{
-			if(args.length == 2){
+			if(args.length < 0 && args.length < 3){
 				Member target = server.getMember(args[0]);
-				Member substitute = server.getMember(args[1]);
+				Member substitute = null;
+				
+				if(args.length == 1){
+					substitute = member;
+				}else{
+					substitute = server.getMember(args[1]);
+				}
+				
 				if(target != null){
 					if(substitute != null){
 						qm.sub(target.getUser(), substitute.getUser());
