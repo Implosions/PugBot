@@ -212,7 +212,7 @@ public class Game {
 			}
 			
 			// Post teams to pug channel
-			if(true){
+			if(ServerManager.getServer(guildId).getSettings().postTeams()){
 				String s = String.format("`Game: %s`", name);
 				ServerManager.getServer(guildId).getPugChannel()
 				.sendMessage(Utils.createMessage(s, pickMenu.getPickedTeamsString(), true)).queue();
