@@ -11,10 +11,21 @@ public class Menu {
 	private List<MenuItem> menuItemList = new ArrayList<MenuItem>();
 	private MessageChannel channel;
 	private Message statusMessage = null;
+	private MenuStatus menuStatus = null;
 	
+	public enum MenuStatus{
+		INITIALIZING,
+		COMPLETE,
+		ABORTED;
+	}
 	
 	public Menu(MessageChannel c){
 		this.channel = c;
+		this.menuStatus = MenuStatus.INITIALIZING;
+	}
+	
+	public void changeMenuStatus(MenuStatus newStatus){
+		menuStatus = newStatus;
 	}
 	
 	public MenuItem getMenuItem(String id){
@@ -24,6 +35,10 @@ public class Menu {
 			}
 		}
 		return null;
+	}
+	
+	public MenuItem getMenuItem(Integer index){
+		return menuItemList.get(index);
 	}
 	
 	public MenuItem getMenuItemByText(String text){
@@ -36,19 +51,27 @@ public class Menu {
 	}
 	
 	public void createMenuItem(String text, String[] buttons){
-		menuItemList.add(new MenuItem(channel, text, buttons));
+		if(menuStatus != MenuStatus.ABORTED){
+			menuItemList.add(new MenuItem(channel, text, buttons));
+		}
 	}
 	
 	public void createMenuItem(String text, String button){
-		menuItemList.add(new MenuItem(channel, text, button));
+		if(menuStatus != MenuStatus.ABORTED){
+			menuItemList.add(new MenuItem(channel, text, button));
+		}
 	}
 	
 	public void createStatusMessage(String text){
-		statusMessage = channel.sendMessage(text).complete();
+		if(menuStatus != MenuStatus.ABORTED){
+			statusMessage = channel.sendMessage(text).complete();
+		}
 	}
 	
 	public void editStatusMessage(String text){
-		statusMessage.editMessage(text).complete();
+		if(menuStatus != MenuStatus.ABORTED){
+			statusMessage.editMessage(text).complete();
+		}
 	}
 	
 	public MessageChannel getChannel(){
