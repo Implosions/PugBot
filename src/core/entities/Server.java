@@ -90,7 +90,6 @@ public class Server {
 				System.out.println(s);
 			}
 		});
-
 		startAFKTimer();
 	}
 
@@ -114,6 +113,8 @@ public class Server {
 	public void updateActivityList(User u){
 		if(qm.isPlayerInQueue(u) || qm.hasPlayerJustFinished(u)){
 			activityList.put(u, System.currentTimeMillis());
+		}else if(activityList.containsKey(u)){
+			activityList.remove(u);
 		}
 	}
 	
