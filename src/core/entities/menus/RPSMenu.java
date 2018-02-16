@@ -19,8 +19,13 @@ public class RPSMenu extends ListenerAdapter{
 	
 	public RPSMenu(User p1, User p2, Trigger trigger){
 		String message = "Rock, Paper, Scissors!\nYou are facing %s";
-		p1.openPrivateChannel().complete().sendMessage(String.format(message, p2.getName())).complete();
-		p2.openPrivateChannel().complete().sendMessage(String.format(message, p1.getName())).complete();
+		try{
+			p1.openPrivateChannel().complete().sendMessage(String.format(message, p2.getName())).complete();
+			p2.openPrivateChannel().complete().sendMessage(String.format(message, p1.getName())).complete();
+		}catch(Exception ex){
+			System.out.println("Error sending private message.\n" + ex.getMessage());
+		}
+		
 		this.trigger = trigger;
 		this.turns = new Turn[]{new Turn(p1), new Turn(p2)};
 		this.menus = new Menu[]{new Menu(p1.openPrivateChannel().complete()), new Menu(p2.openPrivateChannel().complete())};
@@ -56,11 +61,15 @@ public class RPSMenu extends ListenerAdapter{
 	
 	private void createMenuItems(){
 		for(Menu m : menus){
-			m.createStatusMessage("Make your selection:");
-			m.createMenuItem("Rock", CHECKMARK);
-			m.createMenuItem("Paper", CHECKMARK);
-			m.createMenuItem("Scissors", CHECKMARK);
-			m.changeMenuStatus(MenuStatus.COMPLETE);
+			try{
+				m.createStatusMessage("Make your selection:");
+				m.createMenuItem("Rock", CHECKMARK);
+				m.createMenuItem("Paper", CHECKMARK);
+				m.createMenuItem("Scissors", CHECKMARK);
+				m.changeMenuStatus(MenuStatus.COMPLETE);
+			}catch(Exception ex){
+				System.out.println("Error creating menuitems.\n" + ex.getMessage());
+			}
 		}
 	}
 	
@@ -186,7 +195,13 @@ public class RPSMenu extends ListenerAdapter{
 			if(lastUpdateMessage != null){
 				lastUpdateMessage.delete().complete();
 			}
-			lastUpdateMessage = player.openPrivateChannel().complete().sendMessage(String.format("You chose %s%nYour opponent chose %s", p1Turn.toString(), p2Turn.toString())).complete();
+			try{
+				lastUpdateMessage = player.openPrivateChannel().complete()
+						.sendMessage(String.format
+								("You chose %s%nYour opponent chose %s", p1Turn.toString(), p2Turn.toString())).complete();
+			}catch(Exception ex){
+				System.out.println("Error sending private message.\n" + ex.getMessage());
+			}
 		}
 	}
 }

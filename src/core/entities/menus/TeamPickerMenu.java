@@ -69,9 +69,13 @@ public class TeamPickerMenu extends ListenerAdapter{
 	
 	private void createMenuItems(){
 		for(Menu m : menus){
-			m.createStatusMessage("Initializing...");
-			for(User player : playerPool){
-				m.createMenuItem(player.getName(), CHECKMARK);
+			try{
+				m.createStatusMessage("Initializing...");
+				for(User player : playerPool){
+					m.createMenuItem(player.getName(), CHECKMARK);
+				}
+			}catch(Exception ex){
+				System.out.println("Error creating menu items.\n" + ex.getMessage());
 			}
 		}
 		pick();
@@ -92,7 +96,11 @@ public class TeamPickerMenu extends ListenerAdapter{
 			}
 
 			for(User p : playerPool){
-				p.openPrivateChannel().complete().sendMessage(pickedTeamsString).complete();
+				try{
+					p.openPrivateChannel().complete().sendMessage(pickedTeamsString).complete();
+				}catch(Exception ex){
+					System.out.println("Error sending private message.\n" + ex.getMessage());
+				}
 			}
 		}else{
 			for(Menu m : menus){
@@ -227,7 +235,13 @@ public class TeamPickerMenu extends ListenerAdapter{
 			if(lastUpdateMessage != null){
 				lastUpdateMessage.delete().complete();
 			}
-			lastUpdateMessage = captain.openPrivateChannel().complete().sendMessage(String.format("Your opponent picked: %s", playerName)).complete();
+			try{
+				lastUpdateMessage = captain.openPrivateChannel().complete()
+						.sendMessage(String.format("Your opponent picked: %s", playerName)).complete();
+			}catch(Exception ex){
+				System.out.println("Error sending private message.\n" + ex.getMessage());
+			}
+			
 		}
 	}
 }

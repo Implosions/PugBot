@@ -136,8 +136,12 @@ public class Queue {
 		// Send alert to players and compile their names
 		for(User u : players){
 			names += u.getName() + ", ";
-			PrivateChannel c = u.openPrivateChannel().complete();
-			c.sendMessage(String.format("`Your game: %s has started!`", name)).queue();
+			try{
+				PrivateChannel c = u.openPrivateChannel().complete();
+				c.sendMessage(String.format("`Your game: %s has started!`", name)).queue();
+			}catch(Exception ex){
+				System.out.println("Error sending private message.\n" + ex.getMessage());
+			}
 		}
 		names = names.substring(0, names.lastIndexOf(","));
 		
@@ -322,7 +326,12 @@ public class Queue {
 		for(User u : users){
 			Member m = ServerManager.getServer(guildId).getGuild().getMemberById(u.getId());
 			if(!playersInQueue.contains(u) && (m.getOnlineStatus().equals(OnlineStatus.ONLINE) || m.getOnlineStatus().equals(OnlineStatus.IDLE))){
-				u.openPrivateChannel().complete().sendMessage(String.format("Queue: %s is at %d players!", name, currentPlayers)).complete();
+				try{
+					u.openPrivateChannel().complete()
+						.sendMessage(String.format("Queue: %s is at %d players!", name, currentPlayers)).complete();
+				}catch(Exception ex){
+					System.out.println("Error sending private message.\n" + ex.getMessage());
+				}
 			}
 		}
 	}

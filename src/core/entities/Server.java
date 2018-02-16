@@ -84,8 +84,14 @@ public class Server {
 				qm.deletePlayer(u);
 				String s = String.format("%s has been removed from the queue due to inactivity", u.getName());
 				getPugChannel().sendMessage(Utils.createMessage("", s, Color.red)).queue();
-				u.openPrivateChannel().complete().sendMessage("You have been removed from the queue due to inactivity")
-						.queue();
+				
+				try{
+					u.openPrivateChannel().complete()
+						.sendMessage("You have been removed from the queue due to inactivity").queue();
+				}catch(Exception ex){
+					System.out.println("Error sending private message.\n" + ex.getMessage());
+				}
+				
 				qm.updateTopic();
 				System.out.println(s);
 			}

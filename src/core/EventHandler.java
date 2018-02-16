@@ -80,7 +80,7 @@ public class EventHandler extends ListenerAdapter {
 			if (server.cmds.validateCommand(cmd)) {
 				Command cmdObj = server.cmds.getCommandObj(cmd);
 				// Determine which channel to send response
-				if (cmdObj.getDM()) {
+				if (cmdObj.getDM()){
 					channel = event.getAuthor().openPrivateChannel().complete();
 				}else if(cmdObj.getPugCommand()){
 					channel = server.getPugChannel();
@@ -90,7 +90,11 @@ public class EventHandler extends ListenerAdapter {
 				} else {
 					// Executes command and sends response to proper channel
 					cmdObj.execCommand(server, event.getMember(), args);
-					cmdObj.setLastResponseId(channel.sendMessage(cmdObj.getResponse()).complete().getId());
+					try{
+						cmdObj.setLastResponseId(channel.sendMessage(cmdObj.getResponse()).complete().getId());
+					}catch(Exception ex){
+						System.out.println("Error sending message.\n" + ex.getMessage());
+					}
 				}
 			} else {
 				// Will only respond to invalid commands in the pug channel
