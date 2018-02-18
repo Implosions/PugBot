@@ -239,13 +239,17 @@ public class Game {
 	 * @param target the captain to be replaced
 	 */
 	public void subCaptain(User sub, User target){
-		for(Integer i = 0;i < 2;i++){
-			if(captains[i] == target){
-				captains[i] = sub;
+		new Thread(new Runnable(){
+			public void run(){
+				for(Integer i = 0;i < 2;i++){
+					if(captains[i] == target){
+						captains[i] = sub;
+					}
+				}
+				removeMenus();
+				createRPSMenu();
 			}
-		}
-		removeMenus();
-		createRPSMenu();
+		}).start();
 	}
 
 	/**
