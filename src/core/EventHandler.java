@@ -6,6 +6,7 @@ import core.commands.Command;
 import core.entities.Server;
 import core.entities.ServerManager;
 import core.util.Utils;
+import core.exceptions.*;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.OnlineStatus;
 import net.dv8tion.jda.core.entities.Member;
@@ -89,9 +90,20 @@ public class EventHandler extends ListenerAdapter {
 					channel.sendMessage(Utils.createMessage("Error!", "Admin required", false)).queue();
 				} else {
 					// Executes command and sends response to proper channel
-					cmdObj.execCommand(server, event.getMember(), args);
+					Message response;
 					try{
-						cmdObj.setLastResponseId(channel.sendMessage(cmdObj.getResponse()).complete().getId());
+						response = cmdObj.execCommand(server, event.getMember(), args);
+					}catch(BadArgumentsException | DoesNotExistException | DuplicateEntryException | InvalidUseException ex){
+						response = Utils.createMessage("Error!", ex.getMessage(), false);
+					}catch(Exception ex){
+						response = Utils.createMessage("Error!", "Something went wrong", false);
+						System.out.println(ex.getMessage());
+					}
+					
+					try{
+						Message sentMsg = channel.sendMessage(response).complete();
+						
+						cmdObj.setLastResponseId(sentMsg.getId());
 					}catch(Exception ex){
 						System.out.println("Error sending message.\n" + ex.getMessage());
 					}
