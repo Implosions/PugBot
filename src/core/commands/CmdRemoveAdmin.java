@@ -21,27 +21,23 @@ public class CmdRemoveAdmin extends Command{
 	@Override
 	public void execCommand(Server server, Member member, String[] args) {
 		String pName;
-		try{
-			if(args.length == 1){
-				Member m = server.getMember(args[0]);
-				if (m != null){
-					pName = m.getEffectiveName();
-					if(server.isAdmin(m)){
-						server.removeAdmin(m.getUser().getId());
-					}else{
-						throw new InvalidUseException(pName + " is not an admin");
-					}
-				}else{
-					throw new DoesNotExistException("User");
+		if (args.length == 1) {
+			Member m = server.getMember(args[0]);
+			if (m != null) {
+				pName = m.getEffectiveName();
+				if (server.isAdmin(m)) {
+					server.removeAdmin(m.getUser().getId());
+				} else {
+					throw new InvalidUseException(pName + " is not an admin");
 				}
-			}else{
-				throw new BadArgumentsException();
+			} else {
+				throw new DoesNotExistException("User");
 			}
-			this.response = Utils.createMessage(String.format("`%s's admin removed`", pName));
-			System.out.println(success());
-		}catch(BadArgumentsException | DoesNotExistException | InvalidUseException ex){
-			this.response = Utils.createMessage("Error!", ex.getMessage(), false);
+		} else {
+			throw new BadArgumentsException();
 		}
+		this.response = Utils.createMessage(String.format("`%s's admin removed`", pName));
+		System.out.println(success());
 	}
 
 }

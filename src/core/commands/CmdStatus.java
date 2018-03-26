@@ -12,8 +12,6 @@ import core.exceptions.DoesNotExistException;
 import core.util.Utils;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.User;
-import net.dv8tion.jda.core.exceptions.ErrorResponseException;
-import net.dv8tion.jda.core.exceptions.PermissionException;
 
 public class CmdStatus extends Command {
 	
@@ -26,39 +24,32 @@ public class CmdStatus extends Command {
 	@Override
 	public void execCommand(Server server, Member member, String[] args) {
 		QueueManager qm = server.getQueueManager();
-		try {
-			if (!qm.isQueueListEmpty()) {
-				if (args.length == 0) {
-					this.response = Utils.createMessage("", statusBuilder(qm.getQueueList()), true);
-				} else {
-					List<Queue> queueList = new ArrayList<Queue>();
-					for (String a : args) {
-						Queue queue;
-						try {
-							queue = qm.getQueue(Integer.valueOf(a));
-						} catch (NumberFormatException ex) {
-							queue = qm.getQueue(a);
-						}
-						if (queue != null) {
-							queueList.add(queue);
-						}
-					}
-					this.response = Utils.createMessage("", statusBuilder(queueList), true);
-				}
+		if (!qm.isQueueListEmpty()) {
+			if (args.length == 0) {
+				this.response = Utils.createMessage("", statusBuilder(qm.getQueueList()), true);
 			} else {
-				throw new DoesNotExistException("Queue");
+				List<Queue> queueList = new ArrayList<Queue>();
+				for (String a : args) {
+					Queue queue;
+					try {
+						queue = qm.getQueue(Integer.valueOf(a));
+					} catch (NumberFormatException ex) {
+						queue = qm.getQueue(a);
+					}
+					if (queue != null) {
+						queueList.add(queue);
+					}
+				}
+				this.response = Utils.createMessage("", statusBuilder(queueList), true);
 			}
-			// Delete last status message
-			if(lastResponseId != null){
-				qm.getServer().getPugChannel().deleteMessageById(lastResponseId).complete();
-			}
-			System.out.println(success());
-		} catch (DoesNotExistException ex) {
-			this.response = Utils.createMessage("Error!", ex.getMessage(), false);
-		} catch (PermissionException | ErrorResponseException ex){
-			lastResponseId = null;
-			ex.printStackTrace();
+		} else {
+			throw new DoesNotExistException("Queue");
 		}
+		// Delete last status message
+		if (lastResponseId != null) {
+			qm.getServer().getPugChannel().deleteMessageById(lastResponseId).complete();
+		}
+		System.out.println(success());
 	}
 
 	private String statusBuilder(List<Queue> queueList) {

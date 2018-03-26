@@ -15,18 +15,14 @@ public class CmdHelp extends Command{
 	}
 	@Override
 	public void execCommand(Server server, Member member, String[] args) {
-		try{
-			if(args.length == 0){
-				this.response = Utils.createMessage(helpBuilder(server, member));
-			}else{
-				if(server.cmds.validateCommand(args[0])){
-					this.response = Utils.createMessage(server.cmds.getCommandObj(args[0]).help());
-				}
+		if (args.length == 0) {
+			this.response = Utils.createMessage(helpBuilder(server, member));
+		} else {
+			if (server.cmds.validateCommand(args[0])) {
+				this.response = Utils.createMessage(server.cmds.getCommandObj(args[0]).help());
 			}
-			System.out.println(success());
-		}catch(Exception ex){
-			this.response = Utils.createMessage("Error!", ex.getMessage(), false);
 		}
+		System.out.println(success());
 	}
 	
 	private String helpBuilder(Server server, Member member){

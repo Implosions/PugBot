@@ -21,7 +21,6 @@ public class CmdRPS extends Command{
 
 	@Override
 	public void execCommand(Server server, Member member, String[] args) {
-		try{
 			if(args.length == 1){
 				Member m = server.getMember(args[0]);
 				if(m != null && !m.getUser().isBot()){
@@ -38,9 +37,5 @@ public class CmdRPS extends Command{
 			}
 			this.response = Utils.createMessage("`Challenge sent`");
 			System.out.println(success());
-		}catch(BadArgumentsException | DoesNotExistException ex){
-			this.response = Utils.createMessage("Error!", ex.getMessage(), false);
-		}
 	}
-
 }

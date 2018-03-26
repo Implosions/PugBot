@@ -34,38 +34,41 @@ public class CmdBully extends Command {
 
 	@Override
 	public void execCommand(Server server, Member member, String[] args) {
-		try {
-			if (args.length == 1) {
-				// Match user to given name
-				Member m = server.getMember(args[0]);
-				
-				if (m != null) {
-					User u = m.getUser();
-					// Check command invoker is not on cooldown
-					if (!cooldownCollection.containsKey(member.getUser()) || System.currentTimeMillis() - (60000 * COOLDOWN_TIME_MINUTES) >= cooldownCollection.get(member.getUser())) {
-						if (u.getId().equals(Constants.OWNER_ID)) {
-							u = member.getUser();
-						}
-						// Create message with random string in actionList
-						this.response = Utils.createMessage(String.format(actionList.get(random.nextInt(actionList.size())), u.getId()));
-						// Put user in cooldownCollection
-						if(!member.getUser().getId().equals(Constants.OWNER_ID)){
-							cooldownCollection.put(member.getUser(), System.currentTimeMillis());
-						}
-					} else {
-						this.response = Utils.createMessage("Your bullying is on cooldown", String.format("Time remaining: %d Minutes",
-								COOLDOWN_TIME_MINUTES - ((System.currentTimeMillis() - cooldownCollection.get(member.getUser())) / 60000)), false);
+		if (args.length == 1) {
+			// Match user to given name
+			Member m = server.getMember(args[0]);
+
+			if (m != null) {
+				User u = m.getUser();
+				// Check command invoker is not on cooldown
+				if (!cooldownCollection.containsKey(member.getUser()) || System.currentTimeMillis()
+						- (60000 * COOLDOWN_TIME_MINUTES) >= cooldownCollection.get(member.getUser())) {
+					if (u.getId().equals(Constants.OWNER_ID)) {
+						u = member.getUser();
+					}
+					// Create message with random string in actionList
+					this.response = Utils
+							.createMessage(String.format(actionList.get(random.nextInt(actionList.size())), u.getId()));
+					// Put user in cooldownCollection
+					if (!member.getUser().getId().equals(Constants.OWNER_ID)) {
+						cooldownCollection.put(member.getUser(), System.currentTimeMillis());
 					}
 				} else {
-					throw new DoesNotExistException("User");
+					this.response = Utils
+							.createMessage(
+									"Your bullying is on cooldown", String
+											.format("Time remaining: %d Minutes",
+													COOLDOWN_TIME_MINUTES - ((System.currentTimeMillis()
+															- cooldownCollection.get(member.getUser())) / 60000)),
+									false);
 				}
 			} else {
-				throw new BadArgumentsException();
+				throw new DoesNotExistException("User");
 			}
-			System.out.println(success());
-		} catch (BadArgumentsException | DoesNotExistException ex) {
-			this.response = Utils.createMessage("Error!", ex.getMessage(), false);
+		} else {
+			throw new BadArgumentsException();
 		}
+		System.out.println(success());
 	}
 	
 	private List<String> getActionList(){

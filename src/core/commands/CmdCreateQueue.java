@@ -4,7 +4,6 @@ import core.Constants;
 import core.entities.QueueManager;
 import core.entities.Server;
 import core.exceptions.BadArgumentsException;
-import core.exceptions.DuplicateEntryException;
 import core.util.Utils;
 import net.dv8tion.jda.core.entities.Member;
 
@@ -20,21 +19,17 @@ public class CmdCreateQueue extends Command {
 	@Override
 	public void execCommand(Server server, Member member, String[] args) {
 		QueueManager qm = server.getQueueManager();
-		try {
-			if (args.length == 2) {
-				try{
-					qm.createQueue(args[0], Integer.valueOf(args[1]));
-				}catch(NumberFormatException ex){
-					throw new BadArgumentsException("Max players must be an integer value");
-				}
-			} else {
-				throw new BadArgumentsException();
+		if (args.length == 2) {
+			try {
+				qm.createQueue(args[0], Integer.valueOf(args[1]));
+			} catch (NumberFormatException ex) {
+				throw new BadArgumentsException("Max players must be an integer value");
 			}
-			qm.updateTopic();
-			this.response = Utils.createMessage(String.format("Queue %s created", args[0]), qm.getHeader(), true);
-			System.out.println(success());
-		} catch (BadArgumentsException | DuplicateEntryException ex) {
-			this.response = Utils.createMessage("Error!", ex.getMessage(), false);
+		} else {
+			throw new BadArgumentsException();
 		}
+		qm.updateTopic();
+		this.response = Utils.createMessage(String.format("Queue %s created", args[0]), qm.getHeader(), true);
+		System.out.println(success());
 	}
 }

@@ -4,7 +4,6 @@ import core.Constants;
 import core.entities.Server;
 import core.exceptions.BadArgumentsException;
 import core.exceptions.DoesNotExistException;
-import core.exceptions.InvalidUseException;
 import core.util.Utils;
 import net.dv8tion.jda.core.entities.Member;
 
@@ -18,23 +17,18 @@ public class CmdSubCaptain extends Command{
 	
 	@Override
 	public void execCommand(Server server, Member member, String[] args) {
-		try{
-			if(args.length == 1){
-				Member target = server.getMember(args[0]);
+		if (args.length == 1) {
+			Member target = server.getMember(args[0]);
 
-				if(target != null){
-					server.getQueueManager().subCaptain(member.getUser(), target.getUser());
-				}else{
-					throw new DoesNotExistException(args[0]);
-				}
-			}else{
-				throw new BadArgumentsException();
+			if (target != null) {
+				server.getQueueManager().subCaptain(member.getUser(), target.getUser());
+			} else {
+				throw new DoesNotExistException(args[0]);
 			}
-			this.response = Utils.createMessage(String.format("`%s is now a captain`", member.getEffectiveName()));
-			System.out.println(success());
-		}catch(BadArgumentsException | InvalidUseException | DoesNotExistException ex){
-			this.response = Utils.createMessage("Error!", ex.getMessage(), false);
+		} else {
+			throw new BadArgumentsException();
 		}
+		this.response = Utils.createMessage(String.format("`%s is now a captain`", member.getEffectiveName()));
+		System.out.println(success());
 	}
-
 }
