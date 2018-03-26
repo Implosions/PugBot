@@ -6,6 +6,7 @@ import core.entities.Server;
 import core.exceptions.InvalidUseException;
 import core.util.Utils;
 import net.dv8tion.jda.core.entities.Member;
+import net.dv8tion.jda.core.entities.Message;
 
 public class CmdDel extends Command {
 
@@ -16,7 +17,7 @@ public class CmdDel extends Command {
 	}
 
 	@Override
-	public void execCommand(Server server, Member member, String[] args) {
+	public Message execCommand(Server server, Member member, String[] args) {
 		QueueManager qm = server.getQueueManager();
 		if (qm.isPlayerInQueue(member.getUser()) || qm.isPlayerWaiting(member.getUser())) {
 			if (args.length == 0) {
@@ -37,6 +38,7 @@ public class CmdDel extends Command {
 		this.response = Utils.createMessage(String.format("%s deleted from queue", member.getEffectiveName()),
 				qm.getHeader(), true);
 		System.out.println(success());
+		
+		return response;
 	}
-
 }

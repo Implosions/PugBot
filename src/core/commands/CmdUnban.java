@@ -6,6 +6,7 @@ import core.exceptions.BadArgumentsException;
 import core.exceptions.DoesNotExistException;
 import core.util.Utils;
 import net.dv8tion.jda.core.entities.Member;
+import net.dv8tion.jda.core.entities.Message;
 
 public class CmdUnban extends Command{
 
@@ -18,7 +19,7 @@ public class CmdUnban extends Command{
 	}
 	
 	@Override
-	public void execCommand(Server server, Member member, String[] args) {
+	public Message execCommand(Server server, Member member, String[] args) {
 		String pName = "All";
 		if (args.length == 0) {
 			server.unbanAll();
@@ -35,5 +36,7 @@ public class CmdUnban extends Command{
 		}
 		this.response = Utils.createMessage(String.format("`%s unbanned`", pName));
 		System.out.println(success());
+		
+		return response;
 	}
 }

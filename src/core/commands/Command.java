@@ -16,14 +16,10 @@ public abstract class Command {
 	protected boolean adminRequired = false;
 	protected boolean pugCommand = true;
 	
-	public abstract void execCommand(Server server, Member member, String[] args);
+	public abstract Message execCommand(Server server, Member member, String[] args);
 	
 	public String help(){
 		return this.helpMsg;
-	}
-	
-	public Message getResponse(){
-		return this.response;
 	}
 	
 	public boolean getDM(){

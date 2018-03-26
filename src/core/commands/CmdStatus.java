@@ -11,6 +11,7 @@ import core.entities.Server;
 import core.exceptions.DoesNotExistException;
 import core.util.Utils;
 import net.dv8tion.jda.core.entities.Member;
+import net.dv8tion.jda.core.entities.Message;
 import net.dv8tion.jda.core.entities.User;
 
 public class CmdStatus extends Command {
@@ -22,7 +23,7 @@ public class CmdStatus extends Command {
 	}
 
 	@Override
-	public void execCommand(Server server, Member member, String[] args) {
+	public Message execCommand(Server server, Member member, String[] args) {
 		QueueManager qm = server.getQueueManager();
 		if (!qm.isQueueListEmpty()) {
 			if (args.length == 0) {
@@ -50,6 +51,8 @@ public class CmdStatus extends Command {
 			qm.getServer().getPugChannel().deleteMessageById(lastResponseId).complete();
 		}
 		System.out.println(success());
+		
+		return response;
 	}
 
 	private String statusBuilder(List<Queue> queueList) {

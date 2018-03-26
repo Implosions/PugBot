@@ -9,6 +9,7 @@ import core.exceptions.DoesNotExistException;
 import core.util.Trigger;
 import core.util.Utils;
 import net.dv8tion.jda.core.entities.Member;
+import net.dv8tion.jda.core.entities.Message;
 
 public class CmdRPS extends Command{
 	
@@ -20,22 +21,28 @@ public class CmdRPS extends Command{
 	}
 
 	@Override
-	public void execCommand(Server server, Member member, String[] args) {
-			if(args.length == 1){
-				Member m = server.getMember(args[0]);
-				if(m != null && !m.getUser().isBot()){
-					Trigger t = () -> System.out.println("RPS completed");
-					RPSMenu rps = new RPSMenu(member.getUser(), m.getUser(), t);
-					t = () -> {if(!rps.finished()){rps.complete();}};
-					new Timer(180, t).start();
-				}else{
-					throw new DoesNotExistException("User: " + args[0]);
-				}
-				
-			}else{
-				throw new BadArgumentsException();
+	public Message execCommand(Server server, Member member, String[] args) {
+		if (args.length == 1) {
+			Member m = server.getMember(args[0]);
+			if (m != null && !m.getUser().isBot()) {
+				Trigger t = () -> System.out.println("RPS completed");
+				RPSMenu rps = new RPSMenu(member.getUser(), m.getUser(), t);
+				t = () -> {
+					if (!rps.finished()) {
+						rps.complete();
+					}
+				};
+				new Timer(180, t).start();
+			} else {
+				throw new DoesNotExistException("User: " + args[0]);
 			}
-			this.response = Utils.createMessage("`Challenge sent`");
-			System.out.println(success());
+
+		} else {
+			throw new BadArgumentsException();
+		}
+		this.response = Utils.createMessage("`Challenge sent`");
+		System.out.println(success());
+		
+		return response;
 	}
 }

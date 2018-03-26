@@ -5,6 +5,7 @@ import core.entities.QueueManager;
 import core.entities.Server;
 import core.util.Utils;
 import net.dv8tion.jda.core.entities.Member;
+import net.dv8tion.jda.core.entities.Message;
 
 public class CmdAdd extends Command{
 	
@@ -15,7 +16,7 @@ public class CmdAdd extends Command{
 	}
 	
 	@Override
-	public void execCommand(Server server, Member member, String[] args) {
+	public Message execCommand(Server server, Member member, String[] args) {
 		QueueManager qm = server.getQueueManager();
 		if (args.length == 0) {
 			qm.addPlayerToQueue(member.getUser());
@@ -38,6 +39,6 @@ public class CmdAdd extends Command{
 					qm.getHeader(), true);
 		}
 		System.out.println(success());
+		return response;
 	}
-	
 }

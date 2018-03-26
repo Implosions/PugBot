@@ -6,6 +6,7 @@ import core.entities.Server;
 import core.exceptions.BadArgumentsException;
 import core.util.Utils;
 import net.dv8tion.jda.core.entities.Member;
+import net.dv8tion.jda.core.entities.Message;
 
 public class CmdNotify extends Command{
 	
@@ -16,7 +17,7 @@ public class CmdNotify extends Command{
 	}
 	
 	@Override
-	public void execCommand(Server server, Member member, String[] args) {
+	public Message execCommand(Server server, Member member, String[] args) {
 		QueueManager qm = server.getQueueManager();
 		if (args.length == 2) {
 			Integer playerCount;
@@ -36,5 +37,7 @@ public class CmdNotify extends Command{
 		this.response = Utils.createMessage("Notification added", "", true);
 		System.out.println(success());
 		qm.saveToFile();
+		
+		return response;
 	}
 }

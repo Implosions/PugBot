@@ -4,6 +4,7 @@ import core.Constants;
 import core.entities.Server;
 import core.util.Utils;
 import net.dv8tion.jda.core.entities.Member;
+import net.dv8tion.jda.core.entities.Message;
 
 public class CmdHelp extends Command{
 	
@@ -14,7 +15,7 @@ public class CmdHelp extends Command{
 		this.dm = true;
 	}
 	@Override
-	public void execCommand(Server server, Member member, String[] args) {
+	public Message execCommand(Server server, Member member, String[] args) {
 		if (args.length == 0) {
 			this.response = Utils.createMessage(helpBuilder(server, member));
 		} else {
@@ -23,6 +24,8 @@ public class CmdHelp extends Command{
 			}
 		}
 		System.out.println(success());
+		
+		return response;
 	}
 	
 	private String helpBuilder(Server server, Member member){

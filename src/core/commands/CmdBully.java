@@ -15,6 +15,7 @@ import core.exceptions.BadArgumentsException;
 import core.exceptions.DoesNotExistException;
 import core.util.Utils;
 import net.dv8tion.jda.core.entities.Member;
+import net.dv8tion.jda.core.entities.Message;
 import net.dv8tion.jda.core.entities.User;
 
 
@@ -33,7 +34,7 @@ public class CmdBully extends Command {
 	}
 
 	@Override
-	public void execCommand(Server server, Member member, String[] args) {
+	public Message execCommand(Server server, Member member, String[] args) {
 		if (args.length == 1) {
 			// Match user to given name
 			Member m = server.getMember(args[0]);
@@ -54,13 +55,10 @@ public class CmdBully extends Command {
 						cooldownCollection.put(member.getUser(), System.currentTimeMillis());
 					}
 				} else {
-					this.response = Utils
-							.createMessage(
-									"Your bullying is on cooldown", String
-											.format("Time remaining: %d Minutes",
-													COOLDOWN_TIME_MINUTES - ((System.currentTimeMillis()
-															- cooldownCollection.get(member.getUser())) / 60000)),
-									false);
+					this.response = Utils.createMessage("Your bullying is on cooldown", 
+							String.format("Time remaining: %d Minutes", 
+									COOLDOWN_TIME_MINUTES -
+									((System.currentTimeMillis() - cooldownCollection.get(member.getUser())) / 60000)), false);
 				}
 			} else {
 				throw new DoesNotExistException("User");
@@ -69,6 +67,8 @@ public class CmdBully extends Command {
 			throw new BadArgumentsException();
 		}
 		System.out.println(success());
+		
+		return response;
 	}
 	
 	private List<String> getActionList(){
@@ -89,5 +89,4 @@ public class CmdBully extends Command {
 		}
 		return null;
 	}
-
 }

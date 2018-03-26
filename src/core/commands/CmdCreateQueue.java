@@ -6,6 +6,7 @@ import core.entities.Server;
 import core.exceptions.BadArgumentsException;
 import core.util.Utils;
 import net.dv8tion.jda.core.entities.Member;
+import net.dv8tion.jda.core.entities.Message;
 
 public class CmdCreateQueue extends Command {
 
@@ -17,7 +18,7 @@ public class CmdCreateQueue extends Command {
 	}
 
 	@Override
-	public void execCommand(Server server, Member member, String[] args) {
+	public Message execCommand(Server server, Member member, String[] args) {
 		QueueManager qm = server.getQueueManager();
 		if (args.length == 2) {
 			try {
@@ -31,5 +32,7 @@ public class CmdCreateQueue extends Command {
 		qm.updateTopic();
 		this.response = Utils.createMessage(String.format("Queue %s created", args[0]), qm.getHeader(), true);
 		System.out.println(success());
+		
+		return response;
 	}
 }

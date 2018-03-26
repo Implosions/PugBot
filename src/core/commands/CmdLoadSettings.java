@@ -4,6 +4,7 @@ import core.Constants;
 import core.entities.Server;
 import core.util.Utils;
 import net.dv8tion.jda.core.entities.Member;
+import net.dv8tion.jda.core.entities.Message;
 
 public class CmdLoadSettings extends Command{
 	
@@ -16,10 +17,12 @@ public class CmdLoadSettings extends Command{
 	}
 
 	@Override
-	public void execCommand(Server server, Member member, String[] args) {
+	public Message execCommand(Server server, Member member, String[] args) {
 		server.getSettings().loadSettingsFile();
 		this.response = Utils.createMessage("`Settings loaded`");
 		System.out.println(success());
+		
+		return response;
 	}
 
 }

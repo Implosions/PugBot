@@ -4,6 +4,7 @@ import core.Constants;
 import core.entities.Server;
 import core.util.Utils;
 import net.dv8tion.jda.core.entities.Member;
+import net.dv8tion.jda.core.entities.Message;
 
 public class CmdMumble extends Command{
 	
@@ -14,9 +15,11 @@ public class CmdMumble extends Command{
 	}
 
 	@Override
-	public void execCommand(Server server, Member member, String[] args) {
+	public Message execCommand(Server server, Member member, String[] args) {
 		this.response = Utils.createMessage("", server.getSettings().mumble(), true);
 		System.out.println(success());
+		
+		return response;
 	}
 
 }

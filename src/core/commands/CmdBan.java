@@ -7,6 +7,7 @@ import core.exceptions.DoesNotExistException;
 import core.exceptions.InvalidUseException;
 import core.util.Utils;
 import net.dv8tion.jda.core.entities.Member;
+import net.dv8tion.jda.core.entities.Message;
 
 public class CmdBan extends Command{
 
@@ -19,7 +20,7 @@ public class CmdBan extends Command{
 	}
 	
 	@Override
-	public void execCommand(Server server, Member member, String[] args) {
+	public Message execCommand(Server server, Member member, String[] args) {
 		String pName;
 		if (args.length == 1) {
 			Member m = server.getMember(args[0]);
@@ -38,5 +39,7 @@ public class CmdBan extends Command{
 		}
 		this.response = Utils.createMessage(String.format("`%s banned`", pName));
 		System.out.println(success());
+		
+		return response;
 	}
 }

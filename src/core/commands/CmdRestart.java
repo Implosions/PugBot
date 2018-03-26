@@ -5,6 +5,7 @@ import core.entities.Server;
 import core.entities.ServerManager;
 import core.util.Utils;
 import net.dv8tion.jda.core.entities.Member;
+import net.dv8tion.jda.core.entities.Message;
 
 public class CmdRestart extends Command{
 
@@ -16,11 +17,13 @@ public class CmdRestart extends Command{
 	}
 	
 	@Override
-	public void execCommand(Server server, Member member, String[] args) {
+	public Message execCommand(Server server, Member member, String[] args) {
 		ServerManager.removeServer(server.getGuild());
 		ServerManager.addNewServer(server.getGuild());
 		this.response = Utils.createMessage("`Server instance restarted`");
 		System.out.println(success());
+		
+		return response;
 	}
 
 }
