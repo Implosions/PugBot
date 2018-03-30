@@ -103,4 +103,8 @@ public class Constants {
 	public final static String REMOVEADMIN_NAME = "removeadmin";
 	public final static String REMOVEADMIN_HELP = "!removeadmin <name>";
 	public final static String REMOVEADMIN_DESC = "removes a user's admin privileges";
+	
+	public final static String SETTINGS_NAME = "settings";
+	public final static String SETTINGS_HELP = "!settings | !settings <setting> | !settings <setting> <value>";
+	public final static String SETTINGS_DESC = "gets or sets a setting's value";
 }

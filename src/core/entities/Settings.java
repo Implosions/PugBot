@@ -35,7 +35,9 @@ public class Settings {
 		try{
 			FileInputStream is = new FileInputStream(filePath);
 			Properties p = new Properties();
+			
 			p.load(is);
+			
 			mumble = p.getProperty("mumble", mumble);
 			pugChannel = p.getProperty("pugchannel", pugChannel);
 			minNumberOfGames = Integer.valueOf(p.getProperty("mingames", minNumberOfGames.toString()));
@@ -45,6 +47,7 @@ public class Settings {
 			randomizeCaptains = Boolean.valueOf(p.getProperty("randomizecaptains", String.valueOf(randomizeCaptains)));
 			snakePick = Boolean.valueOf(p.getProperty("snakepick", String.valueOf(snakePick)));
 			postTeams = Boolean.valueOf(p.getProperty("postteams", String.valueOf(postTeams)));
+			
 			is.close();
 		}catch(IOException ex){
 			ex.printStackTrace();
@@ -67,6 +70,49 @@ public class Settings {
 			p.setProperty("randomizecaptains", String.valueOf(randomizeCaptains));
 			p.setProperty("snakepick", String.valueOf(snakePick));
 			p.setProperty("postteams", String.valueOf(postTeams));
+			
+			p.store(os, null);
+			os.close();
+		}catch(IOException ex){
+			ex.printStackTrace();
+		}
+	}
+	
+	public void setProperty(String setting, String value){
+		try{
+			FileOutputStream os = new FileOutputStream(filePath);
+			Properties p = new Properties();
+			
+			p.setProperty(setting, value);
+			
+			p.store(os, null);
+			os.close();
+		}catch(IOException ex){
+			ex.printStackTrace();
+		}
+	}
+	
+	public void setProperty(String setting, Integer value){
+		try{
+			FileOutputStream os = new FileOutputStream(filePath);
+			Properties p = new Properties();
+			
+			p.setProperty(setting, value.toString());
+			
+			p.store(os, null);
+			os.close();
+		}catch(IOException ex){
+			ex.printStackTrace();
+		}
+	}
+	
+	public void setProperty(String setting, boolean value){
+		try{
+			FileOutputStream os = new FileOutputStream(filePath);
+			Properties p = new Properties();
+			
+			p.setProperty(setting, String.valueOf(value));
+			
 			p.store(os, null);
 			os.close();
 		}catch(IOException ex){

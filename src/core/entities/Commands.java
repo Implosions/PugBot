@@ -43,6 +43,7 @@ public class Commands {
 		cmdList.put(Constants.UNBAN_NAME, new CmdUnban());
 		cmdList.put(Constants.ADDADMIN_NAME, new CmdAddAdmin());
 		cmdList.put(Constants.REMOVEADMIN_NAME, new CmdRemoveAdmin());
+		cmdList.put(Constants.SETTINGS_NAME, new CmdSettings());
 		
 		populateLists();
 	}
