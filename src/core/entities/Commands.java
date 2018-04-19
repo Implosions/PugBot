@@ -3,20 +3,24 @@ package core.entities;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 
 import core.Constants;
+import core.Database;
 import core.commands.*;
 
 public class Commands {
 	private HashMap<String, Command> cmdList;
-	private ArrayList<String> adminCmds;
-	private ArrayList<String> cmds;
+	private List<String> adminCmds;
+	private List<String> cmds;
+	private List<String> customCmds;
 
-	public Commands() {
+	public Commands(long serverId) {
 		cmdList = new HashMap<String, Command>();
 		adminCmds = new ArrayList<String>();
 		cmds = new ArrayList<String>();
-
+		customCmds = new ArrayList<String>();
+		
 		// Commands
 		cmdList.put(Constants.CREATEQUEUE_NAME, new CmdCreateQueue());
 		cmdList.put(Constants.STATUS_NAME, new CmdStatus());
@@ -44,6 +48,10 @@ public class Commands {
 		cmdList.put(Constants.ADDADMIN_NAME, new CmdAddAdmin());
 		cmdList.put(Constants.REMOVEADMIN_NAME, new CmdRemoveAdmin());
 		cmdList.put(Constants.SETTINGS_NAME, new CmdSettings());
+		cmdList.put(Constants.CREATECOMMAND_NAME, new CmdCreateCommand());
+		cmdList.put(Constants.DELETECOMMAND_NAME, new CmdDeleteCommand());
+		
+		loadCustomCommands(serverId);
 		
 		populateLists();
 	}
@@ -84,15 +92,54 @@ public class Commands {
 	}
 	
 	/**
-	 * @return the list of admin commands
+	 * @return the list of admin command names
 	 */
-	public ArrayList<String> getAdminCmds(){
+	public List<String> getAdminCmds(){
 		return adminCmds;
 	}
+	
 	/**
-	 * @return the list of regular commands
+	 * @return the list of regular command names
 	 */
-	public  ArrayList<String> getCmds(){
+	public List<String> getCmds(){
 		return cmds;
+	}
+	
+	/**
+	 * @return the list of custom command names
+	 */
+	public List<String> getCustomCmds(){
+		return customCmds;
+	}
+	
+	/**
+	 * Adds a custom command to the cmdList
+	 * 
+	 * @param cmd The command to add
+	 */
+	public void addCommand(Command cmd){
+		cmdList.put(cmd.getName(), cmd);
+		customCmds.add(cmd.getName());
+	}
+	
+	/**
+	 * Removes a custom command from the cmdList
+	 * 
+	 * @param name The name of the command to remove
+	 */
+	public void removeCommand(String name){
+		cmdList.remove(name);
+		customCmds.remove(name);
+	}
+	
+	/**
+	 * Loads all of the custom commands from the database
+	 * 
+	 * @param serverId The id of the server to load custom commands for
+	 */
+	private void loadCustomCommands(long serverId){
+		for(CustomCommand cmd : Database.getCustomCommands(serverId)){
+			addCommand(cmd);
+		}
 	}
 }

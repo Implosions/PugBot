@@ -107,4 +107,12 @@ public class Constants {
 	public final static String SETTINGS_NAME = "settings";
 	public final static String SETTINGS_HELP = "!settings | !settings <setting> | !settings <setting> <value>";
 	public final static String SETTINGS_DESC = "gets or sets a setting's value";
+	
+	public final static String CREATECOMMAND_NAME = "createcommand";
+	public final static String CREATECOMMAND_HELP = "!createcommand <name> <message>";
+	public final static String CREATECOMMAND_DESC = "Creates a new command that responds with a set message";
+	
+	public final static String DELETECOMMAND_NAME = "deletecommand";
+	public final static String DELETECOMMAND_HELP = "!deletecommand <name>";
+	public final static String DELETECOMMAND_DESC = "Deletes a custom command";
 }

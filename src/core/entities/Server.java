@@ -33,7 +33,7 @@ public class Server {
 		this.id = guild.getId();
 		Utils.createDir(String.format("%s/%s", "app_data", id));
 		qm = new QueueManager(id);
-		cmds = new Commands();
+		cmds = new Commands(guild.getIdLong());
 		settings = new Settings(id);
 		qm.getQueueList().forEach((q) -> q.getPlayersInQueue().forEach((u) -> updateActivityList(u)));
 		

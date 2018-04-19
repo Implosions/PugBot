@@ -4,6 +4,8 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
+import core.commands.CustomCommand;
+
 public class Database {
 	
 	private static Connection conn = null;
@@ -92,6 +94,16 @@ public class Database {
 					+ "FOREIGN KEY (serverId) REFERENCES DiscordServer(id), "
 					+ "FOREIGN KEY (playerId) REFERENCES Player(id)"
 					+ ")");
+			
+			statement.executeUpdate("CREATE TABLE IF NOT EXISTS "
+					+ "ServerCustomCommand("
+					+ "serverId INTEGER NOT NULL, "
+					+ "name VARCHAR(50) NOT NULL, "
+					+ "message TEXT NOT NULL, "
+					+ "PRIMARY KEY (serverId, name), "
+					+ "FOREIGN KEY (serverId) REFERENCES DiscordServer(id)"
+					+ ")");
+			
 		}catch(Exception ex){
 			ex.printStackTrace();
 		}
@@ -441,6 +453,65 @@ public class Database {
 			pStatement.setInt(1, value);
 			pStatement.setLong(2, serverId);
 			pStatement.setLong(1, playerId);
+			
+			pStatement.execute();
+		}catch(SQLException ex){
+			ex.printStackTrace();
+		}
+	}
+	
+	/**
+	 * @param serverId The id of the server
+	 * @param name The name of the command
+	 * @param message The output of the command
+	 */
+	public static void insertServerCustomCommand(Long serverId, String name, String message){
+		try{
+			PreparedStatement pStatement = conn.prepareStatement("INSERT INTO ServerCustomCommand VALUES(?, ?, ?)");
+			pStatement.setLong(1, serverId);
+			pStatement.setString(2, name);
+			pStatement.setString(3, message);
+			
+			pStatement.execute();
+		}catch(SQLException ex){
+			ex.printStackTrace();
+		}
+	}
+	
+	/**
+	 * @param serverId The id of the server
+	 * @return List of CustomCommand objects
+	 */
+	public static List<CustomCommand> getCustomCommands(Long serverId){
+		List<CustomCommand> cmds = new ArrayList<CustomCommand>();
+		try{
+			PreparedStatement pStatement = conn.prepareStatement("SELECT name, message FROM ServerCustomCommand WHERE serverId = ?");
+			pStatement.setLong(1, serverId);
+			
+			ResultSet rs = pStatement.executeQuery();
+			
+			while(rs.next()){
+				String name = rs.getString(1);
+				String message = rs.getString(2);
+				
+				cmds.add(new CustomCommand(name, message));
+			}
+			
+		}catch(SQLException ex){
+			ex.printStackTrace();
+		}
+		return cmds;
+	}
+	
+	/**
+	 * @param serverId The id of the server
+	 * @param name The name of the command to delete
+	 */
+	public static void deleteCustomCommand(Long serverId, String name){
+		try{
+			PreparedStatement pStatement = conn.prepareStatement("DELETE FROM ServerCustomCommand WHERE serverId = ? AND name = ?");
+			pStatement.setLong(1, serverId);
+			pStatement.setString(2, name);
 			
 			pStatement.execute();
 		}catch(SQLException ex){
