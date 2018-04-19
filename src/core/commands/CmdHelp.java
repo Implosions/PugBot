@@ -20,7 +20,8 @@ public class CmdHelp extends Command{
 			this.response = Utils.createMessage(helpBuilder(server, member));
 		} else {
 			if (server.cmds.validateCommand(args[0])) {
-				this.response = Utils.createMessage(server.cmds.getCommandObj(args[0]).help());
+				Command cmd = server.cmds.getCommandObj(args[0]);
+				this.response = Utils.createMessage(String.format("!%s - %s. Usage: %s", cmd.getName(), cmd.getDescription(), cmd.help()));
 			}
 		}
 		System.out.println(success());
@@ -35,7 +36,15 @@ public class CmdHelp extends Command{
 		// List commands
 		for(String cmd : server.cmds.getCmds()){
 			cmdObj = server.cmds.getCommandObj(cmd);
-			s += String.format("!%s - %s. Usage: %s%n", cmdObj.getName(), cmdObj.getDescription(), cmdObj.help()); 
+			if(cmd != "terminate"){
+				s += String.format("!%s - %s%n", cmdObj.getName(), cmdObj.getDescription());
+			} 
+		}
+		
+		// List custom commands
+		for(String cmd : server.cmds.getCustomCmds()){
+			cmdObj = server.cmds.getCommandObj(cmd);
+			s += String.format("!%s%n", cmdObj.getName()); 
 		}
 		
 		// List admin commands
@@ -43,7 +52,7 @@ public class CmdHelp extends Command{
 			s += "\nAdmin commands:\n\n";
 			for(String cmd : server.cmds.getAdminCmds()){
 				cmdObj = server.cmds.getCommandObj(cmd);
-				s += String.format("!%s - %s. Usage: %s%n", cmdObj.getName(), cmdObj.getDescription(), cmdObj.help()); 
+				s += String.format("!%s - %s%n", cmdObj.getName(), cmdObj.getDescription()); 
 			}
 		}
 		
