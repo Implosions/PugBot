@@ -41,10 +41,8 @@ public class QueueManager {
 	public void createQueue(String name, Integer players) {
 		if (players > 1) {
 			if (!doesQueueExist(name)) {
-				queueList.add(new Queue(name, players, guildId));
-				
-				// Insert queue into database
-				Database.insertQueue(Long.valueOf(guildId), name);
+				int queueId = Database.insertQueue(Long.valueOf(guildId), name);
+				queueList.add(new Queue(name, players, guildId, queueId));
 			} else {
 				throw new DuplicateEntryException("A queue with the same name already exists");
 			}

@@ -104,10 +104,6 @@ public class Constants {
 	public final static String REMOVEADMIN_HELP = "!removeadmin <name>";
 	public final static String REMOVEADMIN_DESC = "removes a user's admin privileges";
 	
-	public final static String SETTINGS_NAME = "settings";
-	public final static String SETTINGS_HELP = "!settings | !settings <setting> | !settings <setting> <value>";
-	public final static String SETTINGS_DESC = "gets or sets a setting's value";
-	
 	public final static String CREATECOMMAND_NAME = "createcommand";
 	public final static String CREATECOMMAND_HELP = "!createcommand <name> <message>";
 	public final static String CREATECOMMAND_DESC = "Creates a new command that responds with a set message";
@@ -115,4 +111,14 @@ public class Constants {
 	public final static String DELETECOMMAND_NAME = "deletecommand";
 	public final static String DELETECOMMAND_HELP = "!deletecommand <name>";
 	public final static String DELETECOMMAND_DESC = "Deletes a custom command";
+	
+	public final static String SERVERSETTINGS_NAME = "serversettings";
+	public final static String SERVERSETTINGS_HELP = "!serversettings | !serversettings <setting> | !serversettings <setting> <value>";
+	public final static String SERVERSETTINGS_DESC = "gets or sets a server setting's value";
+	
+	public final static String QUEUESETTINGS_NAME = "queuesettings";
+	public final static String QUEUESETTINGS_HELP = "!queuesettings <queueName/index> | "
+			+ "!serversettings <queueName/index> <setting> | "
+			+ "!serversettings <queueName/index> <setting> <value>";
+	public final static String QUEUESETTINGS_DESC = "gets or sets a queue setting's value";
 }

@@ -26,11 +26,13 @@ public class Queue {
 	private List<User> waitList = new ArrayList<User>();
 	private HashMap<Integer, List<User>> notifications = new HashMap<Integer, List<User>>();
 	private Trigger t;
+	public QueueSettings settings;
 	
-	public Queue(String name, Integer maxPlayers, String guildId) {
+	public Queue(String name, int maxPlayers, String guildId, int id) {
 		this.name = name;
 		this.maxPlayers = maxPlayers;
 		this.guildId = guildId;
+		this.settings = new QueueSettings(Long.valueOf(guildId), id);
 	}
 
 	/**
@@ -146,7 +148,7 @@ public class Queue {
 		names = names.substring(0, names.lastIndexOf(","));
 		
 		// Create Game and add to the list of active games
-		Game newGame = new Game(guildId, name, players);
+		Game newGame = new Game(this, guildId, name, players);
 		games.add(newGame);
 		
 		// Remove players from all other queues
@@ -154,7 +156,7 @@ public class Queue {
 		
 		// Generate captain string
 		String captainString = "";
-		if(ServerManager.getServer(guildId).getSettings().randomizeCaptains()){
+		if(settings.randomizeCaptains()){
 			captainString = String.format("**Captains:** <@%s> & <@%s>", newGame.getCaptains()[0].getId(), newGame.getCaptains()[1].getId());
 		}
 		
@@ -180,7 +182,7 @@ public class Queue {
 		}
 		games.remove(g);
 		t = () -> ServerManager.getServer(guildId).getQueueManager().timerEnd(players);
-		Timer timer = new Timer(ServerManager.getServer(guildId).getSettings().finishTime(), t);
+		Timer timer = new Timer(ServerManager.getServer(guildId).getSettings().getQueueFinishTimer(), t);
 		timer.start();
 	}
 
@@ -208,6 +210,7 @@ public class Queue {
 		waitList.removeAll(players);
 		currentPlayers = playersInQueue.size();
 	}
+	
 	/**
 	 * Removes a specific player from queue
 	 * 

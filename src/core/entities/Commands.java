@@ -36,8 +36,6 @@ public class Commands {
 		cmdList.put(Constants.NOTIFY_NAME, new CmdNotify());
 		cmdList.put(Constants.DELETENOTIFICATION_NAME, new CmdDeleteNotification());
 		cmdList.put(Constants.TERMINATE_NAME, new CmdTerminate());
-		cmdList.put(Constants.MUMBLE_NAME, new CmdMumble());
-		cmdList.put(Constants.LOADSETTINGS_NAME, new CmdLoadSettings());
 		cmdList.put(Constants.RPS_NAME, new CmdRPS());
 		cmdList.put(Constants.GITHUB_NAME, new CmdGithub());
 		cmdList.put(Constants.SUBCAPTAIN_NAME, new CmdSubCaptain());
@@ -47,9 +45,10 @@ public class Commands {
 		cmdList.put(Constants.UNBAN_NAME, new CmdUnban());
 		cmdList.put(Constants.ADDADMIN_NAME, new CmdAddAdmin());
 		cmdList.put(Constants.REMOVEADMIN_NAME, new CmdRemoveAdmin());
-		cmdList.put(Constants.SETTINGS_NAME, new CmdSettings());
 		cmdList.put(Constants.CREATECOMMAND_NAME, new CmdCreateCommand());
 		cmdList.put(Constants.DELETECOMMAND_NAME, new CmdDeleteCommand());
+		cmdList.put(Constants.SERVERSETTINGS_NAME, new CmdServerSettings());
+		cmdList.put(Constants.QUEUESETTINGS_NAME, new CmdQueueSettings());
 		
 		loadCustomCommands(serverId);
 		

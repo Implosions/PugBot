@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import core.commands.CustomCommand;
+import core.entities.Setting;
 
 public class Database {
 	
@@ -31,6 +32,11 @@ public class Database {
 					+ "DiscordServer("
 					+ "id INTEGER NOT NULL, "
 					+ "name VARCHAR(50) NOT NULL, "
+					+ "setting_AFKTimeout INTEGER NOT NULL DEFAULT 120, "
+					+ "setting_DCTimeout INTEGER NOT NULL DEFAULT 5, "
+					+ "setting_PUGChannel VARCHAR(50) NOT NULL DEFAULT 'pugs', "
+					+ "setting_QueueFinishTimer INTEGER NOT NULL DEFAULT 90, "
+					+ "setting_PostPickedTeamsToPugChannel VARCHAR(5) DEFAULT TRUE, "
 					+ "PRIMARY KEY (id)"
 					+ ")");
 			
@@ -43,19 +49,25 @@ public class Database {
 			
 			statement.executeUpdate("CREATE TABLE IF NOT EXISTS "
 					+ "Queue("
-					+ "name VARCHAR(50) NOT NULL, "
 					+ "serverId INTEGER NOT NULL, "
-					+ "PRIMARY KEY (name, serverId), "
-					+ "FOREIGN KEY (serverId) REFERENCES Server(id)"
+					+ "id INTEGER NOT NULL, "
+					+ "name VARCHAR(50) NOT NULL, "
+					+ "active INTEGER NOT NULL DEFAULT 1, "
+					+ "setting_minNumberOfGamesToCaptain INTEGER NOT NULL DEFAULT 15, "
+					+ "setting_randomizeCaptains VARCHAR(5) NOT NULL DEFAULT 'true', "
+					+ "setting_snakePick VARCHAR(5) NOT NULL DEFAULT 'false', "
+					+ "PRIMARY KEY (id, serverId), "
+					+ "FOREIGN KEY (serverId) REFERENCES DiscordServer(id)"
 					+ ")");
 			
 			statement.executeUpdate("CREATE TABLE IF NOT EXISTS "
 					+ "Game("
 					+ "timestamp INTEGER NOT NULL, "
-					+ "queueName VARCHAR(50) NOT NULL, "
+					+ "queueId INTEGER NOT NULL, "
 					+ "serverId INTEGER NOT NULL, "
-					+ "PRIMARY KEY (timestamp, queueName, serverId), "
+					+ "PRIMARY KEY (timestamp, queueId, serverId), "
 					+ "FOREIGN KEY (serverId) REFERENCES Queue(serverId)"
+					+ "FOREIGN KEY (queueId) REFERENCES Queue(id)"
 					+ ")");
 			
 			statement.executeUpdate("CREATE TABLE IF NOT EXISTS "
@@ -117,7 +129,7 @@ public class Database {
 	 */
 	public static void insertDiscordServer(Long id, String name){
 		try{
-			PreparedStatement pStatement = conn.prepareStatement("INSERT OR IGNORE INTO DiscordServer VALUES(?, ?)");
+			PreparedStatement pStatement = conn.prepareStatement("INSERT OR IGNORE INTO DiscordServer(id, name) VALUES(?, ?)");
 			pStatement.setLong(1, id);
 			pStatement.setString(2, name);
 			
@@ -146,21 +158,49 @@ public class Database {
 	}
 	
 	/**
+	 * The count of queues stored for a server
+	 * 
+	 * @param serverId The id of the server
+	 * @return The number of queues saved for a server
+	 */
+	public static int getQueueCount(long serverId){
+		int count = 0;
+		
+		try{
+			PreparedStatement pStatement = conn.prepareStatement("SELECT count(id) FROM Queue WHERE serverId = ?");
+			pStatement.setLong(1, serverId);
+			
+			
+			ResultSet rs = pStatement.executeQuery();
+			count = rs.getInt(1);
+			
+			rs.close();
+		}catch(SQLException ex){
+			ex.printStackTrace();
+		}
+		return count;
+	}
+	
+	/**
 	 * Insert a queue into the Queue table
 	 * 
 	 * @param serverId the id of the server
-	 * @param Name the name of the queue
+	 * @param name the name of the queue
+	 * @return The id of the queue created
 	 */
-	public static void insertQueue(Long serverId, String Name){
+	public static int insertQueue(long serverId, String name){
+		int id = getQueueCount(serverId);
 		try{
-			PreparedStatement pStatement = conn.prepareStatement("INSERT OR IGNORE INTO Queue VALUES(?, ?)");
-			pStatement.setString(1, Name);
-			pStatement.setLong(2, serverId);
+			PreparedStatement pStatement = conn.prepareStatement("INSERT OR IGNORE INTO Queue(serverId, id, name) VALUES(?, ?, ?)");
+			pStatement.setLong(1, serverId);
+			pStatement.setInt(2, id);
+			pStatement.setString(3, name);
 			
 			pStatement.execute();
 		}catch(SQLException ex){
 			ex.printStackTrace();
 		}
+		return id;
 	}
 	
 	/**
@@ -496,6 +536,7 @@ public class Database {
 				
 				cmds.add(new CustomCommand(name, message));
 			}
+			rs.close();
 			
 		}catch(SQLException ex){
 			ex.printStackTrace();
@@ -514,6 +555,114 @@ public class Database {
 			pStatement.setString(2, name);
 			
 			pStatement.execute();
+		}catch(SQLException ex){
+			ex.printStackTrace();
+		}
+	}
+	
+	/**
+	 * @param serverId The id of the server
+	 * @return A list of settings for the specified server
+	 */
+	public static List<Setting> getServerSettings(long serverId){
+		List<Setting> settings = new ArrayList<Setting>();
+		try{
+			PreparedStatement pStatement = conn.prepareStatement("SELECT setting_AFKTimeout, "
+					+ "setting_DCTimeout, "
+					+ "setting_PUGChannel, "
+					+ "setting_QueueFinishTimer, "
+					+ "setting_PostPickedTeamsToPugChannel "
+					+ "FROM DiscordServer WHERE id = ?");
+			pStatement.setLong(1, serverId);
+			
+			ResultSet rs = pStatement.executeQuery();
+			
+			settings.add(new Setting("AFKTimeout", rs.getInt(1),
+					"minutes", "The amount of time before a user is removed from all queues if no input is detected"));
+			settings.add(new Setting("DCTimeout", rs.getInt(2),
+					"minutes", "The amount of time before a user is removed from all queues after a disconnect is detected"));
+			settings.add(new Setting("PUGChannel", rs.getString(3),
+					null, "The channel that PUG related input and output will be focused in"));
+			settings.add(new Setting("queueFinishTimer", rs.getInt(4),
+					"seconds", "The amount of time for allowing users to re-add to queues after finishing a game"));
+			settings.add(new Setting("PostPickedTeamsToPugChannel", Boolean.valueOf(rs.getString(5)),
+					null, "Post the picked teams to the PUG channel"));
+			
+			rs.close();
+		}catch(SQLException ex){
+			ex.printStackTrace();
+		}
+		return settings;
+	}
+	
+	/**
+	 * @param serverId The id of the server
+	 * @param id The id of the queue
+	 * @return A list of settings for the specified queue
+	 */
+	public static List<Setting> getQueueSettings(long serverId, int id){
+		List<Setting> settings = new ArrayList<Setting>();
+		try{
+			PreparedStatement pStatement = conn.prepareStatement("SELECT setting_minNumberOfGamesToCaptain, "
+					+ "setting_randomizeCaptains, "
+					+ "setting_snakePick "
+					+ "FROM Queue WHERE serverId = ? AND id = ?");
+			pStatement.setLong(1, serverId);
+			pStatement.setInt(2, id);
+			
+			ResultSet rs = pStatement.executeQuery();
+			
+			settings.add(new Setting("minNumberOfGamesToCaptain", rs.getInt(1),
+					null, "The minimum number of games played for a player to be able to captain"));
+			settings.add(new Setting("randomizeCaptains", Boolean.valueOf(rs.getString(2)),
+					null, "Enables the bot to randomly select captains and allow picking through discord"));
+			settings.add(new Setting("snakePick", Boolean.valueOf(rs.getString(3)),
+					null, "Enables a snake at the end of picking"));
+			
+			rs.close();
+		}catch(SQLException ex){
+			ex.printStackTrace();
+		}
+		return settings;
+	}
+	
+	/**
+	 * Updates a specified server setting with a new value
+	 * 
+	 * @param serverId The id of the server
+	 * @param setting The setting to change
+	 * @param value The new value of the setting
+	 */
+	public static void updateServerSetting(long serverId, String setting, String value){
+		try{
+			PreparedStatement pStatement = conn.prepareStatement(
+					String.format("UPDATE DiscordServer SET setting_%s = ? WHERE id = ?", setting));
+			pStatement.setString(1, value);
+			pStatement.setLong(2, serverId);
+			
+			pStatement.executeUpdate();
+		}catch(SQLException ex){
+			ex.printStackTrace();
+		}
+	}
+	
+	/**
+	 * Updates a specified queue setting with a new value
+	 * 
+	 * @param serverId The id of the server
+	 * @param queueId The id of the queue
+	 * @param setting The setting to update
+	 * @param value The new value of the setting
+	 */
+	public static void updateQueueSetting(long serverId, int queueId, String setting, String value){
+		try{
+			PreparedStatement pStatement = conn.prepareStatement(
+					String.format("UPDATE Queue SET setting_%s = ? WHERE serverId = ? AND id = ?", setting));
+			pStatement.setString(1, value);
+			pStatement.setLong(2, serverId);
+			pStatement.setInt(3, queueId);
+			
+			pStatement.executeUpdate();
 		}catch(SQLException ex){
 			ex.printStackTrace();
 		}

@@ -1,158 +1,49 @@
 package core.entities;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.util.Properties;
+import java.util.List;
 
-import core.util.Utils;
-// Settings class; Configurable settings for each server
-public class Settings {
+import core.exceptions.InvalidUseException;
 
-	private String filePath;
+public abstract class Settings {
+	protected List<Setting> settingsList;
+	protected long serverId;
 	
-	private String pugChannel = "pugs";
-	private String mumble = "N/A";
-	private Integer afkTime = 120;
-	private Integer dcTime = 120;
-	private Integer finishTime = 60;
-	private Integer minNumberOfGames = 5;
-	private boolean randomizeCaptains = true;
-	private boolean snakePick = false;
-	private boolean postTeams = false;
-	
-	
-	public Settings(String id){
-		this.filePath = String.format("%s/%s/%s", "app_data", id, "settings.cfg");
-		if(!new File(filePath).exists()){
-			createSettingsFile();
-		}
-		loadSettingsFile();
+	public Settings(long serverId){
+		this.serverId = serverId;
 	}
-
-	public void loadSettingsFile() {
+	
+	public Setting getSetting(String settingName){
+		for(Setting setting : settingsList){
+			if(settingName.equalsIgnoreCase(setting.getName())){
+				return setting;
+			}
+		}
+		throw new InvalidUseException("Setting does not exist");
+	}
+	
+	public void set(String settingName, String value){
+		Setting setting = getSetting(settingName);
 		try{
-			FileInputStream is = new FileInputStream(filePath);
-			Properties p = new Properties();
+			if(setting.getValue().getClass() == Integer.class){
+				int newVal = Integer.valueOf(value);
+				if(newVal > 0){
+					setting.setValue(newVal);
+				}else{
+					throw new InvalidUseException("Value must be greater than 0");
+				}
+				
+			}else if(setting.getValue().getClass() == Boolean.class){
+				setting.setValue(Boolean.valueOf(value));
+			}else{
+				setting.setValue(value.toLowerCase());
+			}
 			
-			p.load(is);
-			
-			mumble = p.getProperty("mumble", mumble);
-			pugChannel = p.getProperty("pugchannel", pugChannel);
-			minNumberOfGames = Integer.valueOf(p.getProperty("mingames", minNumberOfGames.toString()));
-			afkTime = Integer.valueOf(p.getProperty("afktime", afkTime.toString()));
-			dcTime = Integer.valueOf(p.getProperty("dctime", dcTime.toString()));
-			finishTime = Integer.valueOf(p.getProperty("finishtime", finishTime.toString()));
-			randomizeCaptains = Boolean.valueOf(p.getProperty("randomizecaptains", String.valueOf(randomizeCaptains)));
-			snakePick = Boolean.valueOf(p.getProperty("snakepick", String.valueOf(snakePick)));
-			postTeams = Boolean.valueOf(p.getProperty("postteams", String.valueOf(postTeams)));
-			
-			is.close();
-		}catch(IOException ex){
-			ex.printStackTrace();
-		}
-	}
-
-	private void createSettingsFile() {
-		Utils.createFile(filePath);
-		
-		try{
-			FileOutputStream os = new FileOutputStream(filePath);
-			Properties p = new Properties();
-			
-			p.setProperty("mumble", mumble);
-			p.setProperty("pugchannel", pugChannel);
-			p.setProperty("mingames", minNumberOfGames.toString());
-			p.setProperty("afktime", afkTime.toString());
-			p.setProperty("dctime", dcTime.toString());
-			p.setProperty("finishtime", finishTime.toString());
-			p.setProperty("randomizecaptains", String.valueOf(randomizeCaptains));
-			p.setProperty("snakepick", String.valueOf(snakePick));
-			p.setProperty("postteams", String.valueOf(postTeams));
-			
-			p.store(os, null);
-			os.close();
-		}catch(IOException ex){
-			ex.printStackTrace();
+		}catch(NumberFormatException ex){
+			throw new InvalidUseException("New value is of the wrong type");
 		}
 	}
 	
-	public void setProperty(String setting, String value){
-		try{
-			FileOutputStream os = new FileOutputStream(filePath);
-			Properties p = new Properties();
-			
-			p.setProperty(setting, value);
-			
-			p.store(os, null);
-			os.close();
-		}catch(IOException ex){
-			ex.printStackTrace();
-		}
-	}
-	
-	public void setProperty(String setting, Integer value){
-		try{
-			FileOutputStream os = new FileOutputStream(filePath);
-			Properties p = new Properties();
-			
-			p.setProperty(setting, value.toString());
-			
-			p.store(os, null);
-			os.close();
-		}catch(IOException ex){
-			ex.printStackTrace();
-		}
-	}
-	
-	public void setProperty(String setting, boolean value){
-		try{
-			FileOutputStream os = new FileOutputStream(filePath);
-			Properties p = new Properties();
-			
-			p.setProperty(setting, String.valueOf(value));
-			
-			p.store(os, null);
-			os.close();
-		}catch(IOException ex){
-			ex.printStackTrace();
-		}
-	}
-	
-	public String pugChannel(){
-		return pugChannel;
-	}
-	
-	public Integer afkTime(){
-		return afkTime;
-	}
-	
-	public Integer dcTime(){
-		return dcTime;
-	}
-	
-	public Integer finishTime(){
-		return finishTime;
-	}
-	
-	public boolean randomizeCaptains(){
-		return randomizeCaptains;
-	}
-	
-	public String mumble(){
-		return mumble;
-	}
-	
-	public Integer minNumberOfGames(){
-		return minNumberOfGames;
-	}
-	
-	public boolean snakePick(){
-		return snakePick;
-	}
-	
-	public boolean postTeams(){
-		return postTeams;
+	public List<Setting> getSettingsList(){
+		return settingsList;
 	}
 }

@@ -97,7 +97,7 @@ public class EventHandler extends ListenerAdapter {
 						response = Utils.createMessage("Error!", ex.getMessage(), false);
 					}catch(Exception ex){
 						response = Utils.createMessage("Error!", "Something went wrong", false);
-						System.out.println(ex.getMessage());
+						ex.printStackTrace();
 					}
 					
 					try{

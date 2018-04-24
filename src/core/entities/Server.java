@@ -1,7 +1,6 @@
 package core.entities;
 
 import java.awt.Color;
-import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.List;
 
@@ -20,7 +19,7 @@ import net.dv8tion.jda.core.entities.User;
 public class Server {
 	private String id;
 	private Guild guild;
-	private Settings settings;
+	private ServerSettings settings;
 	private QueueManager qm;
 	private HashMap<User, Long> activityList = new HashMap<User, Long>();
 	private List<String> banList;
@@ -34,7 +33,8 @@ public class Server {
 		Utils.createDir(String.format("%s/%s", "app_data", id));
 		qm = new QueueManager(id);
 		cmds = new Commands(guild.getIdLong());
-		settings = new Settings(id);
+		settings = new ServerSettings(guild.getIdLong());
+		
 		qm.getQueueList().forEach((q) -> q.getPlayersInQueue().forEach((u) -> updateActivityList(u)));
 		
 		// Insert guild into database
@@ -59,13 +59,13 @@ public class Server {
 		return qm;
 	}
 
-	public Settings getSettings() {
+	public ServerSettings getSettings() {
 		return settings;
 	}
 
 	public TextChannel getPugChannel() {
 		for (TextChannel c : guild.getTextChannels()) {
-			if (c.getName().equalsIgnoreCase(settings.pugChannel())) {
+			if (c.getName().equalsIgnoreCase(settings.getPUGChannel())) {
 				return c;
 			}
 		}
@@ -80,7 +80,7 @@ public class Server {
 
 	private void afkTimerEnd() {
 		activityList.forEach((u, l) -> {
-			if (qm.isPlayerInQueue(u) && (System.currentTimeMillis() - l) / 60000 >= settings.afkTime()) {
+			if (qm.isPlayerInQueue(u) && (System.currentTimeMillis() - l) / 60000 >= settings.getAFKTimeout()) {
 				qm.deletePlayer(u);
 				String s = String.format("%s has been removed from the queue due to inactivity", u.getName());
 				getPugChannel().sendMessage(Utils.createMessage("", s, Color.red)).queue();
@@ -101,7 +101,7 @@ public class Server {
 
 	private void startDcTimer(Member m) {
 		Trigger trigger = () -> dcTimerEnd(m);
-		Timer timer = new Timer(settings.dcTime(), trigger);
+		Timer timer = new Timer(settings.getDCTimeout() * 60, trigger);
 		timer.start();
 		System.out.println(String.format("User %s has gone offline, starting dc timer", m.getEffectiveName()));
 	}
@@ -110,7 +110,8 @@ public class Server {
 		if (m.getOnlineStatus().equals(OnlineStatus.OFFLINE) && qm.isPlayerInQueue(m.getUser())) {
 			qm.deletePlayer(m.getUser());
 			qm.updateTopic();
-			String s = String.format("%s has been removed from queue after being offline for %s minutes", m.getEffectiveName(), new DecimalFormat("#.##").format((double)settings.dcTime()/60));
+			String s = String.format("%s has been removed from queue after being offline for %s minutes", 
+					m.getEffectiveName(), settings.getDCTimeout());
 			getPugChannel().sendMessage(Utils.createMessage("", s,Color.red)).queue();
 			System.out.println(s);
 		}

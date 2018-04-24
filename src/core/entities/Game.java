@@ -14,6 +14,7 @@ import core.util.Utils;
 import net.dv8tion.jda.core.entities.User;
 
 public class Game {
+	private Queue parent;
 	private String guildId;
 	private String name;
 	private Long timestamp;
@@ -23,7 +24,8 @@ public class Game {
 	private TeamPickerMenu pickMenu = null;
 	private GameStatus status = GameStatus.PICKING;
 
-	public Game(String id, String name, List<User> players) {
+	public Game(Queue parent, String id, String name, List<User> players) {
+		this.parent = parent;
 		this.guildId = id;
 		this.name = name;
 		this.timestamp = System.currentTimeMillis();
@@ -32,7 +34,7 @@ public class Game {
 		// Insert game into database
 		Database.insertGame(timestamp, name, Long.valueOf(guildId));
 		
-		if (ServerManager.getServer(guildId).getSettings().randomizeCaptains()) {
+		if (parent.settings.randomizeCaptains()) {
 			randomizeCaptains();
 		}else{
 			pickingComplete();
@@ -181,7 +183,7 @@ public class Game {
 		nonCaptainPlayers.removeAll(Arrays.asList(captains));
 		captains = rps.getResult();
 		Trigger trigger = () -> pickingComplete();
-		pickMenu = new TeamPickerMenu(captains, nonCaptainPlayers, trigger, ServerManager.getServer(guildId).getSettings().snakePick());
+		pickMenu = new TeamPickerMenu(captains, nonCaptainPlayers, trigger, parent.settings.snakePick());
 	}
 	
 	/**
@@ -212,7 +214,7 @@ public class Game {
 			}
 			
 			// Post teams to pug channel
-			if(ServerManager.getServer(guildId).getSettings().postTeams()){
+			if(ServerManager.getServer(guildId).getSettings().postTeamsToPugChannel()){
 				String s = String.format("`Game: %s`", name);
 				ServerManager.getServer(guildId).getPugChannel()
 				.sendMessage(Utils.createMessage(s, pickMenu.getPickedTeamsString(), true)).queue();
@@ -258,7 +260,7 @@ public class Game {
 	 */
 	private List<User> getCaptainPool() {
 		List<User> captainPool = new ArrayList<User>();
-		Integer minGames = ServerManager.getServer(guildId).getSettings().minNumberOfGames();
+		Integer minGames = parent.settings.getMinNumberOfGamesPlayedToCaptain();
 		
 		for(User p : players){
 			if(Database.queryGetTotalGamesPlayed(p.getIdLong()) >= minGames){
