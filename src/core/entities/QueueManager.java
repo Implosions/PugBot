@@ -1,16 +1,7 @@
 package core.entities;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Scanner;
-
-import org.json.JSONArray;
-import org.json.JSONObject;
 
 import core.Database;
 import core.entities.Game.GameStatus;
@@ -28,7 +19,8 @@ public class QueueManager {
 
 	public QueueManager(String id) {
 		guildId = id;
-		loadFromFile();
+
+		queueList = Database.getServerQueueList(Long.valueOf(id));
 	}
 
 	/**
@@ -41,7 +33,7 @@ public class QueueManager {
 	public void createQueue(String name, Integer players) {
 		if (players > 1) {
 			if (!doesQueueExist(name)) {
-				int queueId = Database.insertQueue(Long.valueOf(guildId), name);
+				int queueId = Database.insertQueue(Long.valueOf(guildId), name, players);
 				queueList.add(new Queue(name, players, guildId, queueId));
 			} else {
 				throw new DuplicateEntryException("A queue with the same name already exists");
@@ -185,7 +177,9 @@ public class QueueManager {
 	public void removeQueue(Integer index) {
 		Integer i = --index;
 		if (doesQueueExist(i)) {
-			queueList.remove(queueList.get(i));
+			Queue q = queueList.get(i);
+			queueList.remove(q);
+			Database.deactivateQueue(Long.valueOf(guildId), q.getId());
 		} else {
 			throw new DoesNotExistException("Queue");
 		}
@@ -199,7 +193,9 @@ public class QueueManager {
 	 */
 	public void removeQueue(String name) {
 		if (doesQueueExist(name)) {
-			queueList.remove(getQueue(name));
+			Queue q = getQueue(name);
+			queueList.remove(q);
+			Database.deactivateQueue(Long.valueOf(guildId), q.getId());
 		} else {
 			throw new DoesNotExistException("Queue");
 		}
@@ -353,7 +349,6 @@ public class QueueManager {
 		} catch (PermissionException ex) {
 			ex.printStackTrace();
 		}
-		saveToFile();
 	}
 
 	/**
@@ -608,116 +603,6 @@ public class QueueManager {
 		} else {
 			throw new DoesNotExistException("Queue");
 		}
-	}
-
-	/**
-	 * Saves a json format to file representing the queues, players in queue, and notifications.
-	 */
-	public void saveToFile() {
-		try {
-			System.out.println("Saving queue to file...");
-			PrintWriter writer = new PrintWriter(new FileOutputStream(String.format("%s/%s/%s", "app_data", guildId, "queue.json")));
-			writer.println(getJSON());
-			writer.close();
-			System.out.println("Queue saved");
-		} catch (Exception ex) {
-			ex.printStackTrace();
-		}
-	}
-
-	/**
-	 * Returns a String containing queue information encoded as json.
-	 * 
-	 * @return a String containing queue information encoded as json.
-	 */
-	private String getJSON() {
-		JSONObject root = new JSONObject();
-		JSONArray ja = new JSONArray();
-		
-		for (Queue q : queueList) {
-			JSONObject jQueue = new JSONObject();
-			JSONArray jPlayers = new JSONArray();
-			JSONArray jNotifications = new JSONArray();
-			// Adds name and max players
-			jQueue.put("name", q.getName());
-			jQueue.put("maxplayers", q.getMaxPlayers());
-			// Adds players
-			for (User p : q.getPlayersInQueue()) {
-				jPlayers.put(p.getId());
-			}
-			jQueue.put("inqueue", jPlayers);
-			// Encodes notifications
-			q.getNotifications().forEach((i, ul) -> {
-				JSONObject jNotification = new JSONObject();
-				JSONArray jNotifyPlayers = new JSONArray();
-				
-				ul.forEach((u) -> jNotifyPlayers.put(u.getId()));
-				jNotification.put("playercount", String.valueOf(i));
-				jNotification.put("notifyplayers", jNotifyPlayers);
-				jNotifications.put(jNotification);
-			});
-			jQueue.put("notifications", jNotifications);
-			// Adds queue to json array
-			ja.put(jQueue);
-		}
-		root.put("queue", ja);
-		return root.toString(4);
-	}
-
-	/**
-	 * Loads the server's queue information from a json file.
-	 */
-	private void loadFromFile() {
-		String s = String.format("%s/%s/%s", "app_data", guildId, "queue.json");
-		if (new File(s).exists()) {
-			try {
-				System.out.println("Loading queue from file...");
-				Scanner reader = new Scanner(new FileInputStream(s));
-				String input = "";
-
-				while (reader.hasNextLine()) {
-					input += reader.nextLine();
-				}
-				reader.close();
-
-				if (!input.isEmpty()) {
-					parseJSON(input);
-					System.out.println("Queue loaded");
-				}
-
-			} catch (IOException ex) {
-				ex.printStackTrace();
-			}
-		}
-
-	}
-
-	/**
-	 * Decodes json representing a previous queue state.
-	 * Creates queues, adds players, and adds notifications.
-	 * 
-	 * @param input the json to be decoded
-	 */
-	private void parseJSON(String input) {
-		JSONObject json = new JSONObject(input);
-		json.getJSONArray("queue").forEach((q) -> {
-			JSONObject jq = new JSONObject(q.toString());
-			// Creates queue
-			createQueue(jq.getString("name"), jq.getInt("maxplayers"));
-			jq.getJSONArray("inqueue").forEach((p) -> {
-				// Adds each player
-				User player = ServerManager.getGuild(guildId).getMemberById(p.toString()).getUser();
-				addPlayerToQueue(player, jq.getString("name"));
-			});
-			// Creates notifications
-			jq.getJSONArray("notifications").forEach((ns) -> {
-				JSONObject n = new JSONObject(ns.toString());
-				n.getJSONArray("notifyplayers")
-						.forEach((np) -> addNotification(
-								ServerManager.getGuild(guildId).getMemberById(np.toString()).getUser(),
-								jq.getString("name"), n.getInt("playercount")));
-			});
-		});
 	}
 
 	/**

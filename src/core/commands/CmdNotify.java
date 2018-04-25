@@ -36,7 +36,6 @@ public class CmdNotify extends Command{
 		}
 		this.response = Utils.createMessage("Notification added", "", true);
 		System.out.println(success());
-		qm.saveToFile();
 		
 		return response;
 	}

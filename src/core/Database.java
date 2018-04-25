@@ -5,7 +5,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import core.commands.CustomCommand;
+import core.entities.Queue;
+import core.entities.ServerManager;
 import core.entities.Setting;
+import net.dv8tion.jda.core.entities.User;
 
 public class Database {
 	
@@ -52,6 +55,7 @@ public class Database {
 					+ "serverId INTEGER NOT NULL, "
 					+ "id INTEGER NOT NULL, "
 					+ "name VARCHAR(50) NOT NULL, "
+					+ "maxPlayers INTEGER NOT NULL, "
 					+ "active INTEGER NOT NULL DEFAULT 1, "
 					+ "setting_minNumberOfGamesToCaptain INTEGER NOT NULL DEFAULT 15, "
 					+ "setting_randomizeCaptains VARCHAR(5) NOT NULL DEFAULT 'true', "
@@ -114,6 +118,29 @@ public class Database {
 					+ "message TEXT NOT NULL, "
 					+ "PRIMARY KEY (serverId, name), "
 					+ "FOREIGN KEY (serverId) REFERENCES DiscordServer(id)"
+					+ ")");
+			
+			statement.executeUpdate("CREATE TABLE IF NOT EXISTS "
+					+ "PlayerInQueue("
+					+ "serverId INTEGER NOT NULL, "
+					+ "queueId INTEGER NOT NULL, "
+					+ "playerId INTEGER NOT NULL, "
+					+ "PRIMARY KEY (serverId, queueId, playerId), "
+					+ "FOREIGN KEY (serverId) REFERENCES DiscordServer(id), "
+					+ "FOREIGN KEY (queueId) REFERENCES Queue(id), "
+					+ "FOREIGN KEY (playerId) REFERENCES Player(id)"
+					+ ")");
+			
+			statement.executeUpdate("CREATE TABLE IF NOT EXISTS "
+					+ "QueueNotification("
+					+ "serverId INTEGER NOT NULL, "
+					+ "queueId INTEGER NOT NULL, "
+					+ "playerId INTEGER NOT NULL, "
+					+ "playerCount INTEGER NOT NULL, "
+					+ "PRIMARY KEY (serverId, queueId, playerId, playerCount), "
+					+ "FOREIGN KEY (serverId) REFERENCES DiscordServer(id), "
+					+ "FOREIGN KEY (queueId) REFERENCES Queue(id), "
+					+ "FOREIGN KEY (playerId) REFERENCES Player(id)"
 					+ ")");
 			
 		}catch(Exception ex){
@@ -188,13 +215,14 @@ public class Database {
 	 * @param name the name of the queue
 	 * @return The id of the queue created
 	 */
-	public static int insertQueue(long serverId, String name){
+	public static int insertQueue(long serverId, String name, int maxPlayers){
 		int id = getQueueCount(serverId);
 		try{
-			PreparedStatement pStatement = conn.prepareStatement("INSERT OR IGNORE INTO Queue(serverId, id, name) VALUES(?, ?, ?)");
+			PreparedStatement pStatement = conn.prepareStatement("INSERT OR IGNORE INTO Queue(serverId, id, name, maxPlayers) VALUES(?, ?, ?, ?)");
 			pStatement.setLong(1, serverId);
 			pStatement.setInt(2, id);
 			pStatement.setString(3, name);
+			pStatement.setInt(4, maxPlayers);
 			
 			pStatement.execute();
 		}catch(SQLException ex){
@@ -663,6 +691,251 @@ public class Database {
 			pStatement.setInt(3, queueId);
 			
 			pStatement.executeUpdate();
+		}catch(SQLException ex){
+			ex.printStackTrace();
+		}
+	}
+	
+	/**
+	 * @param serverId The id of the server
+	 * @return A list of active queues in the specified server
+	 */
+	public static List<Queue> getServerQueueList(long serverId){
+		List<Queue> queueList = new ArrayList<Queue>();
+		
+		try{
+			PreparedStatement pStatement = conn.prepareStatement("SELECT id, name, maxPlayers "
+					+ "FROM Queue WHERE serverId = ? AND active = 1 ORDER BY id");
+			pStatement.setLong(1, serverId);
+			
+			ResultSet rs = pStatement.executeQuery();
+			
+			while(rs.next()){
+				Queue q = new Queue(rs.getString(2), rs.getInt(3), String.valueOf(serverId), rs.getInt(1));
+				
+				for(User p : getPlayersInQueue(serverId, q.getId())){
+					q.add(p);
+				}
+				fillQueueNotifications(serverId, q.getId(), q);
+				queueList.add(q);
+			}
+			rs.close();
+		}catch(SQLException ex){
+			ex.printStackTrace();
+		}
+		
+		return queueList;
+	}
+	
+	/**
+	 * Inserts a record representing a player in a queue
+	 * 
+	 * @param serverId The id of the server
+	 * @param queueId The id of the queue
+	 * @param playerId The id of the player
+	 */
+	public static void insertPlayerInQueue(long serverId, int queueId, long playerId){
+		try{
+			PreparedStatement pStatement = conn.prepareStatement("INSERT OR IGNORE INTO PlayerInQueue VALUES(?, ?, ?)");
+			pStatement.setLong(1, serverId);
+			pStatement.setInt(2, queueId);
+			pStatement.setLong(3, playerId);
+			
+			pStatement.executeUpdate();
+		}catch(SQLException ex){
+			ex.printStackTrace();
+		}
+	}
+	
+	/**
+	 * Delete a record of a player in queue
+	 * 
+	 * @param serverId The id of the server
+	 * @param queueId The id of the queue
+	 * @param playerId The id of the player
+	 */
+	public static void deletePlayerInQueue(long serverId, int queueId, long playerId){
+		try{
+			PreparedStatement pStatement = conn.prepareStatement("DELETE FROM PlayerInQueue "
+					+ "WHERE serverId = ? AND queueId = ? AND playerId = ?");
+			pStatement.setLong(1, serverId);
+			pStatement.setInt(2, queueId);
+			pStatement.setLong(3, playerId);
+			
+			pStatement.executeUpdate();
+		}catch(SQLException ex){
+			ex.printStackTrace();
+		}
+	}
+	
+	/**
+	 * Delete all records of a group of players in queues
+	 * 
+	 * @param serverId The id of the server
+	 * @param queueId The id of the queue
+	 */
+	public static void deletePlayersInQueueFromQueue(long serverId, int queueId){
+		try{
+			PreparedStatement pStatement = conn.prepareStatement("DELETE FROM PlayerInQueue "
+					+ "WHERE serverId = ? AND playerId IN("
+					+ "SELECT playerId FROM PlayerInQueue WHERE serverId = ? AND queueId = ?)");
+			pStatement.setLong(1, serverId);
+			pStatement.setLong(2, serverId);
+			pStatement.setInt(3, queueId);
+			
+			pStatement.executeUpdate();
+		}catch(SQLException ex){
+			ex.printStackTrace();
+		}
+	}
+	
+	/**
+	 * Deletes a player from all queue records
+	 * 	
+	 * @param serverId The id of the server
+	 * @param playerId The id of the player
+	 */
+	public static void deleteFromAllPlayerInQueue(long serverId, long playerId){
+		try{
+			PreparedStatement pStatement = conn.prepareStatement("DELETE FROM PlayerInQueue "
+					+ "WHERE serverId = ? AND playerId = ?");
+			pStatement.setLong(1, serverId);
+			pStatement.setLong(2, playerId);
+			
+			pStatement.executeUpdate();
+		}catch(SQLException ex){
+			ex.printStackTrace();
+		}
+	}
+	
+	/**
+	 * @param serverId The id of the server
+	 * @param queueId The id of the player
+	 * @return A list of users that are in a specified queue
+	 */
+	public static List<User> getPlayersInQueue(long serverId, int queueId){
+		List<User> playerList = new ArrayList<User>();
+		try{
+			PreparedStatement pStatement = conn.prepareStatement("SELECT playerId FROM PlayerInQueue "
+					+ "WHERE serverId = ? AND queueId = ?");
+			pStatement.setLong(1, serverId);
+			pStatement.setInt(2, queueId);
+			
+			ResultSet rs = pStatement.executeQuery();
+			while(rs.next()){
+				User player = ServerManager.getGuild(String.valueOf(serverId)).getMemberById(rs.getLong(1)).getUser();
+				playerList.add(player);
+			}
+			rs.close();
+		}catch(SQLException ex){
+			ex.printStackTrace();
+		}
+		return playerList;
+	}
+	
+	/**
+	 * Mark a queue as inactive, will no longer be loaded at startup
+	 * 
+	 * @param serverId The id of the server
+	 * @param queueId The id of the queue
+	 */
+	public static void deactivateQueue(long serverId, int queueId){
+		try{
+			PreparedStatement pStatement = conn.prepareStatement("UPDATE Queue SET active = 0 "
+					+ "WHERE serverId = ? AND id = ?");
+			pStatement.setLong(1, serverId);
+			pStatement.setInt(2, queueId);
+			
+			pStatement.executeUpdate();
+		}catch(SQLException ex){
+			ex.printStackTrace();
+		}
+	}
+	
+	/**
+	 * Insert a queue notification
+	 * 
+	 * @param serverId The id of the server
+	 * @param queueId The id of the queue
+	 * @param playerId The id of the player
+	 * @param playerCount The player count that the notification will trigger
+	 */
+	public static void insertQueueNotification(long serverId, int queueId, long playerId, int playerCount){
+		try{
+			PreparedStatement pStatement = conn.prepareStatement("INSERT OR IGNORE INTO QueueNotification VALUES(?, ?, ?, ?)");
+			pStatement.setLong(1, serverId);
+			pStatement.setInt(2, queueId);
+			pStatement.setLong(3, playerId);
+			pStatement.setInt(4, playerCount);
+			
+			pStatement.executeUpdate();
+		}catch(SQLException ex){
+			ex.printStackTrace();
+		}
+	}
+	
+	/**
+	 * Delete queue notifications in a specific queue
+	 * 
+	 * @param serverId The id of the server
+	 * @param queueId The id of the queue
+	 * @param playerId The id of the player
+	 */
+	public static void deleteQueueNotification(long serverId, int queueId, long playerId){
+		try{
+			PreparedStatement pStatement = conn.prepareStatement("DELETE FROM QueueNotification "
+					+ "WHERE serverId = ? AND queueId = ? AND playerId = ?");
+			pStatement.setLong(1, serverId);
+			pStatement.setInt(2, queueId);
+			pStatement.setLong(3, playerId);
+			
+			pStatement.executeUpdate();
+		}catch(SQLException ex){
+			ex.printStackTrace();
+		}
+	}
+	
+	/**
+	 * Delete all queue notifications for a specified player 
+	 * 
+	 * @param serverId The id of the server
+	 * @param playerId The id of the player
+	 */
+	public static void deleteAllQueueNotification(long serverId, long playerId){
+		try{
+			PreparedStatement pStatement = conn.prepareStatement("DELETE FROM QueueNotification "
+					+ "WHERE serverId = ? AND playerId = ?");
+			pStatement.setLong(1, serverId);
+			pStatement.setLong(2, playerId);
+			
+			pStatement.executeUpdate();
+		}catch(SQLException ex){
+			ex.printStackTrace();
+		}
+	}
+	
+	/**
+	 * Adds all related notifications to a queue
+	 * 
+	 * @param serverId The id of the server
+	 * @param queueId The id of the queue
+	 * @param queue The queue to add notifications to
+	 */
+	public static void fillQueueNotifications(long serverId, int queueId, Queue queue){
+		try{
+			PreparedStatement pStatement = conn.prepareStatement("SELECT playerCount, playerId FROM QueueNotification "
+					+ "WHERE serverId = ? AND queueId = ? ORDER BY playerCount");
+			pStatement.setLong(1, serverId);
+			pStatement.setInt(2, queueId);
+			
+			ResultSet rs = pStatement.executeQuery();
+			
+			while(rs.next()){
+				User player = ServerManager.getGuild(String.valueOf(serverId)).getMemberById(rs.getLong(2)).getUser();
+				queue.addNotification(player, rs.getInt(1));
+			}
+			
+			rs.close();
 		}catch(SQLException ex){
 			ex.printStackTrace();
 		}

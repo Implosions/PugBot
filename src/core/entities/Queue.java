@@ -8,6 +8,7 @@ import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 import core.util.Utils;
+import core.Database;
 import core.entities.Game.GameStatus;
 import core.util.Trigger;
 import net.dv8tion.jda.core.OnlineStatus;
@@ -21,6 +22,7 @@ public class Queue {
 	private Integer currentPlayers = 0;
 	private String name;
 	private String guildId;
+	private int id;
 	private List<User> playersInQueue = new ArrayList<User>();;
 	private List<Game> games = new ArrayList<Game>();;
 	private List<User> waitList = new ArrayList<User>();
@@ -32,6 +34,7 @@ public class Queue {
 		this.name = name;
 		this.maxPlayers = maxPlayers;
 		this.guildId = guildId;
+		this.id = id;
 		this.settings = new QueueSettings(Long.valueOf(guildId), id);
 	}
 
@@ -45,6 +48,7 @@ public class Queue {
 	public void add(User player) {
 		if (!playersInQueue.contains(player)) {
 			playersInQueue.add(player);
+			Database.insertPlayerInQueue(Long.valueOf(guildId), id, player.getIdLong());
 			currentPlayers++;
 			checkNotifications();
 			if (currentPlayers == maxPlayers) {
@@ -153,6 +157,7 @@ public class Queue {
 		
 		// Remove players from all other queues
 		ServerManager.getServer(guildId).getQueueManager().purgeQueue(players);
+		Database.deletePlayersInQueueFromQueue(Long.valueOf(guildId), id);
 		
 		// Generate captain string
 		String captainString = "";
@@ -194,6 +199,7 @@ public class Queue {
 	public void delete(User s) {
 		if(playersInQueue.contains(s)){
 			playersInQueue.remove(s);
+			Database.deletePlayerInQueue(Long.valueOf(guildId), id, s.getIdLong());
 			currentPlayers--;
 		}else if(waitList.contains(s)){
 			waitList.remove(s);
@@ -309,6 +315,7 @@ public class Queue {
 			notifications.put(playerCount, new ArrayList<User>());
 			notifications.get(playerCount).add(player);
 		}
+		Database.insertQueueNotification(Long.valueOf(guildId), id, player.getIdLong(), playerCount);
 	}
 	
 	/**
@@ -348,6 +355,7 @@ public class Queue {
 		for(List<User> list : notifications.values()){
 			list.remove(player);
 		}
+		Database.deleteQueueNotification(Long.valueOf(guildId), id, player.getIdLong());
 	}
 	
 	/**
@@ -357,5 +365,9 @@ public class Queue {
 	 */
 	public HashMap<Integer, List<User>> getNotifications(){
 		return notifications;
+	}
+	
+	public int getId(){
+		return id;
 	}
 }

@@ -19,7 +19,7 @@ public class QueueSettings extends Settings{
 	}
 	
 	public int getMinNumberOfGamesPlayedToCaptain(){
-		return (int)getSetting("minNumberOfGamesPlayedToCaptain").getValue();
+		return (int)getSetting("minNumberOfGamesToCaptain").getValue();
 	}
 	
 	public boolean randomizeCaptains(){

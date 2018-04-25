@@ -34,7 +34,6 @@ public class CmdDeleteNotification extends Command{
 		}
 		this.response = Utils.createMessage("Notification(s) removed", "", true);
 		System.out.println(success());
-		qm.saveToFile();
 		
 		return response;
 	}
