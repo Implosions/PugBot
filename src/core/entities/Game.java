@@ -15,8 +15,7 @@ import net.dv8tion.jda.core.entities.User;
 
 public class Game {
 	private Queue parent;
-	private String guildId;
-	private String name;
+	private long serverId;
 	private Long timestamp;
 	private List<User> players;
 	private User[] captains = new User[] { null, null };
@@ -24,15 +23,14 @@ public class Game {
 	private TeamPickerMenu pickMenu = null;
 	private GameStatus status = GameStatus.PICKING;
 
-	public Game(Queue parent, String id, String name, List<User> players) {
+	public Game(Queue parent, long serverId, List<User> players) {
 		this.parent = parent;
-		this.guildId = id;
-		this.name = name;
+		this.serverId = serverId;
 		this.timestamp = System.currentTimeMillis();
 		this.players = new ArrayList<User>(players);
 		
 		// Insert game into database
-		Database.insertGame(timestamp, name, Long.valueOf(guildId));
+		Database.insertGame(timestamp, parent.getId(), serverId);
 		
 		if (parent.settings.randomizeCaptains()) {
 			randomizeCaptains();
@@ -123,7 +121,7 @@ public class Game {
 		
 		captains[0] = captainPool.get(random.nextInt(captainPool.size()));
 		
-		captains[1] = new MatchMaker(guildId, captainPool).getMatch(captains[0]);
+		captains[1] = new MatchMaker(String.valueOf(serverId), captainPool).getMatch(captains[0]);
 		
 		if(players.size() > 2){
 			// Create RPS menu on a new thread
@@ -148,7 +146,7 @@ public class Game {
 	 * @return the name of the queue that this game is from
 	 */
 	public String getName() {
-		return name;
+		return parent.getName();
 	}
 	
 	/**
@@ -195,13 +193,13 @@ public class Game {
 		
 		// Insert players in game into database
 		for(User u : players){
-			Database.insertPlayerGame(u.getIdLong(), timestamp, Long.valueOf(guildId));
+			Database.insertPlayerGame(u.getIdLong(), timestamp, serverId);
 		}
 		
 		// Update captains
 		for(User c : captains){
 			if(c != null){
-				Database.updatePlayerGameCaptain(c.getIdLong(), timestamp, Long.valueOf(guildId), true);
+				Database.updatePlayerGameCaptain(c.getIdLong(), timestamp, serverId, true);
 			}
 		}
 		
@@ -209,14 +207,14 @@ public class Game {
 		if(pickMenu != null){
 			Integer count = 1;
 			for (String id : pickMenu.getPickOrder()) {
-				Database.updatePlayerGamePickOrder(Long.valueOf(id), timestamp, Long.valueOf(guildId), count);
+				Database.updatePlayerGamePickOrder(Long.valueOf(id), timestamp, serverId, count);
 				count++;
 			}
 			
 			// Post teams to pug channel
-			if(ServerManager.getServer(guildId).getSettings().postTeamsToPugChannel()){
-				String s = String.format("`Game: %s`", name);
-				ServerManager.getServer(guildId).getPugChannel()
+			if(ServerManager.getServer(String.valueOf(serverId)).getSettings().postTeamsToPugChannel()){
+				String s = String.format("`Game: %s`", parent.getName());
+				ServerManager.getServer(String.valueOf(serverId)).getPugChannel()
 				.sendMessage(Utils.createMessage(s, pickMenu.getPickedTeamsString(), true)).queue();
 			}
 		}

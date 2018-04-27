@@ -152,7 +152,7 @@ public class Queue {
 		names = names.substring(0, names.lastIndexOf(","));
 		
 		// Create Game and add to the list of active games
-		Game newGame = new Game(this, guildId, name, players);
+		Game newGame = new Game(this, Long.valueOf(guildId), players);
 		games.add(newGame);
 		
 		// Remove players from all other queues

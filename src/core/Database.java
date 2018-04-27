@@ -238,11 +238,11 @@ public class Database {
 	 * @param queueName the name of the queue
 	 * @param serverId the server id
 	 */
-	public static void insertGame(Long timestamp, String queueName, Long serverId){
+	public static void insertGame(long timestamp, int queueId, long serverId){
 		try{
 			PreparedStatement pStatement = conn.prepareStatement("INSERT OR IGNORE INTO Game VALUES(?, ?, ?)");
 			pStatement.setLong(1, timestamp / 1000);
-			pStatement.setString(2, queueName);
+			pStatement.setInt(2, queueId);
 			pStatement.setLong(3, serverId);
 			
 			pStatement.execute();
