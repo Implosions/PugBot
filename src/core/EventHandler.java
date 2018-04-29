@@ -93,8 +93,11 @@ public class EventHandler extends ListenerAdapter {
 					Message response;
 					try{
 						response = cmdObj.execCommand(server, event.getMember(), args);
-					}catch(BadArgumentsException | DoesNotExistException | DuplicateEntryException | InvalidUseException ex){
+					}catch(DoesNotExistException | DuplicateEntryException | InvalidUseException ex){
 						response = Utils.createMessage("Error!", ex.getMessage(), false);
+					}catch(BadArgumentsException ex){
+						response = Utils.createMessage("Error!", 
+								String.format("%s%nUsage: %s", ex.getMessage(), cmdObj.help()), false);
 					}catch(Exception ex){
 						response = Utils.createMessage("Error!", "Something went wrong", false);
 						ex.printStackTrace();
@@ -111,7 +114,7 @@ public class EventHandler extends ListenerAdapter {
 			} else {
 				// Will only respond to invalid commands in the pug channel
 				if(channel.equals(server.getPugChannel())){
-					channel.sendMessage(Utils.createMessage("Error!", "Invalid command", false)).queue();
+					channel.sendMessage(Utils.createMessage("Error!", "Invalid command\nUse !help to see all available commands", false)).queue();
 				}
 			}
 		}
