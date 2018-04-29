@@ -135,7 +135,7 @@ public class QueueManager {
 		Integer i = --index;
 		if (doesQueueExist(i)) {
 			Queue q = queueList.get(i);
-			if (q.getCurrentPlayers() < maxPlayers) {
+			if (q.getCurrentPlayersCount() < maxPlayers) {
 				q.setName(newName);
 				q.setMaxPlayers(maxPlayers);
 			} else {
@@ -157,7 +157,7 @@ public class QueueManager {
 	public void editQueue(String oldName, String newName, Integer maxPlayers) {
 		if (doesQueueExist(oldName)) {
 			Queue q = getQueue(oldName);
-			if (q.getCurrentPlayers() < maxPlayers) {
+			if (q.getCurrentPlayersCount() < maxPlayers) {
 				q.setName(newName);
 				q.setMaxPlayers(maxPlayers);
 			} else {
@@ -234,7 +234,7 @@ public class QueueManager {
 				if (q.getNumberOfGames() > 0) {
 					games = String.format(" (In game)");
 				}
-				header += String.format("%s [%d/%d]%s ", q.getName(), q.getCurrentPlayers(), q.getMaxPlayers(), games);
+				header += String.format("%s [%d/%d]%s ", q.getName(), q.getCurrentPlayersCount(), q.getMaxPlayers(), games);
 			}
 			header = header.substring(0, header.lastIndexOf(" "));
 			return header;

@@ -18,7 +18,6 @@ import net.dv8tion.jda.core.entities.User;
 
 public class Queue {
 	private Integer maxPlayers;
-	private Integer currentPlayers = 0;
 	private String name;
 	private String guildId;
 	private int id;
@@ -48,9 +47,9 @@ public class Queue {
 		if (!playersInQueue.contains(player)) {
 			playersInQueue.add(player);
 			Database.insertPlayerInQueue(Long.valueOf(guildId), id, player.getIdLong());
-			currentPlayers++;
 			checkNotifications();
-			if (currentPlayers == maxPlayers) {
+			
+			if (playersInQueue.size() == maxPlayers) {
 				popQueue();
 			}
 		}
@@ -97,8 +96,8 @@ public class Queue {
 	 * 
 	 * @return
 	 */
-	public Integer getCurrentPlayers() {
-		return currentPlayers;
+	public Integer getCurrentPlayersCount() {
+		return playersInQueue.size();
 	}
 
 	/**
@@ -197,7 +196,6 @@ public class Queue {
 		if(playersInQueue.contains(s)){
 			playersInQueue.remove(s);
 			Database.deletePlayerInQueue(Long.valueOf(guildId), id, s.getIdLong());
-			currentPlayers--;
 		}else if(waitList.contains(s)){
 			waitList.remove(s);
 		}
@@ -211,7 +209,6 @@ public class Queue {
 	public void purge(List<User> players) {
 		playersInQueue.removeAll(players);
 		waitList.removeAll(players);
-		currentPlayers = playersInQueue.size();
 	}
 	
 	/**
@@ -222,7 +219,6 @@ public class Queue {
 	public void purge(User player){
 		playersInQueue.remove(player);
 		waitList.remove(player);
-		currentPlayers = playersInQueue.size();
 	}
 
 	/**
@@ -319,8 +315,8 @@ public class Queue {
 	 * Checks if notifications should be sent
 	 */
 	private void checkNotifications(){
-		if(notifications.containsKey(currentPlayers)){
-			notify(notifications.get(currentPlayers));
+		if(notifications.containsKey(playersInQueue.size())){
+			notify(notifications.get(playersInQueue.size()));
 		}
 	}
 
@@ -335,7 +331,7 @@ public class Queue {
 			if(!playersInQueue.contains(u) && (m.getOnlineStatus().equals(OnlineStatus.ONLINE) || m.getOnlineStatus().equals(OnlineStatus.IDLE))){
 				try{
 					u.openPrivateChannel().complete()
-						.sendMessage(String.format("Queue: %s is at %d players!", name, currentPlayers)).complete();
+						.sendMessage(String.format("Queue: %s is at %d players!", name, playersInQueue.size())).complete();
 				}catch(Exception ex){
 					System.out.println("Error sending private message.\n" + ex.getMessage());
 				}

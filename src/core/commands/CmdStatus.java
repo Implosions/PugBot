@@ -60,10 +60,10 @@ public class CmdStatus extends Command {
 
 		for (Queue q : queueList) {
 			// Get basic queue information
-			statusMsg += String.format("**%s** [%s/%s]%n", q.getName(), q.getCurrentPlayers(), q.getMaxPlayers());
+			statusMsg += String.format("**%s** [%s/%s]%n", q.getName(), q.getCurrentPlayersCount(), q.getMaxPlayers());
 			
 			// Get players in queue
-			if (q.getCurrentPlayers() > 0) {
+			if (q.getCurrentPlayersCount() > 0) {
 				String names = ""; 
 				for (User u : q.getPlayersInQueue()) {
 					names += u.getName() + ", ";
