@@ -36,6 +36,10 @@ public class ServerSettings extends Settings{
 	}
 	
 	public boolean postTeamsToPugChannel(){
-		return (boolean)getSetting("PostPickedTeamsToPugChannel").getValue();
+		return (boolean)getSetting("postPickedTeamsToPugChannel").getValue();
+	}
+	
+	public boolean createDiscordVoiceChannels(){
+		return (boolean)getSetting("createDiscordVoiceChannels").getValue();
 	}
 }

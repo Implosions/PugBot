@@ -30,12 +30,7 @@ public class Server {
 	public Server(Guild guild) {
 		this.guild = guild;
 		this.id = guild.getId();
-		Utils.createDir(String.format("%s/%s", "app_data", id));
-		qm = new QueueManager(id);
 		cmds = new Commands(guild.getIdLong());
-		settings = new ServerSettings(guild.getIdLong());
-		
-		qm.getQueueList().forEach((q) -> q.getPlayersInQueue().forEach((u) -> updateActivityList(u)));
 		
 		// Insert guild into database
 		Database.insertDiscordServer(guild.getIdLong(), guild.getName());
@@ -47,6 +42,9 @@ public class Server {
 		
 		banList = Database.queryGetBanList(guild.getIdLong());
 		adminList = Database.queryGetAdminList(guild.getIdLong());
+		settings = new ServerSettings(guild.getIdLong());
+		qm = new QueueManager(id);
+		qm.getQueueList().forEach((q) -> q.getPlayersInQueue().forEach((u) -> updateActivityList(u)));
 		
 		startAFKTimer();
 	}

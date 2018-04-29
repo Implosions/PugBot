@@ -29,4 +29,8 @@ public class QueueSettings extends Settings{
 	public boolean snakePick(){
 		return (boolean)getSetting("snakePick").getValue();
 	}
+	
+	public long getVoiceChannelCategoryId(){
+		return (long)getSetting("voiceChannelCategoryId").getValue();
+	}
 }

@@ -39,7 +39,8 @@ public class Database {
 					+ "setting_DCTimeout INTEGER NOT NULL DEFAULT 5, "
 					+ "setting_PUGChannel VARCHAR(50) NOT NULL DEFAULT 'pugs', "
 					+ "setting_QueueFinishTimer INTEGER NOT NULL DEFAULT 90, "
-					+ "setting_PostPickedTeamsToPugChannel VARCHAR(5) DEFAULT TRUE, "
+					+ "setting_postPickedTeamsToPugChannel VARCHAR(5) DEFAULT 'true', "
+					+ "setting_createDiscordVoiceChannels VARCHAR(5) DEFAULT 'true', "
 					+ "PRIMARY KEY (id)"
 					+ ")");
 			
@@ -60,6 +61,7 @@ public class Database {
 					+ "setting_minNumberOfGamesToCaptain INTEGER NOT NULL DEFAULT 15, "
 					+ "setting_randomizeCaptains VARCHAR(5) NOT NULL DEFAULT 'true', "
 					+ "setting_snakePick VARCHAR(5) NOT NULL DEFAULT 'false', "
+					+ "setting_voiceChannelCategoryId INTEGER NOT NULL DEFAULT 0, "
 					+ "PRIMARY KEY (id, serverId), "
 					+ "FOREIGN KEY (serverId) REFERENCES DiscordServer(id)"
 					+ ")");
@@ -332,7 +334,6 @@ public class Database {
 				+ "WHERE playerId = ?");
 			
 			pStatement.setLong(1, playerId);
-			pStatement.setQueryTimeout(10);
 			return pStatement.executeQuery().getInt(1);
 		}catch(SQLException ex){
 			ex.printStackTrace();
@@ -433,7 +434,6 @@ public class Database {
 				+ "WHERE serverId = ? AND admin = 1");
 			
 			pStatement.setLong(1, serverId);
-			pStatement.setQueryTimeout(10);
 			
 			ResultSet rs = pStatement.executeQuery();
 			
@@ -459,7 +459,6 @@ public class Database {
 				+ "WHERE serverId = ? AND banned = 1");
 			
 			pStatement.setLong(1, serverId);
-			pStatement.setQueryTimeout(10);
 			
 			ResultSet rs = pStatement.executeQuery();
 			
@@ -595,16 +594,18 @@ public class Database {
 	public static List<Setting> getServerSettings(long serverId){
 		List<Setting> settings = new ArrayList<Setting>();
 		try{
-			PreparedStatement pStatement = conn.prepareStatement("SELECT setting_AFKTimeout, "
+			PreparedStatement pStatement = conn.prepareStatement("SELECT "
+					+ "setting_AFKTimeout, "
 					+ "setting_DCTimeout, "
 					+ "setting_PUGChannel, "
 					+ "setting_QueueFinishTimer, "
-					+ "setting_PostPickedTeamsToPugChannel "
+					+ "setting_postPickedTeamsToPugChannel, "
+					+ "setting_createDiscordVoiceChannels "
 					+ "FROM DiscordServer WHERE id = ?");
 			pStatement.setLong(1, serverId);
 			
 			ResultSet rs = pStatement.executeQuery();
-			
+
 			settings.add(new Setting("AFKTimeout", rs.getInt(1),
 					"minutes", "The amount of time before a user is removed from all queues if no input is detected"));
 			settings.add(new Setting("DCTimeout", rs.getInt(2),
@@ -613,8 +614,10 @@ public class Database {
 					null, "The channel that PUG related input and output will be focused in"));
 			settings.add(new Setting("queueFinishTimer", rs.getInt(4),
 					"seconds", "The amount of time for allowing users to re-add to queues after finishing a game"));
-			settings.add(new Setting("PostPickedTeamsToPugChannel", Boolean.valueOf(rs.getString(5)),
+			settings.add(new Setting("postPickedTeamsToPugChannel", Boolean.valueOf(rs.getString(5)),
 					null, "Post the picked teams to the PUG channel"));
+			settings.add(new Setting("createDiscordVoiceChannels", Boolean.valueOf(rs.getString(6)),
+					null, "Create discord voice channels for teams on game start"));
 			
 			rs.close();
 		}catch(SQLException ex){
@@ -633,7 +636,8 @@ public class Database {
 		try{
 			PreparedStatement pStatement = conn.prepareStatement("SELECT setting_minNumberOfGamesToCaptain, "
 					+ "setting_randomizeCaptains, "
-					+ "setting_snakePick "
+					+ "setting_snakePick, "
+					+ "setting_voiceChannelCategoryId "
 					+ "FROM Queue WHERE serverId = ? AND id = ?");
 			pStatement.setLong(1, serverId);
 			pStatement.setInt(2, id);
@@ -646,6 +650,8 @@ public class Database {
 					null, "Enables the bot to randomly select captains and allow picking through discord"));
 			settings.add(new Setting("snakePick", Boolean.valueOf(rs.getString(3)),
 					null, "Enables a snake at the end of picking"));
+			settings.add(new Setting("voiceChannelCategoryId", rs.getLong(4),
+					null, "The ID of the channel category to put generated voice channels in"));
 			
 			rs.close();
 		}catch(SQLException ex){

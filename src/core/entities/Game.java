@@ -11,14 +11,17 @@ import core.entities.menus.TeamPickerMenu;
 import core.util.MatchMaker;
 import core.util.Trigger;
 import core.util.Utils;
+import net.dv8tion.jda.core.entities.Category;
+import net.dv8tion.jda.core.entities.Channel;
 import net.dv8tion.jda.core.entities.User;
 
 public class Game {
 	private Queue parent;
 	private long serverId;
-	private Long timestamp;
+	private long timestamp;
 	private List<User> players;
 	private User[] captains = new User[] { null, null };
+	private Channel[] teamVoiceChannels = new Channel[2];
 	private RPSMenu rps = null;
 	private TeamPickerMenu pickMenu = null;
 	private GameStatus status = GameStatus.PICKING;
@@ -188,8 +191,7 @@ public class Game {
 	 * Inserts information into the database
 	 */
 	private void pickingComplete(){
-		setStatus(GameStatus.PLAYING);
-		
+		setStatus(GameStatus.PLAYING);		
 		
 		// Insert players in game into database
 		for(User u : players){
@@ -218,12 +220,50 @@ public class Game {
 				.sendMessage(Utils.createMessage(s, pickMenu.getPickedTeamsString(), true)).queue();
 			}
 		}
+		
+		if(parent.settings.randomizeCaptains() && 
+				ServerManager.getServer(String.valueOf(serverId)).getSettings().createDiscordVoiceChannels()){
+			createVoiceChannels();
+		}
 	}
 	
+	private void createVoiceChannels() {
+		try{
+			long catId = parent.settings.getVoiceChannelCategoryId();
+			Category category = ServerManager.getGuild(String.valueOf(serverId)).getCategoryById(catId);
+			
+			for(int x = 0;x < captains.length;x++){	
+				teamVoiceChannels[x] = ServerManager.getGuild(String.valueOf(serverId))
+						.getController().createVoiceChannel(captains[x].getName() + "'s team").complete();
+				
+				teamVoiceChannels[x].getManager().setParent(category).queue();
+			}	
+		}catch(Exception ex){
+				System.out.println(ex.getMessage());
+		}
+		
+	}
+	
+	private void deleteVoiceChannels(){
+		if(teamVoiceChannels[0] != null && teamVoiceChannels[1] != null){
+			try{
+				teamVoiceChannels[0].delete().queue();
+				teamVoiceChannels[1].delete().queue();
+			}catch(Exception ex){
+				System.out.println(ex.getMessage());
+			}
+		}
+	}
+	
+	public void finish(){
+		removeMenus();
+		deleteVoiceChannels();
+	}
+
 	/**
 	 * Removes all menus
 	 */
-	public void removeMenus(){
+	private void removeMenus(){
 		if(rps != null && !rps.finished()){
 			rps.complete();
 		}

@@ -708,4 +708,12 @@ public class QueueManager {
 		}
 		return false;
 	}
+	
+	public void finishAllGames(){
+		for(Queue queue : queueList){
+			for(Game game : queue.getGames()){
+				game.finish();
+			}
+		}
+	}
 }

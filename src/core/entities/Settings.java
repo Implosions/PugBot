@@ -34,6 +34,8 @@ public abstract class Settings {
 				
 			}else if(setting.getValue().getClass() == Boolean.class){
 				setting.setValue(Boolean.valueOf(value));
+			}else if(setting.getValue().getClass() == Long.class){
+				setting.setValue(Long.valueOf(value));
 			}else{
 				setting.setValue(value.toLowerCase());
 			}

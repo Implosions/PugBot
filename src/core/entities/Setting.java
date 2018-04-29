@@ -28,6 +28,13 @@ public class Setting {
 		this.description = description;
 	}
 	
+	public Setting(String name, Long value, String descriptor, String description){
+		this.name = name;
+		this.value = value;
+		this.descriptor = descriptor;
+		this.description = description;
+	}
+	
 	public String getName(){
 		return name;
 	}
