@@ -138,6 +138,8 @@ public class QueueManager {
 			if (q.getCurrentPlayersCount() < maxPlayers) {
 				q.setName(newName);
 				q.setMaxPlayers(maxPlayers);
+				
+				Database.updateQueue(Long.valueOf(guildId), q.getId(), q.getName(), q.getMaxPlayers());
 			} else {
 				throw new BadArgumentsException("New max players value must be lower than the old value");
 			}
@@ -160,6 +162,8 @@ public class QueueManager {
 			if (q.getCurrentPlayersCount() < maxPlayers) {
 				q.setName(newName);
 				q.setMaxPlayers(maxPlayers);
+				
+				Database.updateQueue(Long.valueOf(guildId), q.getId(), q.getName(), q.getMaxPlayers());
 			} else {
 				throw new BadArgumentsException("New max players value must be lower than the old value");
 			}

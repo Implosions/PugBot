@@ -946,4 +946,27 @@ public class Database {
 			ex.printStackTrace();
 		}
 	}
+	
+	/**
+	 * Updates a queue's name and max player count
+	 * 
+	 * @param serverId The id of the server
+	 * @param queueId The id of the queue
+	 * @param name The name of the queue
+	 * @param playerCount The maximum number of players
+	 */
+	public static void updateQueue(long serverId, int queueId, String name, int playerCount){
+		try{
+			PreparedStatement pStatement = conn.prepareStatement("UPDATE Queue SET name = ?, maxPlayers = ? "
+					+ "WHERE serverId = ? AND id = ?");
+			pStatement.setString(1, name);
+			pStatement.setInt(2, playerCount);
+			pStatement.setLong(3, serverId);
+			pStatement.setInt(4, queueId);
+			
+			pStatement.executeUpdate();
+		}catch(SQLException ex){
+			ex.printStackTrace();
+		}
+	}
 }
