@@ -492,7 +492,7 @@ public class Database {
 					+ "WHERE serverId = ? AND playerId = ?");
 			pStatement.setInt(1, value);
 			pStatement.setLong(2, serverId);
-			pStatement.setLong(1, playerId);
+			pStatement.setLong(3, playerId);
 			
 			pStatement.execute();
 		}catch(SQLException ex){
@@ -519,7 +519,7 @@ public class Database {
 					+ "WHERE serverId = ? AND playerId = ?");
 			pStatement.setInt(1, value);
 			pStatement.setLong(2, serverId);
-			pStatement.setLong(1, playerId);
+			pStatement.setLong(3, playerId);
 			
 			pStatement.execute();
 		}catch(SQLException ex){
