@@ -15,6 +15,7 @@ public class CmdRemoveQueue extends Command {
 		this.description = Constants.REMOVEQUEUE_DESC;
 		this.name = Constants.REMOVEQUEUE_NAME;
 		this.adminRequired = true;
+		this.pugChannelOnlyCommand = true;
 	}
 
 	@Override

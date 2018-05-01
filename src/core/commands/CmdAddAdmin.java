@@ -15,7 +15,6 @@ public class CmdAddAdmin extends Command{
 		this.description = Constants.ADDADMIN_DESC;
 		this.helpMsg = Constants.ADDADMIN_HELP;
 		this.adminRequired = true;
-		this.pugCommand = false;
 	}
 	
 	@Override

@@ -17,6 +17,7 @@ public class CmdRemove extends Command {
 		this.description = Constants.REMOVE_DESC;
 		this.name = Constants.REMOVE_NAME;
 		this.adminRequired = true;
+		this.pugChannelOnlyCommand = true;
 	}
 
 	@Override

@@ -16,7 +16,6 @@ public class CmdRemoveAdmin extends Command{
 		this.description = Constants.REMOVEADMIN_DESC;
 		this.helpMsg = Constants.REMOVEADMIN_HELP;
 		this.adminRequired = true;
-		this.pugCommand = false;
 	}
 	
 	@Override

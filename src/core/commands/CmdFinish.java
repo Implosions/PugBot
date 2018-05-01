@@ -13,6 +13,7 @@ public class CmdFinish extends Command{
 		this.helpMsg = Constants.FINISH_HELP;
 		this.description = Constants.FINISH_DESC;
 		this.name = Constants.FINISH_NAME;
+		this.pugChannelOnlyCommand = true;
 	}
 	
 	@Override

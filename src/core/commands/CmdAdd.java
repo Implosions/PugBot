@@ -13,6 +13,7 @@ public class CmdAdd extends Command{
 		this.helpMsg = Constants.ADD_HELP;
 		this.description = Constants.ADD_DESC;
 		this.name = Constants.ADD_NAME;
+		this.pugChannelOnlyCommand = true;
 	}
 	
 	@Override

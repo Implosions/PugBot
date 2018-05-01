@@ -14,6 +14,7 @@ public class CmdSubCaptain extends Command{
 		this.name = Constants.SUBCAPTAIN_NAME;
 		this.description = Constants.SUBCAPTAIN_DESC;
 		this.helpMsg = Constants.SUBCAPTAIN_HELP;
+		this.pugChannelOnlyCommand = true;
 	}
 	
 	@Override

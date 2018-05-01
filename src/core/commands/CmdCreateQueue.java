@@ -15,6 +15,7 @@ public class CmdCreateQueue extends Command {
 		this.description = Constants.CREATEQUEUE_DESC;
 		this.name = Constants.CREATEQUEUE_NAME;
 		this.adminRequired = true;
+		this.pugChannelOnlyCommand = true;
 	}
 
 	@Override

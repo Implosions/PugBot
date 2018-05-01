@@ -30,7 +30,6 @@ public class CmdBully extends Command {
 		this.helpMsg = Constants.BULLY_HELP;
 		this.description = Constants.BULLY_DESC;
 		this.name = Constants.BULLY_NAME;
-		this.pugCommand = false;
 	}
 
 	@Override

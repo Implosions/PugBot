@@ -16,7 +16,6 @@ public class CmdBan extends Command{
 		this.description = Constants.BAN_DESC;
 		this.helpMsg = Constants.BAN_HELP;
 		this.adminRequired = true;
-		this.pugCommand = false;
 	}
 	
 	@Override

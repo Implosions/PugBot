@@ -83,7 +83,7 @@ public class EventHandler extends ListenerAdapter {
 				// Determine which channel to send response
 				if (cmdObj.getDM()){
 					channel = event.getAuthor().openPrivateChannel().complete();
-				}else if(cmdObj.getPugCommand()){
+				}else if(cmdObj.isPugChannelOnlyCommand()){
 					channel = server.getPugChannel();
 				}
 				if (cmdObj.getAdminRequired() && !server.isAdmin(event.getMember())) {

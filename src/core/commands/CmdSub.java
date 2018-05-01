@@ -14,6 +14,7 @@ public class CmdSub extends Command{
 		this.helpMsg = Constants.SUB_HELP;
 		this.description = Constants.SUB_DESC;
 		this.name = Constants.SUB_NAME;
+		this.pugChannelOnlyCommand = true;
 	}
 	
 	@Override

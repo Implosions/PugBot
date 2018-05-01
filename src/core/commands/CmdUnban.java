@@ -15,7 +15,6 @@ public class CmdUnban extends Command{
 		this.description = Constants.UNBAN_DESC;
 		this.helpMsg = Constants.UNBAN_HELP;
 		this.adminRequired = true;
-		this.pugCommand = false;
 	}
 	
 	@Override

@@ -14,7 +14,7 @@ public abstract class Command {
 	protected String lastResponseId = null;
 	protected boolean dm = false;
 	protected boolean adminRequired = false;
-	protected boolean pugCommand = true;
+	protected boolean pugChannelOnlyCommand = false;
 	
 	public abstract Message execCommand(Server server, Member member, String[] args);
 	
@@ -38,8 +38,8 @@ public abstract class Command {
 		return description;
 	}
 	
-	public boolean getPugCommand(){
-		return pugCommand;
+	public boolean isPugChannelOnlyCommand(){
+		return pugChannelOnlyCommand;
 	}
 	
 	public void setLastResponseId(String id){

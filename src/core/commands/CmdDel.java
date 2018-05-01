@@ -14,6 +14,7 @@ public class CmdDel extends Command {
 		this.helpMsg = Constants.DEL_HELP;
 		this.description = Constants.DEL_DESC;
 		this.name = Constants.DEL_NAME;
+		this.pugChannelOnlyCommand = true;
 	}
 
 	@Override

@@ -15,6 +15,7 @@ public class CmdEditQueue extends Command{
 		this.description = Constants.EDITQUEUE_DESC;
 		this.name = Constants.EDITQUEUE_NAME;
 		this.adminRequired = true;
+		this.pugChannelOnlyCommand = true;
 	}
 	
 	@Override

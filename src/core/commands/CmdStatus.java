@@ -20,6 +20,7 @@ public class CmdStatus extends Command {
 		this.helpMsg = Constants.STATUS_HELP;
 		this.description = Constants.STATUS_DESC;
 		this.name = Constants.STATUS_NAME;
+		this.pugChannelOnlyCommand = true;
 	}
 
 	@Override

@@ -12,7 +12,6 @@ public class CmdGithub extends Command{
 		this.name = Constants.GITHUB_NAME;
 		this.description = Constants.GITHUB_DESC;
 		this.helpMsg = Constants.GITHUB_HELP;
-		this.pugCommand = false;
 	}
 
 	@Override
