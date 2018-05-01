@@ -1,6 +1,7 @@
 package core;
 
 import java.util.Arrays;
+import java.util.HashSet;
 
 import core.commands.Command;
 import core.entities.Server;
@@ -9,6 +10,7 @@ import core.util.Utils;
 import core.exceptions.*;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.OnlineStatus;
+import net.dv8tion.jda.core.entities.Emote;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.Message;
 import net.dv8tion.jda.core.entities.MessageChannel;
@@ -62,11 +64,23 @@ public class EventHandler extends ListenerAdapter {
 			}catch(PermissionException ex){
 				ex.printStackTrace();
 			}
+			
 			// Workaround for users with spaces in their name
 			// Replaces name with user id
 			if (event.getMessage().getMentionedUsers().size() > 0) {
 				for (User u : event.getMessage().getMentionedUsers()) {
 					message = message.replace("@" + event.getGuild().getMemberById(u.getId()).getEffectiveName(), u.getId());
+				}
+			}
+			
+			// Replaces standard emote string
+			// Allows bot to use server specific emotes
+			if (event.getMessage().getEmotes().size() > 0){
+				// Uses a set to remove duplicates
+				HashSet<Emote> emotes = new HashSet<Emote>(event.getMessage().getEmotes());
+				for (Emote emote : emotes){
+					message = message.replace(":" + emote.getName() + ":", 
+							String.format("<:%s:%s>", emote.getName(), emote.getId()));
 				}
 			}
 			

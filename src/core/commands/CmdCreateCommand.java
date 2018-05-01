@@ -38,7 +38,7 @@ public class CmdCreateCommand extends Command{
 		}
 		
 		System.out.println(success());
-		return Utils.createMessage(String.format("`Command '%s' created`", args[0].toLowerCase()));
+		return Utils.createMessage(String.format("Command '%s' created", args[0].toLowerCase()));
 	}
 
 	private String joinArgs(String[] args){
