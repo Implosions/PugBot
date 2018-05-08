@@ -50,9 +50,9 @@ public class Commands {
 		cmdList.put(Constants.SERVERSETTINGS_NAME, new CmdServerSettings());
 		cmdList.put(Constants.QUEUESETTINGS_NAME, new CmdQueueSettings());
 		
-		loadCustomCommands(serverId);
-		
 		populateLists();
+		
+		loadCustomCommands(serverId);
 	}
 
 	/**
