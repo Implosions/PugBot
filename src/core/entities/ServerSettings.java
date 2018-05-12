@@ -27,10 +27,6 @@ public class ServerSettings extends Settings{
 		return (String)getSetting("PUGChannel").getValue();
 	}
 	
-	public int getMinNumberOfGamesToCaptain(){
-		return (int)getSetting("minNumberOfGamesToCaptain").getValue();
-	}
-	
 	public int getQueueFinishTimer(){
 		return (int)getSetting("queueFinishTimer").getValue();
 	}
