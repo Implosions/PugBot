@@ -8,11 +8,11 @@ import net.dv8tion.jda.core.entities.User;
 
 public class MatchMaker {
 	
-	String guildId;
+	private long serverId;
 	List<Ranking> rankings = new ArrayList<Ranking>();
 	
-	public MatchMaker(String guildId, List<User> players){
-		this.guildId = guildId;
+	public MatchMaker(long guildId, List<User> players){
+		this.serverId = guildId;
 		for(User p : players){
 			rankings.add(new Ranking(p));
 		}
@@ -24,7 +24,7 @@ public class MatchMaker {
 			double score = 0.0;
 			for(Ranking r : rankings){
 				if(r != ranking){
-					Double pickDiff = Database.queryGetPickOrderDiff(Long.valueOf(guildId), ranking.player.getIdLong(), r.player.getIdLong());
+					double pickDiff = Database.queryGetPickOrderDiff(serverId, ranking.player.getIdLong(), r.player.getIdLong());
 
 					score += pickDiff;
 				}

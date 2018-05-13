@@ -124,7 +124,7 @@ public class Game {
 		
 		captains[0] = captainPool.get(random.nextInt(captainPool.size()));
 		
-		captains[1] = new MatchMaker(String.valueOf(serverId), captainPool).getMatch(captains[0]);
+		captains[1] = new MatchMaker(serverId, captainPool).getMatch(captains[0]);
 		
 		if(players.size() > 2){
 			// Create RPS menu on a new thread
@@ -214,15 +214,15 @@ public class Game {
 			}
 			
 			// Post teams to pug channel
-			if(ServerManager.getServer(String.valueOf(serverId)).getSettings().postTeamsToPugChannel()){
+			if(ServerManager.getServer(serverId).getSettings().postTeamsToPugChannel()){
 				String s = String.format("`Game: %s`", parent.getName());
-				ServerManager.getServer(String.valueOf(serverId)).getPugChannel()
+				ServerManager.getServer(serverId).getPugChannel()
 				.sendMessage(Utils.createMessage(s, pickMenu.getPickedTeamsString(), true)).queue();
 			}
 		}
 		
 		if(parent.settings.randomizeCaptains() && 
-				ServerManager.getServer(String.valueOf(serverId)).getSettings().createDiscordVoiceChannels()){
+				ServerManager.getServer(serverId).getSettings().createDiscordVoiceChannels()){
 			createVoiceChannels();
 		}
 	}

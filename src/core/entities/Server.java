@@ -17,7 +17,7 @@ import net.dv8tion.jda.core.entities.User;
 
 // Server class; Controls bot actions for each server
 public class Server {
-	private String id;
+	private long id;
 	private Guild guild;
 	private ServerSettings settings;
 	private QueueManager qm;
@@ -29,15 +29,15 @@ public class Server {
 
 	public Server(Guild guild) {
 		this.guild = guild;
-		this.id = guild.getId();
-		cmds = new Commands(guild.getIdLong());
+		this.id = guild.getIdLong();
+		cmds = new Commands(id);
 		
 		// Insert guild into database
-		Database.insertDiscordServer(guild.getIdLong(), guild.getName());
+		Database.insertDiscordServer(id, guild.getName());
 		// Insert members into database
 		for(Member m : guild.getMembers()){
 			Database.insertPlayer(m.getUser().getIdLong(), m.getEffectiveName());
-			Database.insertPlayerServer(guild.getIdLong(), m.getUser().getIdLong());
+			Database.insertPlayerServer(id, m.getUser().getIdLong());
 		}
 		
 		banList = Database.queryGetBanList(guild.getIdLong());
@@ -49,7 +49,7 @@ public class Server {
 		startAFKTimer();
 	}
 
-	public String getid() {
+	public long getid() {
 		return id;
 	}
 
@@ -168,12 +168,12 @@ public class Server {
 	
 	public void unbanUser(String playerId){
 		banList.remove(playerId);
-		Database.updateBanStatus(guild.getIdLong(), Long.valueOf(playerId), false);
+		Database.updateBanStatus(id, Long.valueOf(playerId), false);
 	}
 	
 	public void unbanAll(){
 		for(String s : banList){
-			Database.updateBanStatus(guild.getIdLong(), Long.valueOf(s), false);
+			Database.updateBanStatus(id, Long.valueOf(s), false);
 		}
 		banList.clear();
 	}
@@ -182,11 +182,11 @@ public class Server {
 		if(!adminList.contains(playerId)){
 			adminList.add(playerId);
 		}
-		Database.updateAdminStatus(guild.getIdLong(), Long.valueOf(playerId), true);
+		Database.updateAdminStatus(id, Long.valueOf(playerId), true);
 	}
 	
 	public void removeAdmin(String playerId){
 		adminList.remove(playerId);
-		Database.updateAdminStatus(guild.getIdLong(), Long.valueOf(playerId), false);
+		Database.updateAdminStatus(id, Long.valueOf(playerId), false);
 	}
 }

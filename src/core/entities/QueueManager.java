@@ -15,12 +15,12 @@ import net.dv8tion.jda.core.exceptions.PermissionException;
 public class QueueManager {
 	private List<Queue> queueList = new ArrayList<Queue>();
 	private List<User> justFinished = new ArrayList<User>();
-	private String guildId;
+	private long serverId;
 
-	public QueueManager(String id) {
-		guildId = id;
+	public QueueManager(long id) {
+		serverId = id;
 
-		queueList = Database.getServerQueueList(Long.valueOf(id));
+		queueList = Database.getServerQueueList(id);
 	}
 
 	/**
@@ -33,8 +33,8 @@ public class QueueManager {
 	public void createQueue(String name, Integer players) {
 		if (players > 1) {
 			if (!doesQueueExist(name)) {
-				int queueId = Database.insertQueue(Long.valueOf(guildId), name, players);
-				queueList.add(new Queue(name, players, guildId, queueId));
+				int queueId = Database.insertQueue(serverId, name, players);
+				queueList.add(new Queue(name, players, serverId, queueId));
 			} else {
 				throw new DuplicateEntryException("A queue with the same name already exists");
 			}
@@ -139,7 +139,7 @@ public class QueueManager {
 				q.setName(newName);
 				q.setMaxPlayers(maxPlayers);
 				
-				Database.updateQueue(Long.valueOf(guildId), q.getId(), q.getName(), q.getMaxPlayers());
+				Database.updateQueue(Long.valueOf(serverId), q.getId(), q.getName(), q.getMaxPlayers());
 			} else {
 				throw new BadArgumentsException("New max players value must be lower than the old value");
 			}
@@ -163,7 +163,7 @@ public class QueueManager {
 				q.setName(newName);
 				q.setMaxPlayers(maxPlayers);
 				
-				Database.updateQueue(Long.valueOf(guildId), q.getId(), q.getName(), q.getMaxPlayers());
+				Database.updateQueue(Long.valueOf(serverId), q.getId(), q.getName(), q.getMaxPlayers());
 			} else {
 				throw new BadArgumentsException("New max players value must be lower than the old value");
 			}
@@ -183,7 +183,7 @@ public class QueueManager {
 		if (doesQueueExist(i)) {
 			Queue q = queueList.get(i);
 			queueList.remove(q);
-			Database.deactivateQueue(Long.valueOf(guildId), q.getId());
+			Database.deactivateQueue(Long.valueOf(serverId), q.getId());
 		} else {
 			throw new DoesNotExistException("Queue");
 		}
@@ -199,7 +199,7 @@ public class QueueManager {
 		if (doesQueueExist(name)) {
 			Queue q = getQueue(name);
 			queueList.remove(q);
-			Database.deactivateQueue(Long.valueOf(guildId), q.getId());
+			Database.deactivateQueue(Long.valueOf(serverId), q.getId());
 		} else {
 			throw new DoesNotExistException("Queue");
 		}
@@ -624,8 +624,8 @@ public class QueueManager {
 	 * 
 	 * @return the guild id associated with this QueueManager instance
 	 */
-	public String getId() {
-		return guildId;
+	public long getId() {
+		return serverId;
 	}
 
 	/**
@@ -634,7 +634,7 @@ public class QueueManager {
 	 * @return the Server instance associated with this QueueManager instance
 	 */
 	public Server getServer() {
-		return ServerManager.getServer(guildId);
+		return ServerManager.getServer(serverId);
 	}
 
 	

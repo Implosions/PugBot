@@ -19,7 +19,7 @@ import net.dv8tion.jda.core.entities.User;
 public class Queue {
 	private Integer maxPlayers;
 	private String name;
-	private String guildId;
+	private long serverId;
 	private int id;
 	private List<User> playersInQueue = new ArrayList<User>();;
 	private List<Game> games = new ArrayList<Game>();;
@@ -28,10 +28,10 @@ public class Queue {
 	private Trigger t;
 	public QueueSettings settings;
 	
-	public Queue(String name, int maxPlayers, String guildId, int id) {
+	public Queue(String name, int maxPlayers, long guildId, int id) {
 		this.name = name;
 		this.maxPlayers = maxPlayers;
-		this.guildId = guildId;
+		this.serverId = guildId;
 		this.id = id;
 		this.settings = new QueueSettings(Long.valueOf(guildId), id);
 	}
@@ -46,7 +46,7 @@ public class Queue {
 	public void add(User player) {
 		if (!playersInQueue.contains(player)) {
 			playersInQueue.add(player);
-			Database.insertPlayerInQueue(Long.valueOf(guildId), id, player.getIdLong());
+			Database.insertPlayerInQueue(Long.valueOf(serverId), id, player.getIdLong());
 			checkNotifications();
 			
 			if (playersInQueue.size() == maxPlayers) {
@@ -135,7 +135,7 @@ public class Queue {
 	private void popQueue() {
 		String names = "";
 		List<User> players = new ArrayList<User>(playersInQueue);
-		TextChannel pugChannel = ServerManager.getServer(guildId).getPugChannel();
+		TextChannel pugChannel = ServerManager.getServer(serverId).getPugChannel();
 		
 		// Send alert to players and compile their names
 		for(User u : players){
@@ -150,12 +150,12 @@ public class Queue {
 		names = names.substring(0, names.lastIndexOf(","));
 		
 		// Create Game and add to the list of active games
-		Game newGame = new Game(this, Long.valueOf(guildId), players);
+		Game newGame = new Game(this, Long.valueOf(serverId), players);
 		games.add(newGame);
 		
 		// Remove players from all other queues
-		ServerManager.getServer(guildId).getQueueManager().purgeQueue(players);
-		Database.deletePlayersInQueueFromQueue(Long.valueOf(guildId), id);
+		ServerManager.getServer(serverId).getQueueManager().purgeQueue(players);
+		Database.deletePlayersInQueueFromQueue(Long.valueOf(serverId), id);
 		
 		// Generate captain string
 		String captainString = "";
@@ -179,11 +179,11 @@ public class Queue {
 	 */
 	public void finish(Game g) {
 		List<User> players = new ArrayList<User>(g.getPlayers());
-		ServerManager.getServer(guildId).getQueueManager().addToJustFinished(players);
+		ServerManager.getServer(serverId).getQueueManager().addToJustFinished(players);
 		g.finish();
 		games.remove(g);
-		t = () -> ServerManager.getServer(guildId).getQueueManager().timerEnd(players);
-		Timer timer = new Timer(ServerManager.getServer(guildId).getSettings().getQueueFinishTimer(), t);
+		t = () -> ServerManager.getServer(serverId).getQueueManager().timerEnd(players);
+		Timer timer = new Timer(ServerManager.getServer(serverId).getSettings().getQueueFinishTimer(), t);
 		timer.start();
 	}
 
@@ -195,7 +195,7 @@ public class Queue {
 	public void delete(User s) {
 		if(playersInQueue.contains(s)){
 			playersInQueue.remove(s);
-			Database.deletePlayerInQueue(Long.valueOf(guildId), id, s.getIdLong());
+			Database.deletePlayerInQueue(Long.valueOf(serverId), id, s.getIdLong());
 		}else if(waitList.contains(s)){
 			waitList.remove(s);
 		}
@@ -308,7 +308,7 @@ public class Queue {
 			notifications.put(playerCount, new ArrayList<User>());
 			notifications.get(playerCount).add(player);
 		}
-		Database.insertQueueNotification(Long.valueOf(guildId), id, player.getIdLong(), playerCount);
+		Database.insertQueueNotification(Long.valueOf(serverId), id, player.getIdLong(), playerCount);
 	}
 	
 	/**
@@ -327,7 +327,7 @@ public class Queue {
 	 */
 	private void notify(List<User> users) {
 		for(User u : users){
-			Member m = ServerManager.getServer(guildId).getGuild().getMemberById(u.getId());
+			Member m = ServerManager.getServer(serverId).getGuild().getMemberById(u.getId());
 			if(!playersInQueue.contains(u) && (m.getOnlineStatus().equals(OnlineStatus.ONLINE) || m.getOnlineStatus().equals(OnlineStatus.IDLE))){
 				try{
 					u.openPrivateChannel().complete()
@@ -348,7 +348,7 @@ public class Queue {
 		for(List<User> list : notifications.values()){
 			list.remove(player);
 		}
-		Database.deleteQueueNotification(Long.valueOf(guildId), id, player.getIdLong());
+		Database.deleteQueueNotification(Long.valueOf(serverId), id, player.getIdLong());
 	}
 	
 	/**

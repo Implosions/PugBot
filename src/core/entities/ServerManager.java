@@ -18,9 +18,9 @@ public class ServerManager {
 								});
 	}
 	
-	public static Server getServer(String id){
+	public static Server getServer(long id){
 		for(Server s : servers){
-			if(s.getid().equals(id)){
+			if(s.getid() == id){
 				return s;
 			}
 		}
@@ -33,7 +33,7 @@ public class ServerManager {
 	}
 	
 	public static void removeServer(Guild guild){
-		servers.remove(getServer(guild.getId()));
+		servers.remove(getServer(guild.getIdLong()));
 	}
 	
 	public static Guild getGuild(String id){
