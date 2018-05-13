@@ -33,7 +33,7 @@ public class Queue {
 		this.maxPlayers = maxPlayers;
 		this.serverId = guildId;
 		this.id = id;
-		this.settings = new QueueSettings(Long.valueOf(guildId), id);
+		this.settings = new QueueSettings(guildId, id);
 	}
 
 	/**
@@ -46,7 +46,7 @@ public class Queue {
 	public void add(User player) {
 		if (!playersInQueue.contains(player)) {
 			playersInQueue.add(player);
-			Database.insertPlayerInQueue(Long.valueOf(serverId), id, player.getIdLong());
+			Database.insertPlayerInQueue(serverId, id, player.getIdLong());
 			checkNotifications();
 			
 			if (playersInQueue.size() == maxPlayers) {
@@ -150,12 +150,12 @@ public class Queue {
 		names = names.substring(0, names.lastIndexOf(","));
 		
 		// Create Game and add to the list of active games
-		Game newGame = new Game(this, Long.valueOf(serverId), players);
+		Game newGame = new Game(this, serverId, players);
 		games.add(newGame);
 		
 		// Remove players from all other queues
 		ServerManager.getServer(serverId).getQueueManager().purgeQueue(players);
-		Database.deletePlayersInQueueFromQueue(Long.valueOf(serverId), id);
+		Database.deletePlayersInQueueFromQueue(serverId, id);
 		
 		// Generate captain string
 		String captainString = "";
@@ -195,7 +195,7 @@ public class Queue {
 	public void delete(User s) {
 		if(playersInQueue.contains(s)){
 			playersInQueue.remove(s);
-			Database.deletePlayerInQueue(Long.valueOf(serverId), id, s.getIdLong());
+			Database.deletePlayerInQueue(serverId, id, s.getIdLong());
 		}else if(waitList.contains(s)){
 			waitList.remove(s);
 		}
@@ -308,7 +308,7 @@ public class Queue {
 			notifications.put(playerCount, new ArrayList<User>());
 			notifications.get(playerCount).add(player);
 		}
-		Database.insertQueueNotification(Long.valueOf(serverId), id, player.getIdLong(), playerCount);
+		Database.insertQueueNotification(serverId, id, player.getIdLong(), playerCount);
 	}
 	
 	/**
@@ -348,7 +348,7 @@ public class Queue {
 		for(List<User> list : notifications.values()){
 			list.remove(player);
 		}
-		Database.deleteQueueNotification(Long.valueOf(serverId), id, player.getIdLong());
+		Database.deleteQueueNotification(serverId, id, player.getIdLong());
 	}
 	
 	/**
