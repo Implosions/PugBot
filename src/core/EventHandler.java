@@ -39,7 +39,7 @@ public class EventHandler extends ListenerAdapter {
 	 */
 	@Override
 	public void onGuildMessageReceived(GuildMessageReceivedEvent event) {
-		Server server = ServerManager.getServer(event.getGuild().getId());
+		Server server = ServerManager.getServer(event.getGuild().getIdLong());
 		String message = event.getMessage().getContent();
 		if (server != null && message.startsWith("!") && message.length() > 1 && !event.getAuthor().isBot()) {
 			
@@ -140,7 +140,7 @@ public class EventHandler extends ListenerAdapter {
 		Member m = event.getGuild().getMember(event.getUser());
 		// Passes online status if a player goes offline
 		if(m.getOnlineStatus().equals(OnlineStatus.OFFLINE)){
-			ServerManager.getServer(event.getGuild().getId()).playerDisconnect(m);
+			ServerManager.getServer(event.getGuild().getIdLong()).playerDisconnect(m);
 		}
 	}
 	
@@ -158,12 +158,12 @@ public class EventHandler extends ListenerAdapter {
 
 	public void onGenericGuildMessageReaction(GenericGuildMessageReactionEvent event) {
 		// Updates activity list with the user
-		ServerManager.getServer(event.getGuild().getId()).updateActivityList(event.getUser());
+		ServerManager.getServer(event.getGuild().getIdLong()).updateActivityList(event.getUser());
 	}
 	
 	public void onGenericGuild(GenericGuildEvent event){
 		// Updates Server's Guild object with any changes
-		ServerManager.getServer(event.getGuild().getId()).setGuild(event.getGuild());
+		ServerManager.getServer(event.getGuild().getIdLong()).setGuild(event.getGuild());
 	}
 	
 	public void onGuildMemberJoin(GuildMemberJoinEvent event){

@@ -717,7 +717,7 @@ public class Database {
 			ResultSet rs = pStatement.executeQuery();
 			
 			while(rs.next()){
-				Queue q = new Queue(rs.getString(2), rs.getInt(3), String.valueOf(serverId), rs.getInt(1));
+				Queue q = new Queue(rs.getString(2), rs.getInt(3), serverId, rs.getInt(1));
 				
 				for(User p : getPlayersInQueue(serverId, q.getId())){
 					q.add(p);
