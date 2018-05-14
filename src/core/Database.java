@@ -8,6 +8,7 @@ import core.commands.CustomCommand;
 import core.entities.Queue;
 import core.entities.ServerManager;
 import core.entities.Setting;
+import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.User;
 
 public class Database {
@@ -937,8 +938,10 @@ public class Database {
 			ResultSet rs = pStatement.executeQuery();
 			
 			while(rs.next()){
-				User player = ServerManager.getGuild(String.valueOf(serverId)).getMemberById(rs.getLong(2)).getUser();
-				queue.addNotification(player, rs.getInt(1));
+				Member member = ServerManager.getGuild(String.valueOf(serverId)).getMemberById(rs.getLong(2));
+				if(member != null){
+					queue.addNotification(member.getUser(), rs.getInt(1));
+				}
 			}
 			
 			rs.close();
