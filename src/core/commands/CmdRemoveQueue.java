@@ -1,6 +1,8 @@
 package core.commands;
 
 import core.Constants;
+import core.Database;
+import core.entities.Queue;
 import core.entities.QueueManager;
 import core.entities.Server;
 import core.exceptions.BadArgumentsException;
@@ -22,18 +24,26 @@ public class CmdRemoveQueue extends Command {
 	public Message execCommand(Server server, Member member, String[] args) {
 		QueueManager qm = server.getQueueManager();
 		if (args.length > 0) {
-			for (String a : args) {
+			for (String arg : args) {
+				Queue queue;
+				
 				try {
-					qm.removeQueue(Integer.valueOf(a));
+					queue = qm.getQueue(Integer.valueOf(arg));
 				} catch (NumberFormatException ex) {
-					qm.removeQueue(a);
+					queue = qm.getQueue(arg);
 				}
+				
+				if(queue != null){
+					qm.removeQueue(queue);
+					Database.deactivateQueue(server.getid(), queue.getId());
+					qm.updateTopic();
+				}
+				
 			}
+			this.response = Utils.createMessage("`Queue(s) removed`");
 		} else {
 			throw new BadArgumentsException();
 		}
-		qm.updateTopic();
-		this.response = Utils.createMessage(String.format("Queue %s removed", args[0]), qm.getHeader(), true);
 		System.out.println(success());
 		
 		return response;

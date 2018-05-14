@@ -4,6 +4,7 @@ import core.Constants;
 import core.entities.QueueManager;
 import core.entities.Server;
 import core.exceptions.BadArgumentsException;
+import core.exceptions.InvalidUseException;
 import core.util.Utils;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.Message;
@@ -19,7 +20,6 @@ public class CmdSub extends Command{
 	
 	@Override
 	public Message execCommand(Server server, Member member, String[] args) {
-		String targName, subName;
 		QueueManager qm = server.getQueueManager();
 		if (args.length < 3) {
 			Member target = server.getMember(args[0]);
@@ -33,20 +33,34 @@ public class CmdSub extends Command{
 
 			if (target != null) {
 				if (substitute != null) {
-					qm.sub(target.getUser(), substitute.getUser());
-					targName = target.getEffectiveName();
-					subName = substitute.getEffectiveName();
+					if(!qm.isPlayerIngame(substitute.getUser())){
+						if(qm.isPlayerIngame(target.getUser())){
+							qm.getPlayersGame(target.getUser()).sub(target.getUser(), substitute.getUser());
+							qm.purgeQueue(substitute.getUser());
+							
+							this.response = Utils.createMessage(
+							String.format("%s has been substituted with %s",
+									target.getEffectiveName(), substitute.getEffectiveName()), "", true);
+							qm.updateTopic();
+						}else{
+							throw new InvalidUseException(target.getEffectiveName() + " is not in-game");
+						}
+						
+					}else{
+						throw new InvalidUseException(substitute.getEffectiveName() + " is already in-game");
+					}
+					
 				} else {
-					throw new BadArgumentsException("Substitute player does not exist");
+					throw new InvalidUseException("Substitute player does not exist");
 				}
+				
 			} else {
-				throw new BadArgumentsException("Target player does not exist");
+				throw new InvalidUseException("Target player does not exist");
 			}
+			
 		} else {
 			throw new BadArgumentsException();
 		}
-		qm.updateTopic();
-		this.response = Utils.createMessage(String.format("%s has been subbed with %s", targName, subName), "", true);
 		System.out.println(success());
 		
 		return response;

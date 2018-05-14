@@ -5,7 +5,7 @@ import core.entities.Server;
 import core.entities.Timer;
 import core.entities.menus.RPSMenu;
 import core.exceptions.BadArgumentsException;
-import core.exceptions.DoesNotExistException;
+import core.exceptions.InvalidUseException;
 import core.util.Trigger;
 import core.util.Utils;
 import net.dv8tion.jda.core.entities.Member;
@@ -33,7 +33,7 @@ public class CmdRPS extends Command{
 				};
 				new Timer(180, t).start();
 			} else {
-				throw new DoesNotExistException("User: " + args[0]);
+				throw new InvalidUseException("User does not exist");
 			}
 
 		} else {

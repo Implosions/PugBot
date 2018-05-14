@@ -79,7 +79,7 @@ public class Server {
 	private void afkTimerEnd() {
 		activityList.forEach((u, l) -> {
 			if (qm.isPlayerInQueue(u) && (System.currentTimeMillis() - l) / 60000 >= settings.getAFKTimeout()) {
-				qm.deletePlayer(u);
+				qm.purgeQueue(u);
 				String s = String.format("%s has been removed from the queue due to inactivity", u.getName());
 				getPugChannel().sendMessage(Utils.createMessage("", s, Color.red)).queue();
 				
@@ -106,7 +106,7 @@ public class Server {
 
 	private void dcTimerEnd(Member m) {
 		if (m.getOnlineStatus().equals(OnlineStatus.OFFLINE) && qm.isPlayerInQueue(m.getUser())) {
-			qm.deletePlayer(m.getUser());
+			qm.purgeQueue(m.getUser());
 			qm.updateTopic();
 			String s = String.format("%s has been removed from queue after being offline for %s minutes", 
 					m.getEffectiveName(), settings.getDCTimeout());

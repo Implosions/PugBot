@@ -107,7 +107,7 @@ public class EventHandler extends ListenerAdapter {
 					Message response;
 					try{
 						response = cmdObj.execCommand(server, event.getMember(), args);
-					}catch(DoesNotExistException | DuplicateEntryException | InvalidUseException ex){
+					}catch(InvalidUseException ex){
 						response = Utils.createMessage("Error!", ex.getMessage(), false);
 					}catch(BadArgumentsException ex){
 						response = Utils.createMessage("Error!", 

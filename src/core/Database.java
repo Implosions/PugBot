@@ -720,7 +720,7 @@ public class Database {
 				Queue q = new Queue(rs.getString(2), rs.getInt(3), serverId, rs.getInt(1));
 				
 				for(User p : getPlayersInQueue(serverId, q.getId())){
-					q.add(p);
+					q.addPlayerToQueueDirectly(p);
 				}
 				fillQueueNotifications(serverId, q.getId(), q);
 				queueList.add(q);

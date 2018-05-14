@@ -44,15 +44,23 @@ public class Queue {
 	 * @param player the player to be added
 	 */
 	public void add(User player) {
-		if (!playersInQueue.contains(player)) {
-			playersInQueue.add(player);
-			Database.insertPlayerInQueue(serverId, id, player.getIdLong());
-			checkNotifications();
-			
-			if (playersInQueue.size() == maxPlayers) {
-				popQueue();
+		if (!playersInQueue.contains(player) && !getManager().isPlayerIngame(player)) {
+			if(!getManager().hasPlayerJustFinished(player)){
+				playersInQueue.add(player);
+				Database.insertPlayerInQueue(serverId, id, player.getIdLong());
+				checkNotifications();
+				
+				if (playersInQueue.size() == maxPlayers) {
+					popQueue();
+				}
+			}else{
+				addToWaitList(player);
 			}
 		}
+	}
+	
+	public void addPlayerToQueueDirectly(User player){
+		playersInQueue.add(player);
 	}
 
 	/**
@@ -207,18 +215,11 @@ public class Queue {
 	 * @param players List of players to remove from queue
 	 */
 	public void purge(List<User> players) {
-		playersInQueue.removeAll(players);
-		waitList.removeAll(players);
-	}
-	
-	/**
-	 * Removes a specific player from queue
-	 * 
-	 * @param player the player to remove from queue
-	 */
-	public void purge(User player){
-		playersInQueue.remove(player);
-		waitList.remove(player);
+		for(User player : players){
+			if(playersInQueue.contains(player) || waitList.contains(player)){
+				delete(player);
+			}
+		}
 	}
 
 	/**
@@ -362,5 +363,9 @@ public class Queue {
 	
 	public int getId(){
 		return id;
+	}
+	
+	private QueueManager getManager(){
+		return ServerManager.getServer(serverId).getQueueManager();
 	}
 }

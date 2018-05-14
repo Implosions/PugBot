@@ -8,7 +8,7 @@ import core.entities.Game;
 import core.entities.Queue;
 import core.entities.QueueManager;
 import core.entities.Server;
-import core.exceptions.DoesNotExistException;
+import core.exceptions.InvalidUseException;
 import core.util.Utils;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.Message;
@@ -45,7 +45,7 @@ public class CmdStatus extends Command {
 				this.response = Utils.createMessage("", statusBuilder(queueList), true);
 			}
 		} else {
-			throw new DoesNotExistException("Queue");
+			throw new InvalidUseException("There are no active queues");
 		}
 		// Delete last status message
 		if (lastResponseId != null) {
@@ -87,7 +87,7 @@ public class CmdStatus extends Command {
 			statusMsg += System.lineSeparator();
 		}
 		if (statusMsg.isEmpty()) {
-			throw new DoesNotExistException("Queue");
+			throw new InvalidUseException("Queue does not exist");
 		}
 		return statusMsg;
 	}

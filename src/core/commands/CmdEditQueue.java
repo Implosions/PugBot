@@ -1,9 +1,12 @@
 package core.commands;
 
 import core.Constants;
+import core.Database;
+import core.entities.Queue;
 import core.entities.QueueManager;
 import core.entities.Server;
 import core.exceptions.BadArgumentsException;
+import core.exceptions.InvalidUseException;
 import core.util.Utils;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.Message;
@@ -22,20 +25,44 @@ public class CmdEditQueue extends Command{
 	public Message execCommand(Server server, Member member, String[] args) {
 		QueueManager qm = server.getQueueManager();
 		if (args.length == 3) {
+			int playerCount;
+			String newName = args[1];
+			Queue queue;
+			
 			try {
-				qm.editQueue(Integer.valueOf(args[0]), args[1], Integer.valueOf(args[2]));
+				playerCount = Integer.valueOf(args[2]);
 			} catch (NumberFormatException ex) {
-				try {
-					qm.editQueue(args[0], args[1], Integer.valueOf(args[2]));
-				} catch (NumberFormatException e) {
-					throw new BadArgumentsException("New max player count must be a valid number");
-				}
+				throw new InvalidUseException("Player count must be a valid number");
 			}
+			
+			try {
+				queue = qm.getQueue(Integer.valueOf(args[0]));
+			} catch (NumberFormatException ex) {
+				queue = qm.getQueue(args[0]);
+			}
+			
+			if(queue != null){
+				if(queue.getCurrentPlayersCount() < playerCount){
+					String oldName = queue.getName();
+					
+					queue.setName(newName);
+					queue.setMaxPlayers(playerCount);
+					
+					Database.updateQueue(server.getid(), queue.getId(), queue.getName(), queue.getMaxPlayers());
+					qm.updateTopic();
+					
+					this.response = Utils.createMessage(String.format("`Queue %s edited`", oldName));
+				}else{
+					throw new InvalidUseException("New player count must be greater than the amount of current players");
+				}
+				
+			}else{
+				throw new InvalidUseException("Queue does not exist");
+			}
+			
 		} else {
 			throw new BadArgumentsException();
 		}
-		qm.updateTopic();
-		this.response = Utils.createMessage(String.format("Queue %s edited", args[0]), qm.getHeader(), true);
 		System.out.println(success());
 		
 		return response;

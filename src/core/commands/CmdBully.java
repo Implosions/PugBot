@@ -12,7 +12,7 @@ import java.util.List;
 import core.Constants;
 import core.entities.Server;
 import core.exceptions.BadArgumentsException;
-import core.exceptions.DoesNotExistException;
+import core.exceptions.InvalidUseException;
 import core.util.Utils;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.Message;
@@ -60,7 +60,7 @@ public class CmdBully extends Command {
 									((System.currentTimeMillis() - cooldownCollection.get(member.getUser())) / 60000)), false);
 				}
 			} else {
-				throw new DoesNotExistException("User");
+				throw new InvalidUseException("User does not exist");
 			}
 		} else {
 			throw new BadArgumentsException();

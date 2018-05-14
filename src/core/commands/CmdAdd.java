@@ -1,11 +1,14 @@
 package core.commands;
 
 import core.Constants;
+import core.entities.Queue;
 import core.entities.QueueManager;
 import core.entities.Server;
+import core.exceptions.InvalidUseException;
 import core.util.Utils;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.Message;
+import net.dv8tion.jda.core.entities.User;
 
 public class CmdAdd extends Command{
 	
@@ -19,25 +22,53 @@ public class CmdAdd extends Command{
 	@Override
 	public Message execCommand(Server server, Member member, String[] args) {
 		QueueManager qm = server.getQueueManager();
-		if (args.length == 0) {
-			qm.addPlayerToQueue(member.getUser());
-		} else {
-			for (String q : args) {
-				try {
-					qm.addPlayerToQueue(member.getUser(), Integer.valueOf(q));
-				} catch (NumberFormatException ex) {
-					qm.addPlayerToQueue(member.getUser(), q);
+		User player = member.getUser();
+		if(!qm.isQueueListEmpty()){
+			if(!qm.isPlayerIngame(player)){
+				String queueMsg;
+				
+				if (args.length == 0) {
+					for(Queue queue : qm.getQueueList()){
+						queue.add(member.getUser());
+					}
+					queueMsg = member.getEffectiveName() + " added to all queues";
+				} else {
+					String queueNames = "";
+					for (String arg : args) {
+						Queue queue;
+						
+						try {
+							queue = qm.getQueue(Integer.valueOf(arg));
+						} catch (NumberFormatException ex) {
+							queue = qm.getQueue(arg);
+						}
+						
+						if(queue != null){
+							queue.add(player);
+							queueNames += queue.getName() + ", ";
+						}else{
+							qm.updateTopic();
+							throw new InvalidUseException(String.format("Queue '%s' does not exist", arg));
+						}
+					}
+					queueNames = queueNames.substring(0, queueNames.length() - 2);
+					queueMsg = member.getEffectiveName() + " added to " + queueNames;
 				}
+				qm.updateTopic();
+				if (qm.hasPlayerJustFinished(member.getUser())) {
+					this.response = Utils.createMessage(queueMsg,
+							String.format("Your game has just finished, you will be randomized into the queue after %d seconds",
+									server.getSettings().getQueueFinishTimer()), true);
+				} else {
+					this.response = Utils.createMessage(queueMsg, qm.getHeader(), true);
+				}
+				
+			}else{
+				throw new InvalidUseException("You are already in-game");
 			}
-		}
-		qm.updateTopic();
-		if (qm.hasPlayerJustFinished(member.getUser())) {
-			this.response = Utils.createMessage(String.format("%s added to queue", member.getEffectiveName()),
-					String.format("Your game has just finished, you will be randomized into queue after %d seconds",
-							server.getSettings().getQueueFinishTimer()), true);
-		} else {
-			this.response = Utils.createMessage(String.format("%s added to queue", member.getEffectiveName()),
-					qm.getHeader(), true);
+			
+		}else{
+			throw new InvalidUseException("There are no active queues");
 		}
 		System.out.println(success());
 		return response;

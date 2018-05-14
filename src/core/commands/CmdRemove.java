@@ -3,9 +3,11 @@ package core.commands;
 import java.util.Arrays;
 
 import core.Constants;
+import core.entities.Queue;
 import core.entities.QueueManager;
 import core.entities.Server;
 import core.exceptions.BadArgumentsException;
+import core.exceptions.InvalidUseException;
 import core.util.Utils;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.Message;
@@ -30,24 +32,34 @@ public class CmdRemove extends Command {
 			if (m != null) {
 				pName = m.getEffectiveName();
 				if (args.length == 1) {
-					qm.remove(m.getUser());
+					for(Queue queue : qm.getQueueList()){
+						queue.delete(m.getUser());
+					}
 				} else {
-					for (String s : Arrays.copyOfRange(args, 1, args.length)) {
+					for (String arg : Arrays.copyOfRange(args, 1, args.length)) {
+						Queue queue;
+						
 						try {
-							qm.remove(m.getUser(), Integer.valueOf(s));
+							queue = qm.getQueue(Integer.valueOf(arg));
 						} catch (NumberFormatException ex) {
-							qm.remove(m.getUser(), s);
+							queue = qm.getQueue(arg);
+						}
+						
+						if(queue != null){
+							queue.delete(m.getUser());
+						}else{
+							throw new InvalidUseException(String.format("Queue '%s' does not exist", arg));
 						}
 					}
 				}
 			} else {
-				throw new BadArgumentsException(args[0] + " does not exist");
+				throw new InvalidUseException(String.format("Could not find user '%s'", args[0]));
 			}
 		} else {
 			throw new BadArgumentsException();
 		}
 		qm.updateTopic();
-		this.response = Utils.createMessage(String.format("%s removed from queue", pName), qm.getHeader(), true);
+		this.response = Utils.createMessage(String.format("%s removed", pName), qm.getHeader(), true);
 		System.out.println(success());
 		
 		return response;

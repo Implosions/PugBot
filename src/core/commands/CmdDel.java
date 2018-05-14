@@ -1,6 +1,7 @@
 package core.commands;
 
 import core.Constants;
+import core.entities.Queue;
 import core.entities.QueueManager;
 import core.entities.Server;
 import core.exceptions.InvalidUseException;
@@ -22,22 +23,37 @@ public class CmdDel extends Command {
 		QueueManager qm = server.getQueueManager();
 		if (qm.isPlayerInQueue(member.getUser()) || qm.isPlayerWaiting(member.getUser())) {
 			if (args.length == 0) {
-				qm.deletePlayer(member.getUser());
+				for(Queue queue : qm.getQueueList()){
+					queue.delete(member.getUser());
+				}
+				
+				this.response = Utils.createMessage(String.format("%s deleted from all queues", member.getEffectiveName()),
+						qm.getHeader(), true);
 			} else {
-				for (String q : args) {
+				String queueNames = "";
+				for (String arg : args) {
+					Queue queue;
+					
 					try {
-						qm.deletePlayer(member.getUser(), Integer.valueOf(q));
+						queue = qm.getQueue(Integer.valueOf(arg));
 					} catch (NumberFormatException ex) {
-						qm.deletePlayer(member.getUser(), q);
+						queue = qm.getQueue(arg);
+					}
+					
+					if(queue != null){
+						queue.delete(member.getUser());
+						queueNames += queue.getName() + ", ";
 					}
 				}
+				
+				queueNames = queueNames.substring(0, queueNames.length() - 2);
+				this.response = Utils.createMessage(String.format("%s deleted from %s", member.getEffectiveName(), queueNames),
+						qm.getHeader(), true);
 			}
+			qm.updateTopic();
 		} else {
 			throw new InvalidUseException("You are not in any queue");
 		}
-		qm.updateTopic();
-		this.response = Utils.createMessage(String.format("%s deleted from queue", member.getEffectiveName()),
-				qm.getHeader(), true);
 		System.out.println(success());
 		
 		return response;
