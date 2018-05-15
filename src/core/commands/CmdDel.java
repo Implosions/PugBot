@@ -31,19 +31,13 @@ public class CmdDel extends Command {
 						qm.getHeader(), true);
 			} else {
 				String queueNames = "";
-				for (String arg : args) {
-					Queue queue;
-					
-					try {
-						queue = qm.getQueue(Integer.valueOf(arg));
-					} catch (NumberFormatException ex) {
-						queue = qm.getQueue(arg);
-					}
-					
-					if(queue != null){
-						queue.delete(member.getUser());
-						queueNames += queue.getName() + ", ";
-					}
+				for (Queue queue : qm.getListOfQueuesFromStringArgs(args)) {
+					queue.delete(member.getUser());
+					queueNames += queue.getName() + ", ";
+				}
+				
+				if(queueNames.isEmpty()){
+					throw new InvalidUseException("No valid queues named");
 				}
 				
 				queueNames = queueNames.substring(0, queueNames.length() - 2);

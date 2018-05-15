@@ -25,32 +25,29 @@ public class CmdRemove extends Command {
 	@Override
 	public Message execCommand(Server server, Member member, String[] args) {
 		QueueManager qm = server.getQueueManager();
-		String pName;
+
 		if (args.length > 0) {
 			Member m = server.getMember(args[0]);
 
 			if (m != null) {
-				pName = m.getEffectiveName();
 				if (args.length == 1) {
-					for(Queue queue : qm.getQueueList()){
-						queue.delete(m.getUser());
-					}
+					qm.purgeQueue(m.getUser());
+					this.response = Utils.createMessage(String.format("%s removed from all queues", m.getEffectiveName()), qm.getHeader(), true);
 				} else {
-					for (String arg : Arrays.copyOfRange(args, 1, args.length)) {
-						Queue queue;
-						
-						try {
-							queue = qm.getQueue(Integer.valueOf(arg));
-						} catch (NumberFormatException ex) {
-							queue = qm.getQueue(arg);
-						}
-						
-						if(queue != null){
-							queue.delete(m.getUser());
-						}else{
-							throw new InvalidUseException(String.format("Queue '%s' does not exist", arg));
-						}
+					String queueNames = "";
+					for (Queue queue : qm.getListOfQueuesFromStringArgs(Arrays.copyOfRange(args, 1, args.length))) {
+						queue.delete(m.getUser());
+						queueNames += queue.getName() + ", ";
 					}
+					
+					if(queueNames.isEmpty()){
+						throw new InvalidUseException("No valid queue named");
+					}
+					
+					queueNames = queueNames.substring(0, queueNames.length() - 2);
+					
+					this.response = Utils.createMessage(String.format(
+							"%s removed from %s", m.getEffectiveName(), queueNames), qm.getHeader(), true);
 				}
 			} else {
 				throw new InvalidUseException(String.format("Could not find user '%s'", args[0]));
@@ -59,7 +56,6 @@ public class CmdRemove extends Command {
 			throw new BadArgumentsException();
 		}
 		qm.updateTopic();
-		this.response = Utils.createMessage(String.format("%s removed", pName), qm.getHeader(), true);
 		System.out.println(success());
 		
 		return response;

@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import core.Database;
-import core.entities.Game.GameStatus;
-import core.exceptions.InvalidUseException;
 import net.dv8tion.jda.core.entities.User;
 import net.dv8tion.jda.core.exceptions.PermissionException;
 
@@ -35,6 +33,24 @@ public class QueueManager {
 	 */
 	public List<Queue> getQueueList() {
 		return queueList;
+	}
+	
+	public List<Queue> getListOfQueuesFromStringArgs(String[] args){
+		List<Queue> queues = new ArrayList<Queue>();
+		Queue queue;
+		for(String arg : args){
+			try{
+				queue = getQueue(Integer.valueOf(arg));
+			}catch(NumberFormatException ex){
+				queue = getQueue(arg);
+			}
+			
+			if(queue != null){
+				queues.add(queue);
+			}
+		}
+		
+		return queues;
 	}
 
 	/**
@@ -99,37 +115,6 @@ public class QueueManager {
 			System.out.println("Topic updated");
 		} catch (PermissionException ex) {
 			ex.printStackTrace();
-		}
-	}
-	
-	/**
-	 * Substitutes a captain of a game with a player in that game
-	 * 
-	 * @param sub the substitute player
-	 * @param target the captain to be replaced
-	 */
-	public void subCaptain(User sub, User target){
-		if(isPlayerIngame(sub)){
-			if(isPlayerIngame(target)){
-				Game g = getPlayersGame(sub);
-				if(g.getStatus() == GameStatus.PICKING){
-					if (g.getCaptains()[0] == target || g.getCaptains()[1] == target) {
-						if(g.getCaptains()[0] != sub && g.getCaptains()[1] != sub){
-							g.subCaptain(sub, target);
-						}else{
-							throw new InvalidUseException("You are already a captain");
-						}
-					} else {
-						throw new InvalidUseException(target.getName() + " is not a captain in your game");
-					}
-				}else{
-					throw new InvalidUseException("Game is already being played");
-				}
-			}else{
-				throw new InvalidUseException(target.getName() + " is not in-game");
-			}
-		}else{
-			throw new InvalidUseException("You are not in-game");
 		}
 	}
 

@@ -34,23 +34,15 @@ public class CmdAdd extends Command{
 					queueMsg = member.getEffectiveName() + " added to all queues";
 				} else {
 					String queueNames = "";
-					for (String arg : args) {
-						Queue queue;
-						
-						try {
-							queue = qm.getQueue(Integer.valueOf(arg));
-						} catch (NumberFormatException ex) {
-							queue = qm.getQueue(arg);
-						}
-						
-						if(queue != null){
-							queue.add(player);
-							queueNames += queue.getName() + ", ";
-						}else{
-							qm.updateTopic();
-							throw new InvalidUseException(String.format("Queue '%s' does not exist", arg));
-						}
+					for (Queue queue : qm.getListOfQueuesFromStringArgs(args)) {
+						queue.add(member.getUser());
+						queueNames += queue.getName() + ", ";
 					}
+					
+					if(queueNames.isEmpty()){
+						throw new InvalidUseException("No valid queues named");
+					}
+					
 					queueNames = queueNames.substring(0, queueNames.length() - 2);
 					queueMsg = member.getEffectiveName() + " added to " + queueNames;
 				}

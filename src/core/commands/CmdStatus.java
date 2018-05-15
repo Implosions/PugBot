@@ -1,6 +1,5 @@
 package core.commands;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import core.Constants;
@@ -30,19 +29,7 @@ public class CmdStatus extends Command {
 			if (args.length == 0) {
 				this.response = Utils.createMessage("", statusBuilder(qm.getQueueList()), true);
 			} else {
-				List<Queue> queueList = new ArrayList<Queue>();
-				for (String a : args) {
-					Queue queue;
-					try {
-						queue = qm.getQueue(Integer.valueOf(a));
-					} catch (NumberFormatException ex) {
-						queue = qm.getQueue(a);
-					}
-					if (queue != null) {
-						queueList.add(queue);
-					}
-				}
-				this.response = Utils.createMessage("", statusBuilder(queueList), true);
+				this.response = Utils.createMessage("", statusBuilder(qm.getListOfQueuesFromStringArgs(args)), true);
 			}
 		} else {
 			throw new InvalidUseException("There are no active queues");
