@@ -1,5 +1,5 @@
-# BullyBot
-BullyBot is a Discord bot used to facilitate and organize pickup games.
+# PugBot
+PugBot is a Discord bot used to facilitate and organize pickup games.
 
 ## Features
 - Create, update, and remove different queues for users to add to
@@ -31,4 +31,4 @@ BullyBot is a Discord bot used to facilitate and organize pickup games.
 - [SQLite JDBC driver](https://github.com/xerial/sqlite-jdbc)
 
 ## Acknowledgements
-BullyBot is based on the IRC pug bot [Xenia](https://github.com/xzanth/pugbot) by [Xzanth](https://github.com/xzanth)
+PugBot is based on the IRC pug bot [Xenia](https://github.com/xzanth/pugbot) by [Xzanth](https://github.com/xzanth)
