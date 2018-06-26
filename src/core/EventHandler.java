@@ -94,35 +94,39 @@ public class EventHandler extends ListenerAdapter {
 
 			if (server.cmds.validateCommand(cmd)) {
 				Command cmdObj = server.cmds.getCommandObj(cmd);
-				// Determine which channel to send response
-				if (cmdObj.getDM()){
-					channel = event.getAuthor().openPrivateChannel().complete();
-				}else if(cmdObj.isPugChannelOnlyCommand()){
-					channel = server.getPugChannel();
-				}
-				if (cmdObj.getAdminRequired() && !server.isAdmin(event.getMember())) {
-					channel.sendMessage(Utils.createMessage("Error!", "Admin required", false)).queue();
-				} else {
-					// Executes command and sends response to proper channel
-					Message response;
-					try{
-						response = cmdObj.execCommand(server, event.getMember(), args);
-					}catch(InvalidUseException ex){
-						response = Utils.createMessage("Error!", ex.getMessage(), false);
-					}catch(BadArgumentsException ex){
-						response = Utils.createMessage("Error!", 
-								String.format("%s%nUsage: %s", ex.getMessage(), cmdObj.help()), false);
-					}catch(Exception ex){
-						response = Utils.createMessage("Error!", "Something went wrong", false);
-						ex.printStackTrace();
+				
+				// Pug channel only commands in other channels will be ignored
+				if(!(channel != server.getPugChannel() && cmdObj.isPugChannelOnlyCommand())){
+				
+					// Determine which channel to send response
+					if (cmdObj.getDM()){
+						channel = event.getAuthor().openPrivateChannel().complete();
 					}
 					
-					try{
-						Message sentMsg = channel.sendMessage(response).complete();
+					if (cmdObj.getAdminRequired() && !server.isAdmin(event.getMember())) {
+						channel.sendMessage(Utils.createMessage("Error!", "Admin required", false)).queue();
+					} else {
+						// Executes command and sends response to proper channel
+						Message response;
+						try{
+							response = cmdObj.execCommand(server, event.getMember(), args);
+						}catch(InvalidUseException ex){
+							response = Utils.createMessage("Error!", ex.getMessage(), false);
+						}catch(BadArgumentsException ex){
+							response = Utils.createMessage("Error!", 
+									String.format("%s%nUsage: %s", ex.getMessage(), cmdObj.help()), false);
+						}catch(Exception ex){
+							response = Utils.createMessage("Error!", "Something went wrong", false);
+							ex.printStackTrace();
+						}
 						
-						cmdObj.setLastResponseId(sentMsg.getId());
-					}catch(Exception ex){
-						System.out.println("Error sending message.\n" + ex.getMessage());
+						try{
+							Message sentMsg = channel.sendMessage(response).complete();
+							
+							cmdObj.setLastResponseId(sentMsg.getId());
+						}catch(Exception ex){
+							System.out.println("Error sending message.\n" + ex.getMessage());
+						}
 					}
 				}
 			} else {
