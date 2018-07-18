@@ -22,7 +22,6 @@ import net.dv8tion.jda.core.events.guild.member.GuildMemberJoinEvent;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.core.events.message.guild.react.GenericGuildMessageReactionEvent;
 import net.dv8tion.jda.core.events.user.UserOnlineStatusUpdateEvent;
-import net.dv8tion.jda.core.exceptions.PermissionException;
 import net.dv8tion.jda.core.hooks.ListenerAdapter;
 
 // EventHandler class
@@ -43,27 +42,12 @@ public class EventHandler extends ListenerAdapter {
 		String message = event.getMessage().getContent();
 		if (message.startsWith("!") && message.length() > 1 && !event.getAuthor().isBot()) {
 			
-			// Check if member is banned, return if true
-			if(server.isBanned(event.getMember())){
+			// Check if member is banned or the input is spam
+			if(server.isBanned(event.getMember()) || server.isSpam(event.getMessage())){
 				return;
 			}
 			
 			MessageChannel channel = event.getChannel();
-			
-			// Command spam check
-			// Checks last 5 messages if the same input was submitted in the past 3 seconds
-			try{
-				for(Message m : channel.getHistory().retrievePast(5).complete()){
-					if(!m.getId().equals(event.getMessageId()) 
-							&& m.getAuthor().equals(event.getAuthor()) 
-							&& m.getContent().equals(event.getMessage().getContent())
-							&& m.getCreationTime().isAfter(event.getMessage().getCreationTime().minusSeconds(3))){
-						return;
-					}
-				}
-			}catch(PermissionException ex){
-				ex.printStackTrace();
-			}
 			
 			// Workaround for users with spaces in their name
 			// Replaces name with user id

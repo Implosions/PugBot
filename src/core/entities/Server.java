@@ -12,6 +12,7 @@ import net.dv8tion.jda.core.OnlineStatus;
 import net.dv8tion.jda.core.Permission;
 import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.entities.Member;
+import net.dv8tion.jda.core.entities.Message;
 import net.dv8tion.jda.core.entities.TextChannel;
 import net.dv8tion.jda.core.entities.User;
 
@@ -22,6 +23,7 @@ public class Server {
 	private ServerSettings settings;
 	private QueueManager qm;
 	private HashMap<User, Long> activityList = new HashMap<User, Long>();
+	private java.util.Queue<Message> messageCache = new java.util.LinkedList<Message>();
 	private List<String> banList;
 	private List<String> adminList;
 	
@@ -188,5 +190,24 @@ public class Server {
 	public void removeAdmin(String playerId){
 		adminList.remove(playerId);
 		Database.updateAdminStatus(id, Long.valueOf(playerId), false);
+	}
+	
+	public boolean isSpam(Message message){
+		boolean spam = false;
+		for(Message m : messageCache){
+			long timeDiff = message.getCreationTime().toEpochSecond() - m.getCreationTime().toEpochSecond();
+			if(timeDiff <= 3 && m.getAuthor().getIdLong() == message.getAuthor().getIdLong() &&
+					m.getContent().equals(message.getContent())){
+				spam = true;
+				break;
+			}
+		}
+		
+		if(messageCache.size() > 9){
+			messageCache.remove();
+		}
+		messageCache.add(message);
+		
+		return spam;
 	}
 }
