@@ -41,7 +41,7 @@ public class EventHandler extends ListenerAdapter {
 	public void onGuildMessageReceived(GuildMessageReceivedEvent event) {
 		Server server = ServerManager.getServer(event.getGuild().getIdLong());
 		String message = event.getMessage().getContent();
-		if (server != null && message.startsWith("!") && message.length() > 1 && !event.getAuthor().isBot()) {
+		if (message.startsWith("!") && message.length() > 1 && !event.getAuthor().isBot()) {
 			
 			// Check if member is banned, return if true
 			if(server.isBanned(event.getMember())){
