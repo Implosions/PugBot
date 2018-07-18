@@ -192,6 +192,12 @@ public class Server {
 		Database.updateAdminStatus(id, Long.valueOf(playerId), false);
 	}
 	
+	/**
+	 * Checks a message cache to see if the message sent is identical to any other within 3 seconds
+	 * 
+	 * @param message
+	 * @return
+	 */
 	public boolean isSpam(Message message){
 		boolean spam = false;
 		for(Message m : messageCache){
