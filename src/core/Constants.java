@@ -45,8 +45,8 @@ public class Constants {
 	public final static String HELP_DESC = "Returns help information";
 	
 	public final static String BULLY_NAME = "bully";
-	public final static String BULLY_HELP = "!bully <player>";
-	public final static String BULLY_DESC = "Bullies the specified player";
+	public final static String BULLY_HELP = "!bully <user>";
+	public final static String BULLY_DESC = "Creates a message and mentions the specified user";
 	
 	public final static String NOTIFY_NAME = "notify";
 	public final static String NOTIFY_HELP = "!notify <queue> <playercount>";
@@ -121,4 +121,24 @@ public class Constants {
 			+ "!serversettings <queueName/index> <setting> | "
 			+ "!serversettings <queueName/index> <setting> <value>";
 	public final static String QUEUESETTINGS_DESC = "gets or sets a queue setting's value";
+	
+	public final static String ADDGROUP_NAME = "addgroup";
+	public final static String ADDGROUP_HELP = "!addgroup <name>";
+	public final static String ADDGROUP_DESC = "Creates a group and associated role that users can join and leave from";
+	
+	public final static String DELETEGROUP_NAME = "deletegroup";
+	public final static String DELETEGROUP_HELP = "!deletegroup <name>";
+	public final static String DELETEGROUP_DESC = "Deletes a group and associated role";
+	
+	public final static String GROUPS_NAME = "groups";
+	public final static String GROUPS_HELP = "!groups";
+	public final static String GROUPS_DESC = "Lists the available groups in this server";
+	
+	public final static String JOINGROUP_NAME = "joingroup";
+	public final static String JOINGROUP_HELP = "!joingroup <name>";
+	public final static String JOINGROUP_DESC = "Joins the specified group and gives you an associated role";
+	
+	public final static String LEAVEGROUP_NAME = "leavegroup";
+	public final static String LEAVEGROUP_HELP = "!leavegroup <name>";
+	public final static String LEAVEGROUP_DESC = "Leaves the specified group and removes the associated role";
 }

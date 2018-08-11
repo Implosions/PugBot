@@ -15,7 +15,7 @@ public class CmdTerminate extends Command{
 	@Override
 	public Message execCommand(Server server, Member member, String[] args) {
 		if (member.getUser().getId().equals(Constants.OWNER_ID)) {
-			System.out.println("getSuccess()");
+			System.out.println(success());
 			System.exit(0);
 		} else {
 			throw new InvalidUseException("You do not have the required permissions");

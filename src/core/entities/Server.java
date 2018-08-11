@@ -7,14 +7,17 @@ import java.util.List;
 import core.util.Utils;
 import core.Constants;
 import core.Database;
+import core.exceptions.InvalidUseException;
 import core.util.Trigger;
 import net.dv8tion.jda.core.OnlineStatus;
 import net.dv8tion.jda.core.Permission;
 import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.Message;
+import net.dv8tion.jda.core.entities.Role;
 import net.dv8tion.jda.core.entities.TextChannel;
 import net.dv8tion.jda.core.entities.User;
+import net.dv8tion.jda.core.managers.RoleManager;
 
 // Server class; Controls bot actions for each server
 public class Server {
@@ -26,6 +29,7 @@ public class Server {
 	private java.util.Queue<Message> messageCache = new java.util.LinkedList<Message>();
 	private List<String> banList;
 	private List<String> adminList;
+	private HashMap<String, Role> groupDict = new HashMap<String, Role>();
 	
 	public Commands cmds;
 
@@ -47,6 +51,7 @@ public class Server {
 		settings = new ServerSettings(guild.getIdLong());
 		qm = new QueueManager(id);
 		qm.getQueueList().forEach((q) -> q.getPlayersInQueue().forEach((u) -> updateActivityList(u)));
+		groupDict = Database.retrieveGroups(id);
 		
 		startAFKTimer();
 	}
@@ -215,5 +220,69 @@ public class Server {
 		messageCache.add(message);
 		
 		return spam;
+	}
+	
+	/**
+	 * Creates a role, adds it to the group dictionary, and inserts the id into the database
+	 * 
+	 * @throws InvalidUseException If a group with the same name already exists
+	 * 
+	 * @param groupName The name of the group
+	 */
+	public void addGroup(String groupName){
+		if(groupDict.containsKey(groupName)){
+			throw new InvalidUseException("A group with this name already exists!");
+		}
+		
+		Role role = guild.getController().createRole().complete();
+		RoleManager manager = role.getManager();
+		
+		//TODO: Update with new syntax after JDA upgrade
+		manager.setMentionable(true).queue();
+		manager.setName(groupName).queue();
+		
+		groupDict.put(groupName.toLowerCase(), role);
+		Database.insertGroup(id, role.getIdLong());
+	}
+	
+	/**
+	 * Deletes a specified group and associated role
+	 * 
+	 * @throws InvalidUseException If groupName is not a valid group
+	 * 
+	 * @param groupName The name of the group
+	 */
+	public void deleteGroup(String groupName){
+		if(!groupDict.containsKey(groupName)){
+			throw new InvalidUseException("A group with that name does not exist");
+		}else{
+			Role role = groupDict.get(groupName);
+			groupDict.remove(groupName);
+			Database.deleteGroup(id, role.getIdLong());
+			role.delete().queue();
+		}
+	}
+	
+	/**
+	 * Creates an array of all group names
+	 * 
+	 * @return A String[] containing all group names
+	 */
+	public String[] getGroupNames(){
+		return groupDict.keySet().toArray(new String[0]);
+	}
+	
+	/**
+	 * Gets a group by its name
+	 * 
+	 * @param groupName The name of the group
+	 * @return The Role associated with the group
+	 */
+	public Role getGroup(String groupName){
+		if(!groupDict.containsKey(groupName)){
+			throw new InvalidUseException(String.format("The group %s does not exist", groupName));
+		}
+		
+		return groupDict.get(groupName.toLowerCase());
 	}
 }
