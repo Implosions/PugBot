@@ -9,9 +9,9 @@ import net.dv8tion.jda.core.entities.Message;
 public class CmdGroups extends Command{
 
 	public CmdGroups(){
-		this.name = Constants.DELETEGROUP_NAME;
-		this.description = Constants.DELETEGROUP_DESC;
-		this.helpMsg = Constants.DELETEGROUP_HELP;
+		this.name = Constants.GROUPS_NAME;
+		this.description = Constants.GROUPS_DESC;
+		this.helpMsg = Constants.GROUPS_HELP;
 		this.pugChannelOnlyCommand = true;
 	}
 	

@@ -49,7 +49,7 @@ public class Commands {
 		cmdList.put(Constants.DELETECOMMAND_NAME, new CmdDeleteCommand());
 		cmdList.put(Constants.SERVERSETTINGS_NAME, new CmdServerSettings());
 		cmdList.put(Constants.QUEUESETTINGS_NAME, new CmdQueueSettings());
-		cmdList.put(Constants.ADDGROUP_NAME, new CmdAddGroup());
+		cmdList.put(Constants.ADDGROUP_NAME, new CmdCreateGroup());
 		cmdList.put(Constants.DELETEGROUP_NAME, new CmdDeleteGroup());
 		cmdList.put(Constants.GROUPS_NAME, new CmdGroups());
 		cmdList.put(Constants.JOINGROUP_NAME, new CmdJoinGroup());
