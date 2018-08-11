@@ -7,9 +7,9 @@ import core.util.Utils;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.Message;
 
-public class CmdAddGroup extends Command{
+public class CmdCreateGroup extends Command{
 	
-	public CmdAddGroup(){
+	public CmdCreateGroup(){
 		this.name = Constants.ADDGROUP_NAME;
 		this.description = Constants.ADDGROUP_DESC;
 		this.helpMsg = Constants.ADDGROUP_HELP;

@@ -122,8 +122,8 @@ public class Constants {
 			+ "!serversettings <queueName/index> <setting> <value>";
 	public final static String QUEUESETTINGS_DESC = "gets or sets a queue setting's value";
 	
-	public final static String ADDGROUP_NAME = "addgroup";
-	public final static String ADDGROUP_HELP = "!addgroup <name>";
+	public final static String ADDGROUP_NAME = "creategroup";
+	public final static String ADDGROUP_HELP = "!creategroup <name>";
 	public final static String ADDGROUP_DESC = "Creates a group and associated role that users can join and leave from";
 	
 	public final static String DELETEGROUP_NAME = "deletegroup";
