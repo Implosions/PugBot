@@ -22,6 +22,7 @@ import net.dv8tion.jda.core.events.guild.member.GuildMemberJoinEvent;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.core.events.message.guild.react.GenericGuildMessageReactionEvent;
 import net.dv8tion.jda.core.events.user.UserOnlineStatusUpdateEvent;
+import net.dv8tion.jda.core.exceptions.InsufficientPermissionException;
 import net.dv8tion.jda.core.hooks.ListenerAdapter;
 
 // EventHandler class
@@ -99,6 +100,8 @@ public class EventHandler extends ListenerAdapter {
 						}catch(BadArgumentsException ex){
 							response = Utils.createMessage("Error!", 
 									String.format("%s%nUsage: %s", ex.getMessage(), cmdObj.help()), false);
+						}catch(InsufficientPermissionException ex){
+							response = Utils.createMessage("Error!", "Missing permissions to manage roles", false);
 						}catch(Exception ex){
 							response = Utils.createMessage("Error!", "Something went wrong", false);
 							ex.printStackTrace();

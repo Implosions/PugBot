@@ -2,6 +2,7 @@ package core;
 
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import core.commands.CustomCommand;
@@ -9,6 +10,7 @@ import core.entities.Queue;
 import core.entities.ServerManager;
 import core.entities.Setting;
 import net.dv8tion.jda.core.entities.Member;
+import net.dv8tion.jda.core.entities.Role;
 import net.dv8tion.jda.core.entities.User;
 
 public class Database {
@@ -144,6 +146,14 @@ public class Database {
 					+ "FOREIGN KEY (serverId) REFERENCES DiscordServer(id), "
 					+ "FOREIGN KEY (queueId) REFERENCES Queue(id), "
 					+ "FOREIGN KEY (playerId) REFERENCES Player(id)"
+					+ ")");
+			
+			statement.executeUpdate("CREATE TABLE IF NOT EXISTS "
+					+ "ServerRoleGroup("
+					+ "serverId INTEGER NOT NULL, "
+					+ "roleId INTEGER NOT NULL, "
+					+ "PRIMARY KEY (serverId, roleId), "
+					+ "FOREIGN KEY (serverId) REFERENCES DiscordServer(id)"
 					+ ")");
 			
 		}catch(Exception ex){
@@ -971,5 +981,78 @@ public class Database {
 		}catch(SQLException ex){
 			ex.printStackTrace();
 		}
+	}
+	
+	/**
+	 * Inserts a new role group into the database
+	 * 
+	 * @param serverId The id of the server
+	 * @param roleId The id of the role
+	 */
+	public static void insertGroup(long serverId, long roleId){
+		try{
+			PreparedStatement pStatement = conn.prepareStatement("INSERT OR IGNORE INTO ServerRoleGroup VALUES(?, ?)");
+			pStatement.setLong(1, serverId);
+			pStatement.setLong(2, roleId);
+			
+			pStatement.executeUpdate();
+		}catch(SQLException ex){
+			ex.printStackTrace();
+		}
+	}
+	
+	/**
+	 * Deletes a role group from a server
+	 * 
+	 * @param serverId The id of the server
+	 * @param roleId The id of the role
+	 */
+	public static void deleteGroup(long serverId, long roleId){
+		try{
+			PreparedStatement pStatement = conn.prepareStatement("DELETE FROM ServerRoleGroup "
+					+ "WHERE serverId = ? AND roleId = ?");
+			pStatement.setLong(1, serverId);
+			pStatement.setLong(2, roleId);
+			
+			pStatement.executeUpdate();
+		}catch(SQLException ex){
+			ex.printStackTrace();
+		}
+	}
+	
+	/**
+	 * Retrieves the role groups for a server
+	 * 
+	 * @param serverId The id of the server
+	 * @return HashMap<String, Role> containing the server's groups
+	 */
+	public static HashMap<String, Role> retrieveGroups(long serverId){
+		HashMap<String, Role> dict = new HashMap<String, Role>();
+		
+		try{
+			PreparedStatement pStatement = conn.prepareStatement("SELECT roleId FROM ServerRoleGroup "
+					+ "WHERE serverId = ?");
+			pStatement.setLong(1, serverId);
+			
+			ResultSet rs = pStatement.executeQuery();
+			
+			while(rs.next()){
+				long roleId = rs.getLong(1);
+				
+				try{
+					Role role = ServerManager.getGuild(String.valueOf(serverId)).getRoleById(roleId);
+					
+					dict.put(role.getName().toLowerCase(), role);
+				}catch(Exception ex){
+					System.out.println("Error retrieving role: " + roleId);
+				}
+			}
+			
+			rs.close();
+		}catch(SQLException ex){
+			ex.printStackTrace();
+		}
+		
+		return dict;
 	}
 }
