@@ -19,7 +19,7 @@ public class CmdRestart extends Command{
 	@Override
 	public Message execCommand(Server server, Member member, String[] args) {
 		server.getQueueManager().finishAllGames();
-		ServerManager.removeServer(server.getGuild());
+		ServerManager.removeServer(server.getid());
 		ServerManager.addNewServer(server.getGuild());
 		
 		this.response = Utils.createMessage("`Server instance restarted`");

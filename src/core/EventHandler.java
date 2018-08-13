@@ -30,7 +30,7 @@ import net.dv8tion.jda.core.hooks.ListenerAdapter;
 public class EventHandler extends ListenerAdapter {
 
 	public EventHandler(JDA jda) {
-		new ServerManager(jda.getGuilds());
+		new ServerManager(jda);
 	}
 	
 	
@@ -143,7 +143,7 @@ public class EventHandler extends ListenerAdapter {
 	
 	public void onGuildLeave(GuildLeaveEvent event) {
 		// Removes the server from the server list
-		ServerManager.removeServer(event.getGuild());
+		ServerManager.removeServer(event.getGuild().getIdLong());
 		System.out.println(String.format("Removed from server: %s", event.getGuild().getName()));
 	}
 

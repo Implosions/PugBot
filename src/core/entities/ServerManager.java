@@ -1,47 +1,62 @@
 package core.entities;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
 
 import core.util.Utils;
+import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.entities.Guild;
 
 public class ServerManager {
-	private static List<Server> servers = new ArrayList<Server>();
-	private static List<Guild> guilds;
+	private static ServerManager manager;
+	private static JDA jdaInstance;
 	
-	public ServerManager(List<Guild> guilds){
-		Utils.createDir("app_data");
-		ServerManager.guilds = guilds;
-		guilds.forEach((g) -> {servers.add(new Server(g));
-									servers.get(servers.size() - 1).getQueueManager().updateTopic();
-								});
+	private HashMap<Long, Server> servers;
+	
+	private ServerManager(){
+		servers = new HashMap<Long, Server>();
+		
+		for(Guild guild : getJDAInstance().getGuilds()){
+			servers.put(guild.getIdLong(), new Server(guild));
+		}
 	}
 	
-	public static Server getServer(long id){
-		for(Server s : servers){
-			if(s.getid() == id){
-				return s;
-			}
-		}
-		return null;
+	public ServerManager(JDA jda){
+		
+		Utils.createDir("app_data");
+		
+		jdaInstance = jda;
+		manager = new ServerManager();
+	}
+	
+	public static Server getServer(long serverId){
+		return manager.servers.get(serverId);
+	}
+	
+	public static Server getServer(String serverId){
+		return manager.servers.get(Long.valueOf(serverId));
 	}
 	
 	public static void addNewServer(Guild guild){
-		servers.add(new Server(guild));
-		servers.get(servers.size() - 1).getQueueManager().updateTopic();
+		manager.servers.put(guild.getIdLong(), new Server(guild));
 	}
 	
-	public static void removeServer(Guild guild){
-		servers.remove(getServer(guild.getIdLong()));
+	public static void removeServer(long serverId){
+		@SuppressWarnings("unused")
+		Server server = getServer(serverId);
+		
+		server = null;
+		manager.servers.remove(serverId);
 	}
 	
-	public static Guild getGuild(String id){
-		for(Guild g : guilds){
-			if(g.getId().equals(id)){
-				return g;
-			}
-		}
-		return null;
+	public static Guild getGuild(long guildId){
+		return jdaInstance.getGuildById(guildId);
+	}
+	
+	public static Guild getGuild(String guildId){
+		return jdaInstance.getGuildById(guildId);
+	}
+	
+	public static JDA getJDAInstance(){
+		return jdaInstance;
 	}
 }
