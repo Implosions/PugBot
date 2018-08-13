@@ -32,115 +32,115 @@ public class EventHandler extends ListenerAdapter {
 	public EventHandler(JDA jda) {
 		new ServerManager(jda);
 	}
-	
-	
+
 	/**
-	 * Gets message sent from guild, checks if the message is a command, tokenizes the arguments, and executes the command.
+	 * Gets message sent from guild, checks if the message is a command,
+	 * tokenizes the arguments, and executes the command.
 	 */
 	@Override
 	public void onGuildMessageReceived(GuildMessageReceivedEvent event) {
 		Server server = ServerManager.getServer(event.getGuild().getIdLong());
 		String message = event.getMessage().getContent();
 		if (message.startsWith("!") && message.length() > 1 && !event.getAuthor().isBot()) {
-			
+
 			// Check if member is banned or the input is spam
-			if(server.isBanned(event.getMember()) || server.isSpam(event.getMessage())){
+			if (server.isBanned(event.getMember()) || server.isSpam(event.getMessage())) {
 				return;
 			}
-			
+
 			MessageChannel channel = event.getChannel();
-			
+
 			// Workaround for users with spaces in their name
 			// Replaces name with user id
 			if (event.getMessage().getMentionedUsers().size() > 0) {
 				for (User u : event.getMessage().getMentionedUsers()) {
-					message = message.replace("@" + event.getGuild().getMemberById(u.getId()).getEffectiveName(), u.getId());
+					message = message.replace("@" + event.getGuild().getMemberById(u.getId()).getEffectiveName(),
+							u.getId());
 				}
 			}
-			
+
 			// Replaces standard emote string
 			// Allows bot to use server specific emotes
-			if (event.getMessage().getEmotes().size() > 0){
+			if (event.getMessage().getEmotes().size() > 0) {
 				// Uses a set to remove duplicates
 				HashSet<Emote> emotes = new HashSet<Emote>(event.getMessage().getEmotes());
-				for (Emote emote : emotes){
-					message = message.replace(":" + emote.getName() + ":", 
+				for (Emote emote : emotes) {
+					message = message.replace(":" + emote.getName() + ":",
 							String.format("<:%s:%s>", emote.getName(), emote.getId()));
 				}
 			}
-			
+
 			String[] tokens = message.substring(1).split(" ");
-			
+
 			// Log input
 			System.out.println("Command input: " + event.getAuthor().toString() + " " + Arrays.toString(tokens));
-			
+
 			String cmd = tokens[0].toLowerCase();
 			String[] args = Arrays.copyOfRange(tokens, 1, tokens.length);
 
 			if (server.cmds.validateCommand(cmd)) {
 				Command cmdObj = server.cmds.getCommandObj(cmd);
-				
+
 				// Pug channel only commands in other channels will be ignored
-				if(!(channel != server.getPugChannel() && cmdObj.isPugChannelOnlyCommand())){
-				
+				if (!(channel != server.getPugChannel() && cmdObj.isPugChannelOnlyCommand())) {
+
 					// Determine which channel to send response
-					if (cmdObj.getDM()){
+					if (cmdObj.getDM()) {
 						channel = event.getAuthor().openPrivateChannel().complete();
 					}
-					
+
 					if (cmdObj.getAdminRequired() && !server.isAdmin(event.getMember())) {
 						channel.sendMessage(Utils.createMessage("Error!", "Admin required", false)).queue();
 					} else {
 						// Executes command and sends response to proper channel
 						Message response;
-						try{
+						try {
 							response = cmdObj.execCommand(server, event.getMember(), args);
-						}catch(InvalidUseException ex){
+						} catch (InvalidUseException | InsufficientPermissionException ex) {
 							response = Utils.createMessage("Error!", ex.getMessage(), false);
-						}catch(BadArgumentsException ex){
-							response = Utils.createMessage("Error!", 
+						} catch (BadArgumentsException ex) {
+							response = Utils.createMessage("Error!",
 									String.format("%s%nUsage: %s", ex.getMessage(), cmdObj.help()), false);
-						}catch(InsufficientPermissionException ex){
-							response = Utils.createMessage("Error!", "Missing permissions to manage roles", false);
-						}catch(Exception ex){
+						} catch (Exception ex) {
 							response = Utils.createMessage("Error!", "Something went wrong", false);
 							ex.printStackTrace();
 						}
-						
-						try{
+
+						try {
 							Message sentMsg = channel.sendMessage(response).complete();
-							
+
 							cmdObj.setLastResponseId(sentMsg.getId());
-						}catch(Exception ex){
+						} catch (Exception ex) {
 							System.out.println("Error sending message.\n" + ex.getMessage());
 						}
 					}
 				}
 			} else {
 				// Will only respond to invalid commands in the pug channel
-				if(channel.equals(server.getPugChannel())){
-					channel.sendMessage(Utils.createMessage("Error!", "Invalid command\nUse !help to see all available commands", false)).queue();
+				if (channel.equals(server.getPugChannel())) {
+					channel.sendMessage(Utils.createMessage("Error!",
+							"Invalid command\nUse !help to see all available commands", false)).queue();
 				}
 			}
 		}
 		// Updates Server.activityList
 		server.updateActivityList(event.getAuthor());
 	}
-	
+
 	public void onUserOnlineStatusUpdate(UserOnlineStatusUpdateEvent event) {
 		Member m = event.getGuild().getMember(event.getUser());
 		// Passes online status if a player goes offline
-		if(m.getOnlineStatus().equals(OnlineStatus.OFFLINE)){
+		if (m.getOnlineStatus().equals(OnlineStatus.OFFLINE)) {
 			ServerManager.getServer(event.getGuild().getIdLong()).playerDisconnect(m);
 		}
 	}
-	
+
 	public void onGuildJoin(GuildJoinEvent event) {
 		// Adds the new server to the server list
 		ServerManager.addNewServer(event.getGuild());
 		System.out.println(String.format("Joined server: %s", event.getGuild().getName()));
 	}
-	
+
 	public void onGuildLeave(GuildLeaveEvent event) {
 		// Removes the server from the server list
 		ServerManager.removeServer(event.getGuild().getIdLong());
@@ -151,13 +151,13 @@ public class EventHandler extends ListenerAdapter {
 		// Updates activity list with the user
 		ServerManager.getServer(event.getGuild().getIdLong()).updateActivityList(event.getUser());
 	}
-	
-	public void onGenericGuild(GenericGuildEvent event){
+
+	public void onGenericGuild(GenericGuildEvent event) {
 		// Updates Server's Guild object with any changes
 		ServerManager.getServer(event.getGuild().getIdLong()).setGuild(event.getGuild());
 	}
-	
-	public void onGuildMemberJoin(GuildMemberJoinEvent event){
+
+	public void onGuildMemberJoin(GuildMemberJoinEvent event) {
 		// Inserts new player into database
 		Database.insertPlayer(event.getUser().getIdLong(), event.getMember().getEffectiveName());
 	}
