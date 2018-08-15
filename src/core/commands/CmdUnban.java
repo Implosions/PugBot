@@ -3,39 +3,39 @@ package core.commands;
 import core.Constants;
 import core.entities.Server;
 import core.exceptions.BadArgumentsException;
-import core.exceptions.InvalidUseException;
 import core.util.Utils;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.Message;
 
-public class CmdUnban extends Command{
+public class CmdUnban extends Command {
 
-	public CmdUnban(){
+	public CmdUnban(Server server) {
 		this.name = Constants.UNBAN_NAME;
 		this.description = Constants.UNBAN_DESC;
 		this.helpMsg = Constants.UNBAN_HELP;
 		this.adminRequired = true;
+		this.server = server;
 	}
-	
+
 	@Override
-	public Message execCommand(Server server, Member member, String[] args) {
+	public Message execCommand(Member caller, String[] args) {
 		String pName = "All";
+
+		if (args.length < 1) {
+			throw new BadArgumentsException();
+		}
+
 		if (args.length == 0) {
 			server.unbanAll();
 		} else if (args.length == 1) {
 			Member m = server.getMember(args[0]);
-			if (m != null) {
-				pName = m.getEffectiveName();
-				server.unbanUser(m.getUser().getId());
-			} else {
-				throw new InvalidUseException("User does not exist");
-			}
-		} else {
-			throw new BadArgumentsException();
+			pName = m.getEffectiveName();
+
+			server.unbanUser(m.getUser().getIdLong());
 		}
-		this.response = Utils.createMessage(String.format("`%s unbanned`", pName));
-		System.out.println(success());
-		
+
+		this.response = Utils.createMessage(String.format("`%s has been unbanned`", pName));
+
 		return response;
 	}
 }

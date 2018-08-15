@@ -11,42 +11,33 @@ import core.util.Utils;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.Message;
 
-public class CmdCreateCommand extends Command{
+public class CmdCreateCommand extends Command {
 
-	public CmdCreateCommand(){
+	public CmdCreateCommand(Server server) {
 		this.name = Constants.CREATECOMMAND_NAME;
 		this.helpMsg = Constants.CREATECOMMAND_HELP;
 		this.description = Constants.CREATECOMMAND_DESC;
 		this.adminRequired = true;
-	}
-	
-	@Override
-	public Message execCommand(Server server, Member member, String[] args) {
-		if(args.length >= 2){
-			String name = args[0].toLowerCase();
-			if(!server.cmds.validateCommand(name)){
-				String response = joinArgs(Arrays.copyOfRange(args, 1, args.length));
-			
-				server.cmds.addCommand(new CustomCommand(name, response));
-				Database.insertServerCustomCommand(Long.valueOf(server.getid()), name, response);
-			}else{
-				throw new InvalidUseException(String.format("Command '%s' already exists", name));
-			}
-			
-		}else{
-			throw new BadArgumentsException();
-		}
-		
-		System.out.println(success());
-		return Utils.createMessage(String.format("Command '%s' created", args[0].toLowerCase()));
+		this.server = server;
 	}
 
-	private String joinArgs(String[] args){
-		String message = "";
-		for(String arg : args){
-			message += arg + " ";
+	@Override
+	public Message execCommand(Member caller, String[] args) {
+		if (args.length < 2) {
+			throw new BadArgumentsException();
 		}
-		
-		return message;
+
+		String cmdName = args[0].toLowerCase();
+
+		if (server.cmds.validateCommand(cmdName)) {
+			throw new InvalidUseException(String.format("Command '%s' already exists", cmdName));
+		}
+
+		String cmdResponse = String.join(" ", Arrays.copyOfRange(args, 1, args.length));
+
+		server.cmds.addCommand(new CustomCommand(cmdName, cmdResponse));
+		Database.insertServerCustomCommand(Long.valueOf(server.getId()), cmdName, cmdResponse);
+
+		return Utils.createMessage(String.format("Command '%s' created", cmdName));
 	}
 }

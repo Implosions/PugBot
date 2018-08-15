@@ -15,30 +15,31 @@ import net.dv8tion.jda.core.entities.User;
 
 public class CmdStatus extends Command {
 	
-	public CmdStatus() {
+	public CmdStatus(Server server) {
 		this.helpMsg = Constants.STATUS_HELP;
 		this.description = Constants.STATUS_DESC;
 		this.name = Constants.STATUS_NAME;
 		this.pugChannelOnlyCommand = true;
+		this.server = server;
 	}
 
 	@Override
-	public Message execCommand(Server server, Member member, String[] args) {
+	public Message execCommand(Member caller, String[] args) {
 		QueueManager qm = server.getQueueManager();
-		if (!qm.isQueueListEmpty()) {
-			if (args.length == 0) {
-				this.response = Utils.createMessage("", statusBuilder(qm.getQueueList()), true);
-			} else {
-				this.response = Utils.createMessage("", statusBuilder(qm.getListOfQueuesFromStringArgs(args)), true);
-			}
+		String statusMsg;
+		
+		if (args.length == 0) {
+			statusMsg = statusBuilder(qm.getQueueList());
 		} else {
-			throw new InvalidUseException("There are no active queues");
+			statusMsg = statusBuilder(qm.getListOfQueuesFromStringArgs(args));
 		}
+		
+		this.response = Utils.createMessage(null, statusMsg, true);
+		
 		// Delete last status message
 		if (lastResponseId != null) {
 			qm.getServer().getPugChannel().deleteMessageById(lastResponseId).complete();
 		}
-		System.out.println(success());
 		
 		return response;
 	}
@@ -73,9 +74,11 @@ public class CmdStatus extends Command {
 			}
 			statusMsg += System.lineSeparator();
 		}
+		
 		if (statusMsg.isEmpty()) {
 			throw new InvalidUseException("Queue does not exist");
 		}
+		
 		return statusMsg;
 	}
 }

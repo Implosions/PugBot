@@ -15,7 +15,6 @@ import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.Message;
 import net.dv8tion.jda.core.entities.MessageChannel;
 import net.dv8tion.jda.core.entities.User;
-import net.dv8tion.jda.core.events.guild.GenericGuildEvent;
 import net.dv8tion.jda.core.events.guild.GuildJoinEvent;
 import net.dv8tion.jda.core.events.guild.GuildLeaveEvent;
 import net.dv8tion.jda.core.events.guild.member.GuildMemberJoinEvent;
@@ -95,7 +94,7 @@ public class EventHandler extends ListenerAdapter {
 						// Executes command and sends response to proper channel
 						Message response;
 						try {
-							response = cmdObj.execCommand(server, event.getMember(), args);
+							response = cmdObj.execCommand(event.getMember(), args);
 						} catch (InvalidUseException | InsufficientPermissionException ex) {
 							response = Utils.createMessage("Error!", ex.getMessage(), false);
 						} catch (BadArgumentsException ex) {
@@ -150,11 +149,6 @@ public class EventHandler extends ListenerAdapter {
 	public void onGenericGuildMessageReaction(GenericGuildMessageReactionEvent event) {
 		// Updates activity list with the user
 		ServerManager.getServer(event.getGuild().getIdLong()).updateActivityList(event.getUser());
-	}
-
-	public void onGenericGuild(GenericGuildEvent event) {
-		// Updates Server's Guild object with any changes
-		ServerManager.getServer(event.getGuild().getIdLong()).setGuild(event.getGuild());
 	}
 
 	public void onGuildMemberJoin(GuildMemberJoinEvent event) {

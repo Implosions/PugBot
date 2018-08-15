@@ -3,7 +3,9 @@ package core;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import core.commands.CustomCommand;
 import core.entities.Queue;
@@ -20,7 +22,7 @@ public class Database {
 	public Database(){
 		try{
 			Class.forName("org.sqlite.JDBC");
-			conn = DriverManager.getConnection("jdbc:sqlite:app_data/bullybot.db");
+			conn = DriverManager.getConnection("jdbc:sqlite:app_data/pugbot.db");
 			createTables();
 		}catch(Exception ex){
 			ex.printStackTrace();
@@ -435,11 +437,12 @@ public class Database {
 	}
 	
 	/**
-	 * @param serverId the discord server
+	 * @param serverId The discord server id
 	 * @return List of user ids that have admin privileges
 	 */
-	public static List<String> queryGetAdminList(Long serverId){
-		List<String> admins = new ArrayList<String>();
+	public static Set<Long> queryGetAdminList(Long serverId){
+		Set<Long> admins = new HashSet<Long>();
+		
 		try{
 			PreparedStatement pStatement = conn.prepareStatement("SELECT playerId FROM PlayerServer "
 				+ "WHERE serverId = ? AND admin = 1");
@@ -449,22 +452,24 @@ public class Database {
 			ResultSet rs = pStatement.executeQuery();
 			
 			while(rs.next()){
-				admins.add(rs.getString(1));
+				admins.add(rs.getLong(1));
 			}
 			
 			rs.close();
 		}catch(SQLException ex){
 			ex.printStackTrace();
 		}
+		
 		return admins;
 	}
 	
 	/**
-	 * @param serverId the discord server
+	 * @param serverId The discord server id
 	 * @return List of user ids that are currently banned from using the bot
 	 */
-	public static List<String> queryGetBanList(Long serverId){
-		List<String> bans = new ArrayList<String>();
+	public static Set<Long> queryGetBanList(Long serverId){
+		Set<Long> bans = new HashSet<Long>();
+		
 		try{
 			PreparedStatement pStatement = conn.prepareStatement("SELECT playerId FROM PlayerServer "
 				+ "WHERE serverId = ? AND banned = 1");
@@ -474,13 +479,14 @@ public class Database {
 			ResultSet rs = pStatement.executeQuery();
 			
 			while(rs.next()){
-				bans.add(rs.getString(1));
+				bans.add(rs.getLong(1));
 			}
 			
 			rs.close();
 		}catch(SQLException ex){
 			ex.printStackTrace();
 		}
+		
 		return bans;
 	}
 	

@@ -1,6 +1,5 @@
 package core.commands;
 
-import core.entities.Server;
 import core.util.Utils;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.Message;
@@ -15,7 +14,7 @@ public class CustomCommand extends Command{
 	}
 	
 	@Override
-	public Message execCommand(Server server, Member member, String[] args) {
+	public Message execCommand(Member caller, String[] args) {
 		return response;
 	}
 

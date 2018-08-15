@@ -8,36 +8,32 @@ import core.util.Utils;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.Message;
 
-public class CmdRemoveAdmin extends Command{
+public class CmdRemoveAdmin extends Command {
 
-	public CmdRemoveAdmin(){
+	public CmdRemoveAdmin(Server server) {
 		this.name = Constants.REMOVEADMIN_NAME;
 		this.description = Constants.REMOVEADMIN_DESC;
 		this.helpMsg = Constants.REMOVEADMIN_HELP;
 		this.adminRequired = true;
+		this.server = server;
 	}
-	
+
 	@Override
-	public Message execCommand(Server server, Member member, String[] args) {
-		String pName;
-		if (args.length == 1) {
-			Member m = server.getMember(args[0]);
-			if (m != null) {
-				pName = m.getEffectiveName();
-				if (server.isAdmin(m)) {
-					server.removeAdmin(m.getUser().getId());
-				} else {
-					throw new InvalidUseException(pName + " is not an admin");
-				}
-			} else {
-				throw new InvalidUseException("User does not exist");
-			}
-		} else {
+	public Message execCommand(Member caller, String[] args) {
+		if (args.length != 1) {
 			throw new BadArgumentsException();
 		}
-		this.response = Utils.createMessage(String.format("`%s's admin removed`", pName));
-		System.out.println(success());
-		
+
+		Member m = server.getMember(args[0]);
+
+		if (server.isAdmin(m)) {
+			server.removeAdmin(m.getUser().getIdLong());
+		} else {
+			throw new InvalidUseException(m.getEffectiveName() + " is not an admin");
+		}
+
+		this.response = Utils.createMessage(String.format("`%s's admin removed`", m.getEffectiveName()));
+
 		return response;
 	}
 

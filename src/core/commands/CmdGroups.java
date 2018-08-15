@@ -8,15 +8,15 @@ import net.dv8tion.jda.core.entities.Message;
 
 public class CmdGroups extends Command{
 
-	public CmdGroups(){
+	public CmdGroups(Server server){
 		this.name = Constants.GROUPS_NAME;
 		this.description = Constants.GROUPS_DESC;
 		this.helpMsg = Constants.GROUPS_HELP;
-		this.pugChannelOnlyCommand = true;
+		this.server = server;
 	}
 	
 	@Override
-	public Message execCommand(Server server, Member member, String[] args) {
+	public Message execCommand(Member caller, String[] args) {
 		String formattedNames = String.join(", ", server.getGroupNames());
 		
 		if(formattedNames.isEmpty()){
