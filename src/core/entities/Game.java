@@ -154,7 +154,7 @@ public class Game {
 				playerPool.remove(captain1);
 				playerPool.remove(captain2);
 				
-				pickController = new PUGPickMenuController(captain1, captain2, playerPool);
+				pickController = new PUGPickMenuController(captain1, captain2, playerPool, "1");
 				pickController.start();
 				
 				pickingComplete();
@@ -251,8 +251,13 @@ public class Game {
 	 * Removes all menus
 	 */
 	private void cancelMenus(){
-		pickController.cancel();
-		rpsController.cancel();
+		if(pickController != null){
+			pickController.cancel();
+		}
+		
+		if(rpsController != null){
+			rpsController.cancel();
+		}
 	}
 	
 	/**

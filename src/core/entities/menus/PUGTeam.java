@@ -31,7 +31,13 @@ public class PUGTeam extends MenuManager<PUGPickMenuController, PUGPickMenu> {
 		}
 		
 		int index = (int)action;
-		Member pick = controller.getPlayerPool().get(index);
+		List<Member> playerPool = controller.getPlayerPool();
+		
+		if(index >= playerPool.size()){
+			return;
+		}
+		
+		Member pick = playerPool.get(index);
 		
 		if(!controller.getPickedPlayers().contains(pick)){
 			players.add(pick);

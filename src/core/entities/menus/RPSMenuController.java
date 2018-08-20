@@ -98,4 +98,8 @@ public class RPSMenuController extends MenuController<RPSTeam> {
 	protected void generatePages() {
 		pages = null;
 	}
+	
+	@Override
+	protected void onMenuCreation() {
+	}
 }

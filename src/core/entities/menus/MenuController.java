@@ -16,6 +16,7 @@ public abstract class MenuController<Manager extends MenuManager<?, ?>> {
 	public synchronized void start() {
 		manager1.createMenu();
 		manager2.createMenu();
+		onMenuCreation();
 		
 		boolean condition = true;
 
@@ -72,4 +73,6 @@ public abstract class MenuController<Manager extends MenuManager<?, ?>> {
 	protected abstract void complete();
 
 	protected abstract void generatePages();
+	
+	protected abstract void onMenuCreation();
 }

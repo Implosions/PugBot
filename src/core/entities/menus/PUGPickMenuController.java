@@ -2,6 +2,7 @@ package core.entities.menus;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.ListIterator;
 
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.MessageEmbed.Field;
@@ -9,17 +10,19 @@ import net.dv8tion.jda.core.entities.MessageEmbed.Field;
 public class PUGPickMenuController extends MenuController<PUGTeam>{
 	
 	private List<Member> playerPool;
-	private List<Member> pickedPlayers = new ArrayList<Member>();;
+	private List<Member> pickedPlayers = new ArrayList<Member>();
+	private int picksRemaining = 0;
+	private ListIterator<Integer> pickIterator;
 	
-	public PUGPickMenuController(Member captain1, Member captain2, List<Member> playerPool) {
+	public PUGPickMenuController(Member captain1, Member captain2, List<Member> playerPool, String pickPattern) {
 		pageSize = 5;
 		manager1 = new PUGTeam(captain1, this);
 		manager2 = new PUGTeam(captain2, this);
 		this.playerPool = new ArrayList<Member>(playerPool);
 		generatePages();
+		parsePickPattern(pickPattern);
 		
-		manager1.nextTurn();		
-		updateMenus();
+		manager1.nextTurn();
 	}
 	
 	@Override
@@ -32,9 +35,21 @@ public class PUGPickMenuController extends MenuController<PUGTeam>{
 		removeField(index);
 		generatePages();
 		
-		switchTurns();
+		picksRemaining--;
+		
+		if(picksRemaining == 0){
+			picksRemaining = getNextPickCount();
+			
+			switchTurns();
+		}
+		
 		updateMenus();
 		notifyAll();
+	}
+	
+	@Override
+	protected void onMenuCreation() {
+		updateMenus();
 	}
 	
 	@Override
@@ -99,5 +114,38 @@ public class PUGPickMenuController extends MenuController<PUGTeam>{
 			manager2.getMenu().updateYourTurn(getTeamsString());
 			manager1.getMenu().updateOpponentsTurn(getTeamsString());
 		}
+	}
+	
+	private void parsePickPattern(String pattern){
+		List<Integer> pickPattern = new ArrayList<Integer>();
+		String[] tokens = pattern.split(" ");
+		String pickLoop;
+		
+		if(tokens.length == 2){
+			picksRemaining = Integer.parseInt(tokens[0]);
+			pickLoop = tokens[1];
+		}else{
+			pickLoop = tokens[0];
+		}
+		
+		for(char digit : pickLoop.toCharArray()){
+			pickPattern.add(Integer.parseInt(String.valueOf(digit)));
+		}
+		
+		pickIterator = pickPattern.listIterator();
+		
+		if(picksRemaining == 0){
+			picksRemaining = pickIterator.next();
+		}
+	}
+	
+	private int getNextPickCount(){
+		if(!pickIterator.hasNext()){
+			while(pickIterator.hasPrevious()){
+				pickIterator.previous();
+			}
+		}
+		
+		return pickIterator.next();
 	}
 }
