@@ -4,12 +4,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import core.Database;
-import net.dv8tion.jda.core.entities.User;
+import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.exceptions.PermissionException;
 
 public class QueueManager {
 	private List<Queue> queueList = new ArrayList<Queue>();
-	private List<User> justFinished = new ArrayList<User>();
+	private List<Member> justFinished = new ArrayList<Member>();
 	private long serverId;
 
 	public QueueManager(long id) {
@@ -87,9 +87,9 @@ public class QueueManager {
 	/**
 	 * Removes a list of players from all queues
 	 * 
-	 * @param players List of User to be removed
+	 * @param players List of Member to be removed
 	 */
-	public void purgeQueue(List<User> players) {
+	public void purgeQueue(List<Member> players) {
 		for (Queue q : queueList) {
 			q.purge(players);
 		}
@@ -100,7 +100,7 @@ public class QueueManager {
 	 * 
 	 * @param player the player to be removed
 	 */
-	public void purgeQueue(User player) {
+	public void purgeQueue(Member player) {
 		for (Queue q : queueList) {
 			q.delete(player);
 		}
@@ -124,7 +124,7 @@ public class QueueManager {
 	 * @param player the player to check
 	 * @return true if the player is in-game, false if not
 	 */
-	public boolean isPlayerIngame(User player) {
+	public boolean isPlayerIngame(Member player) {
 		for (Queue q : queueList) {
 			for (Game g : q.getGames()) {
 				if (g.getPlayers().contains(player)) {
@@ -135,7 +135,7 @@ public class QueueManager {
 		return false;
 	}
 	
-	public Game getPlayersGame(User player){
+	public Game getPlayersGame(Member player){
 		for (Queue q : queueList) {
 			for (Game g : q.getGames()) {
 				if (g.getPlayers().contains(player)) {
@@ -151,7 +151,7 @@ public class QueueManager {
 	 * 
 	 * @param players the players to be added to the list
 	 */
-	public void addToJustFinished(List<User> players) {
+	public void addToJustFinished(List<Member> players) {
 		justFinished.addAll(players);
 	}
 	
@@ -161,7 +161,7 @@ public class QueueManager {
 	 * 
 	 * @param players the players to be removed from justFinished and added to their respective queues
 	 */
-	public void timerEnd(List<User> players) {
+	public void timerEnd(List<Member> players) {
 		justFinished.removeAll(players);
 		for (Queue q : queueList) {
 			q.addPlayersWaiting(players);
@@ -176,7 +176,7 @@ public class QueueManager {
 	 * @param player the player to be checked
 	 * @return true if the player is in a queue, false of not
 	 */
-	public boolean isPlayerInQueue(User player) {
+	public boolean isPlayerInQueue(Member player) {
 		for (Queue q : queueList) {
 			if (q.getPlayersInQueue().contains(player)) {
 				return true;
@@ -191,7 +191,7 @@ public class QueueManager {
 	 * @param player the player to check
 	 * @return true if the player has just finished, false if not
 	 */
-	public boolean hasPlayerJustFinished(User player) {
+	public boolean hasPlayerJustFinished(Member player) {
 		return justFinished.contains(player);
 	}
 
@@ -280,7 +280,7 @@ public class QueueManager {
 	 * @return true if the player is in a queue's wait list
 	 * @see Queue
 	 */
-	public boolean isPlayerWaiting(User player){
+	public boolean isPlayerWaiting(Member player){
 		for(Queue q : queueList){
 			if(q.isPlayerWaiting(player)){
 				return true;

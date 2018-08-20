@@ -4,16 +4,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 import core.Database;
-import net.dv8tion.jda.core.entities.User;
+import net.dv8tion.jda.core.entities.Member;
 
 public class MatchMaker {
 	
 	private long serverId;
 	List<Ranking> rankings = new ArrayList<Ranking>();
 	
-	public MatchMaker(long guildId, List<User> players){
+	public MatchMaker(long guildId, List<Member> players){
 		this.serverId = guildId;
-		for(User p : players){
+		for(Member p : players){
 			rankings.add(new Ranking(p));
 		}
 		calcRank();
@@ -24,7 +24,7 @@ public class MatchMaker {
 			double score = 0.0;
 			for(Ranking r : rankings){
 				if(r != ranking){
-					double pickDiff = Database.queryGetPickOrderDiff(serverId, ranking.player.getIdLong(), r.player.getIdLong());
+					double pickDiff = Database.queryGetPickOrderDiff(serverId, ranking.player.getUser().getIdLong(), r.player.getUser().getIdLong());
 
 					score += pickDiff;
 				}
@@ -33,7 +33,7 @@ public class MatchMaker {
 		}
 	}
 	
-	public User getMatch(User captain){
+	public Member getMatch(Member captain){
 		Ranking captainRanking = getRanking(captain);
 		Ranking closestMatch = null;
 		
@@ -51,7 +51,7 @@ public class MatchMaker {
 		return closestMatch.player;
 	}
 	
-	private Ranking getRanking(User player){
+	private Ranking getRanking(Member player){
 		for(Ranking ranking : rankings){
 			if(ranking.player == player){
 				return ranking;
@@ -61,10 +61,10 @@ public class MatchMaker {
 	}
 	
 	private class Ranking{
-		private User player;
+		private Member player;
 		private Integer score;
 		
-		public Ranking(User player){
+		public Ranking(Member player){
 			this.player = player;
 			this.score = 0;
 		}

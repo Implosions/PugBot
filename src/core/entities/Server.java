@@ -16,7 +16,6 @@ import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.Message;
 import net.dv8tion.jda.core.entities.Role;
 import net.dv8tion.jda.core.entities.TextChannel;
-import net.dv8tion.jda.core.entities.User;
 import net.dv8tion.jda.core.managers.RoleManager;
 
 // Server class; Controls bot actions for each server
@@ -24,7 +23,7 @@ public class Server {
 	private Guild guild;
 	private ServerSettings settings;
 	private QueueManager qm;
-	private HashMap<User, Long> activityList = new HashMap<User, Long>();
+	private HashMap<Member, Long> activityList = new HashMap<Member, Long>();
 	private java.util.Queue<Message> messageCache = new java.util.LinkedList<Message>();
 	private Set<Long> banList;
 	private Set<Long> adminList;
@@ -83,22 +82,30 @@ public class Server {
 	}
 
 	private void afkTimerEnd() {
-		for (User user : activityList.keySet()) {
-			long time = activityList.get(user);
+		boolean update = false;
+		
+		for (Member member : activityList.keySet()) {
+			long time = activityList.get(member);
 
-			if (!qm.isPlayerInQueue(user)) {
-				activityList.remove(user);
+			if (!qm.isPlayerInQueue(member)) {
+				activityList.remove(member);
 				continue;
 			}
 
 			if ((System.currentTimeMillis() - time) / 60000 >= settings.getAFKTimeout()) {
 				String msg = String.format("<%d> has been removed from all queues after being inactive for %d minutes",
-						user.getId(), settings.getAFKTimeout());
+						member.getUser().getId(), settings.getAFKTimeout());
 
 				getPugChannel().sendMessage(Utils.createMessage("", msg, false)).queue();
+				
+				update = true;
 			}
 		}
-		qm.updateTopic();
+		
+		if(update){
+			qm.updateTopic();
+		}
+		
 		startAFKTimer();
 	}
 
@@ -109,8 +116,8 @@ public class Server {
 	}
 
 	private void dcTimerEnd(Member m) {
-		if (m.getOnlineStatus().equals(OnlineStatus.OFFLINE) && qm.isPlayerInQueue(m.getUser())) {
-			qm.purgeQueue(m.getUser());
+		if (m.getOnlineStatus().equals(OnlineStatus.OFFLINE) && qm.isPlayerInQueue(m)) {
+			qm.purgeQueue(m);
 			qm.updateTopic();
 
 			String msg = String.format("%s has been removed from all queues after being offline for %s minutes",
@@ -120,16 +127,16 @@ public class Server {
 		}
 	}
 
-	public void updateActivityList(User u) {
-		if (qm.isPlayerInQueue(u) || qm.hasPlayerJustFinished(u)) {
-			activityList.put(u, System.currentTimeMillis());
-		} else if (activityList.containsKey(u)) {
-			activityList.remove(u);
+	public void updateActivityList(Member m) {
+		if (qm.isPlayerInQueue(m) || qm.hasPlayerJustFinished(m)) {
+			activityList.put(m, System.currentTimeMillis());
+		} else if (activityList.containsKey(m)) {
+			activityList.remove(m);
 		}
 	}
 
 	public void playerDisconnect(Member m) {
-		if (qm.isPlayerInQueue(m.getUser()) || qm.hasPlayerJustFinished(m.getUser())) {
+		if (qm.isPlayerInQueue(m) || qm.hasPlayerJustFinished(m)) {
 			startDcTimer(m);
 		}
 	}

@@ -14,17 +14,16 @@ import net.dv8tion.jda.core.OnlineStatus;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.PrivateChannel;
 import net.dv8tion.jda.core.entities.TextChannel;
-import net.dv8tion.jda.core.entities.User;
 
 public class Queue {
 	private Integer maxPlayers;
 	private String name;
 	private long serverId;
 	private int id;
-	private List<User> playersInQueue = new ArrayList<User>();;
+	private List<Member> playersInQueue = new ArrayList<Member>();;
 	private List<Game> games = new ArrayList<Game>();;
-	private List<User> waitList = new ArrayList<User>();
-	private HashMap<Integer, List<User>> notifications = new HashMap<Integer, List<User>>();
+	private List<Member> waitList = new ArrayList<Member>();
+	private HashMap<Integer, List<Member>> notifications = new HashMap<Integer, List<Member>>();
 	private Trigger t;
 	public QueueSettings settings;
 	
@@ -43,11 +42,11 @@ public class Queue {
 	 * 
 	 * @param player the player to be added
 	 */
-	public void add(User player) {
+	public void add(Member player) {
 		if (!playersInQueue.contains(player) && !getManager().isPlayerIngame(player)) {
 			if(!getManager().hasPlayerJustFinished(player)){
 				playersInQueue.add(player);
-				Database.insertPlayerInQueue(serverId, id, player.getIdLong());
+				Database.insertPlayerInQueue(serverId, id, player.getUser().getIdLong());
 				checkNotifications();
 				
 				if (playersInQueue.size() == maxPlayers) {
@@ -59,7 +58,7 @@ public class Queue {
 		}
 	}
 	
-	public void addPlayerToQueueDirectly(User player){
+	public void addPlayerToQueueDirectly(Member player){
 		playersInQueue.add(player);
 	}
 
@@ -131,7 +130,7 @@ public class Queue {
 	 * 
 	 * @return List of players currently in queue
 	 */
-	public List<User> getPlayersInQueue() {
+	public List<Member> getPlayersInQueue() {
 		return playersInQueue;
 	}
 
@@ -142,14 +141,14 @@ public class Queue {
 	 */
 	private void popQueue() {
 		String names = "";
-		List<User> players = new ArrayList<User>(playersInQueue);
+		List<Member> players = new ArrayList<Member>(playersInQueue);
 		TextChannel pugChannel = ServerManager.getServer(serverId).getPugChannel();
 		
 		// Send alert to players and compile their names
-		for(User u : players){
-			names += u.getName() + ", ";
+		for(Member m : players){
+			names += m.getEffectiveName() + ", ";
 			try{
-				PrivateChannel c = u.openPrivateChannel().complete();
+				PrivateChannel c = m.getUser().openPrivateChannel().complete();
 				c.sendMessage(String.format("`Your game: %s has started!`", name)).queue();
 			}catch(Exception ex){
 				System.out.println("Error sending private message.\n" + ex.getMessage());
@@ -168,7 +167,7 @@ public class Queue {
 		// Generate captain string
 		String captainString = "";
 		if(settings.randomizeCaptains()){
-			captainString = String.format("**Captains:** <@%s> & <@%s>", newGame.getCaptains()[0].getId(), newGame.getCaptains()[1].getId());
+			captainString = String.format("**Captains:** <@%s> & <@%s>", newGame.getCaptains()[0].getUser().getId(), newGame.getCaptains()[1].getUser().getId());
 		}
 		
 		// Send game start message to pug channel
@@ -186,7 +185,7 @@ public class Queue {
 	 * @param g the game to finish
 	 */
 	public void finish(Game g) {
-		List<User> players = new ArrayList<User>(g.getPlayers());
+		List<Member> players = new ArrayList<Member>(g.getPlayers());
 		ServerManager.getServer(serverId).getQueueManager().addToJustFinished(players);
 		g.finish();
 		games.remove(g);
@@ -198,14 +197,14 @@ public class Queue {
 	/**
 	 * Removes player from queue or waitList
 	 * 
-	 * @param s the player to remove
+	 * @param member the player to remove
 	 */
-	public void delete(User s) {
-		if(playersInQueue.contains(s)){
-			playersInQueue.remove(s);
-			Database.deletePlayerInQueue(serverId, id, s.getIdLong());
-		}else if(waitList.contains(s)){
-			waitList.remove(s);
+	public void delete(Member member) {
+		if(playersInQueue.contains(member)){
+			playersInQueue.remove(member);
+			Database.deletePlayerInQueue(serverId, id, member.getUser().getIdLong());
+		}else if(waitList.contains(member)){
+			waitList.remove(member);
 		}
 	}
 
@@ -214,8 +213,8 @@ public class Queue {
 	 * 
 	 * @param players List of players to remove from queue
 	 */
-	public void purge(List<User> players) {
-		for(User player : players){
+	public void purge(List<Member> players) {
+		for(Member player : players){
 			if(playersInQueue.contains(player) || waitList.contains(player)){
 				delete(player);
 			}
@@ -229,8 +228,8 @@ public class Queue {
 	 * @return true if player matches the name provided
 	 */
 	public boolean containsPlayer(String name) {
-		for (User u : playersInQueue) {
-			if (u.getName().equalsIgnoreCase(name)) {
+		for (Member u : playersInQueue) {
+			if (u.getEffectiveName().equalsIgnoreCase(name)) {
 				return true;
 			}
 		}
@@ -238,32 +237,32 @@ public class Queue {
 	}
 
 	/**
-	 * Returns a User object matching the provided name
+	 * Returns a Member object matching the provided name
 	 * 
 	 * @param name the name to match to a player
-	 * @return User object matching the provided name, null if no matches
+	 * @return Member object matching the provided name, null if no matches
 	 */
-	public User getPlayer(String name) {
-		for (User u : playersInQueue) {
-			if (u.getName().equalsIgnoreCase(name)) {
-				return u;
-			}
-		}
-		return null;
-	}
+//	public Member getPlayer(String name) {
+//		for (Member u : playersInQueue) {
+//			if (u.getEffectiveName().equalsIgnoreCase(name)) {
+//				return u;
+//			}
+//		}
+//		return null;
+//	}
 
 	/**
 	 * Randomizes players waiting after finishing a game into queue
 	 * 
 	 * @param players the players to allow to add to queue
 	 */
-	public void addPlayersWaiting(List<User> players) {
+	public void addPlayersWaiting(List<Member> players) {
 		if(waitList.size() > 0){
 			Random random = new Random();
-			List<User> playersToAdd = new ArrayList<User>(players);
+			List<Member> playersToAdd = new ArrayList<Member>(players);
 			while(playersToAdd.size() > 0){
 				Integer i = random.nextInt(playersToAdd.size());
-				User player = playersToAdd.get(i);
+				Member player = playersToAdd.get(i);
 				if(waitList.contains(player)){
 					add(player);
 					waitList.remove(player);
@@ -278,7 +277,7 @@ public class Queue {
 	 * 
 	 * @param player the player to add to the wait list
 	 */
-	public void addToWaitList(User player){
+	public void addToWaitList(Member player){
 		if(!waitList.contains(player)){
 			waitList.add(player);
 		}
@@ -290,7 +289,7 @@ public class Queue {
 	 * @param player the player to check
 	 * @return true if the player is in the wait list
 	 */
-	public boolean isPlayerWaiting(User player){
+	public boolean isPlayerWaiting(Member player){
 		return waitList.contains(player);
 	}
 
@@ -300,16 +299,16 @@ public class Queue {
 	 * @param player the player associated with the notification
 	 * @param playerCount the threshold to alert to player
 	 */
-	public void addNotification(User player, Integer playerCount) {
+	public void addNotification(Member player, Integer playerCount) {
 		if(notifications.containsKey(playerCount)){
 			if(!notifications.get(playerCount).contains(player)){
 				notifications.get(playerCount).add(player);
 			}
 		}else{
-			notifications.put(playerCount, new ArrayList<User>());
+			notifications.put(playerCount, new ArrayList<Member>());
 			notifications.get(playerCount).add(player);
 		}
-		Database.insertQueueNotification(serverId, id, player.getIdLong(), playerCount);
+		Database.insertQueueNotification(serverId, id, player.getUser().getIdLong(), playerCount);
 	}
 	
 	/**
@@ -326,12 +325,11 @@ public class Queue {
 	 * 
 	 * @param users the users to send alerts to
 	 */
-	private void notify(List<User> users) {
-		for(User u : users){
-			Member m = ServerManager.getServer(serverId).getGuild().getMemberById(u.getId());
-			if(!playersInQueue.contains(u) && (m.getOnlineStatus().equals(OnlineStatus.ONLINE) || m.getOnlineStatus().equals(OnlineStatus.IDLE))){
+	private void notify(List<Member> users) {
+		for(Member m : users){
+			if(!playersInQueue.contains(m) && (m.getOnlineStatus().equals(OnlineStatus.ONLINE) || m.getOnlineStatus().equals(OnlineStatus.IDLE))){
 				try{
-					u.openPrivateChannel().complete()
+					m.getUser().openPrivateChannel().complete()
 						.sendMessage(String.format("Queue: %s is at %d players!", name, playersInQueue.size())).complete();
 				}catch(Exception ex){
 					System.out.println("Error sending private message.\n" + ex.getMessage());
@@ -345,11 +343,11 @@ public class Queue {
 	 * 
 	 * @param player the player to remove notifications for
 	 */
-	public void removeNotification(User player) {
-		for(List<User> list : notifications.values()){
+	public void removeNotification(Member player) {
+		for(List<Member> list : notifications.values()){
 			list.remove(player);
 		}
-		Database.deleteQueueNotification(serverId, id, player.getIdLong());
+		Database.deleteQueueNotification(serverId, id, player.getUser().getIdLong());
 	}
 	
 	/**
@@ -357,7 +355,7 @@ public class Queue {
 	 * 
 	 * @return HashMap of notifications in this queue
 	 */
-	public HashMap<Integer, List<User>> getNotifications(){
+	public HashMap<Integer, List<Member>> getNotifications(){
 		return notifications;
 	}
 	

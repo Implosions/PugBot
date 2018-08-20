@@ -6,31 +6,27 @@ import java.util.List;
 import java.util.Random;
 
 import core.Database;
-import core.entities.menus.RPSMenu;
-import core.entities.menus.TeamPickerMenu;
 import core.util.MatchMaker;
 import core.util.Trigger;
 import core.util.Utils;
 import net.dv8tion.jda.core.entities.Category;
 import net.dv8tion.jda.core.entities.Channel;
-import net.dv8tion.jda.core.entities.User;
+import net.dv8tion.jda.core.entities.Member;
 
 public class Game {
 	private Queue parent;
 	private long serverId;
 	private long timestamp;
-	private List<User> players;
-	private User[] captains = new User[] { null, null };
+	private List<Member> players;
+	private Member[] captains = new Member[] { null, null };
 	private Channel[] teamVoiceChannels = new Channel[2];
-	private RPSMenu rps = null;
-	private TeamPickerMenu pickMenu = null;
 	private GameStatus status = GameStatus.PICKING;
 
-	public Game(Queue parent, long serverId, List<User> players) {
+	public Game(Queue parent, long serverId, List<Member> players) {
 		this.parent = parent;
 		this.serverId = serverId;
 		this.timestamp = System.currentTimeMillis();
-		this.players = new ArrayList<User>(players);
+		this.players = new ArrayList<Member>(players);
 		
 		// Insert game into database
 		Database.insertGame(timestamp, parent.getId(), serverId);
@@ -50,7 +46,7 @@ public class Game {
 	/**
 	 * @return the list of players in this game
 	 */
-	public List<User> getPlayers() {
+	public List<Member> getPlayers() {
 		return players;
 	}
 
@@ -67,10 +63,10 @@ public class Game {
 	 * @param name the name of the player
 	 * @return the player matching the name
 	 */
-	public User getPlayer(String name) {
-		for (User u : players) {
-			if (u.getName().equalsIgnoreCase(name)) {
-				return u;
+	public Member getPlayer(String name) {
+		for (Member m : players) {
+			if (m.getEffectiveName().equalsIgnoreCase(name)) {
+				return m;
 			}
 		}
 		return null;
@@ -82,20 +78,16 @@ public class Game {
 	 * @param target the player to replace
 	 * @param substitute the player that will replace the target
 	 */
-	public void sub(User target, User substitute){
+	public void sub(Member target, Member substitute){
 		players.remove(target);
 		players.add(substitute);
 		
 		// If the target is a captain and the picking has not started or has not finished yet call subCaptain
-		for(User c : captains) {
-			if (c == target && (pickMenu == null || pickMenu != null && !pickMenu.finished())) {
+		// TODO check if picking is finished/in progress
+		for(Member c : captains) {
+			if (c == target) {
 				subCaptain(substitute, target);
 			}
-		}
-		
-		// If picking has not finished yet substitute the target in the pickMenu
-		if(pickMenu != null && !pickMenu.finished()){
-			pickMenu.sub(target, substitute);
 		}
 	}
 
@@ -106,8 +98,8 @@ public class Game {
 	 * @return true if the player is in this game
 	 */
 	public boolean containsPlayer(String name) {
-		for (User u : players) {
-			if (u.getName().equalsIgnoreCase(name)) {
+		for (Member m : players) {
+			if (m.getEffectiveName().equalsIgnoreCase(name)) {
 				return true;
 			}
 		}
@@ -120,7 +112,7 @@ public class Game {
 	 */
 	private void randomizeCaptains() {
 		Random random = new Random();
-		List<User> captainPool = getCaptainPool();
+		List<Member> captainPool = getCaptainPool();
 		
 		captains[0] = captainPool.get(random.nextInt(captainPool.size()));
 		
@@ -141,7 +133,7 @@ public class Game {
 	/**
 	 * @return array of captains
 	 */
-	public User[] getCaptains() {
+	public Member[] getCaptains() {
 		return captains;
 	}
 
@@ -168,23 +160,15 @@ public class Game {
 		this.status = status;
 	}
 	
-	/**
-	 * Creates a new RPSMenu
-	 */
 	public void createRPSMenu(){
-		Trigger trigger = () -> createPickMenu();
-		rps = new RPSMenu(captains[0], captains[1], trigger);
+		
 	}
 	
 	/**
 	 * Creates a new TeamPickerMenu
 	 */
 	public void createPickMenu(){
-		List<User> nonCaptainPlayers = new ArrayList<User>(players);
-		nonCaptainPlayers.removeAll(Arrays.asList(captains));
-		captains = rps.getResult();
-		Trigger trigger = () -> pickingComplete();
-		pickMenu = new TeamPickerMenu(captains, nonCaptainPlayers, trigger, parent.settings.snakePick());
+		
 	}
 	
 	/**
@@ -194,12 +178,12 @@ public class Game {
 		setStatus(GameStatus.PLAYING);		
 		
 		// Insert players in game into database
-		for(User u : players){
+		for(Member u : players){
 			Database.insertPlayerGame(u.getIdLong(), timestamp, serverId);
 		}
 		
 		// Update captains
-		for(User c : captains){
+		for(Member c : captains){
 			if(c != null){
 				Database.updatePlayerGameCaptain(c.getIdLong(), timestamp, serverId, true);
 			}
@@ -234,7 +218,7 @@ public class Game {
 			
 			for(int x = 0;x < captains.length;x++){	
 				teamVoiceChannels[x] = ServerManager.getGuild(String.valueOf(serverId))
-						.getController().createVoiceChannel(captains[x].getName() + "'s team").complete();
+						.getController().createVoiceChannel(captains[x].getEffectiveName() + "'s team").complete();
 				
 				teamVoiceChannels[x].getManager().setParent(category).queue();
 			}	
@@ -264,12 +248,7 @@ public class Game {
 	 * Removes all menus
 	 */
 	private void removeMenus(){
-		if(rps != null && !rps.finished()){
-			rps.complete();
-		}
-		if(pickMenu != null && !pickMenu.finished()){
-			pickMenu.complete();
-		}
+		
 	}
 	
 	/**
@@ -278,7 +257,7 @@ public class Game {
 	 * @param sub the player replacing a captain
 	 * @param target the captain to be replaced
 	 */
-	public void subCaptain(User sub, User target){
+	public void subCaptain(Member sub, Member target){
 		new Thread(new Runnable(){
 			public void run(){
 				for(Integer i = 0;i < 2;i++){
@@ -296,13 +275,13 @@ public class Game {
 	 * Adds eligible players to the captainPool
 	 * Returns players of not enough eligible players
 	 */
-	private List<User> getCaptainPool() {
-		List<User> captainPool = new ArrayList<User>();
+	private List<Member> getCaptainPool() {
+		List<Member> captainPool = new ArrayList<Member>();
 		Integer minGames = parent.settings.getMinNumberOfGamesPlayedToCaptain();
 		
-		for(User p : players){
-			if(Database.queryGetTotalGamesPlayed(p.getIdLong()) >= minGames){
-				captainPool.add(p);
+		for(Member m : players){
+			if(Database.queryGetTotalGamesPlayed(m.getUser().getIdLong()) >= minGames){
+				captainPool.add(m);
 			}
 		}
 		
