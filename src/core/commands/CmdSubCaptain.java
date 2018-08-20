@@ -29,37 +29,34 @@ public class CmdSubCaptain extends Command {
 		}
 
 		QueueManager qm = server.getQueueManager();
-		Member targetMember = server.getMember(args[0]);
+		Member target = server.getMember(args[0]);
 
-		User target = targetMember.getUser();
-		User sub = caller.getUser();
-
-		if (!qm.isPlayerIngame(sub)) {
+		if (!qm.isPlayerIngame(caller)) {
 			throw new InvalidUseException("You are not in-game");
 		}
 
 		if (qm.isPlayerIngame(target)) {
-			throw new InvalidUseException(targetMember.getEffectiveName() + " is not in-game");
+			throw new InvalidUseException(target.getEffectiveName() + " is not in-game");
 		}
 
-		Game game = qm.getPlayersGame(sub);
+		Game game = qm.getPlayersGame(caller);
 
 		if (game.getStatus() != GameStatus.PICKING) {
 			throw new InvalidUseException("Picking has finished");
 		}
 
 		if (game.getCaptains()[0] == target || game.getCaptains()[1] == target) {
-			throw new InvalidUseException(targetMember.getEffectiveName() + " is not a captain in your game");
+			throw new InvalidUseException(target.getEffectiveName() + " is not a captain in your game");
 		}
 
-		if (game.getCaptains()[0] != sub && game.getCaptains()[1] != sub) {
+		if (game.getCaptains()[0] != caller && game.getCaptains()[1] != caller) {
 			throw new InvalidUseException("You are already a captain");
 		}
 
-		game.subCaptain(sub, target);
+		game.subCaptain(caller, target);
 
 		this.response = Utils.createMessage(String.format("`%s has replaced %s as captain`", caller.getEffectiveName(),
-				targetMember.getEffectiveName()));
+				target.getEffectiveName()));
 
 		return response;
 	}

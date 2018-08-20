@@ -8,7 +8,6 @@ import core.exceptions.InvalidUseException;
 import core.util.Utils;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.Message;
-import net.dv8tion.jda.core.entities.User;
 
 public class CmdAdd extends Command {
 
@@ -23,13 +22,12 @@ public class CmdAdd extends Command {
 	@Override
 	public Message execCommand(Member caller, String[] args) {
 		QueueManager qm = server.getQueueManager();
-		User player = caller.getUser();
 
 		if (qm.isQueueListEmpty()) {
 			throw new InvalidUseException("There are no active queues");
 		}
 
-		if (qm.isPlayerIngame(player)) {
+		if (qm.isPlayerIngame(caller)) {
 			throw new InvalidUseException("You are already in-game");
 		}
 
@@ -37,14 +35,14 @@ public class CmdAdd extends Command {
 
 		if (args.length == 0) {
 			for (Queue queue : qm.getQueueList()) {
-				queue.add(caller.getUser());
+				queue.add(caller);
 			}
 
 			queueMsg = caller.getEffectiveName() + " added to all queues";
 		} else {
 			String queueNames = "";
 			for (Queue queue : qm.getListOfQueuesFromStringArgs(args)) {
-				queue.add(caller.getUser());
+				queue.add(caller);
 				queueNames += queue.getName() + ", ";
 			}
 
@@ -58,7 +56,7 @@ public class CmdAdd extends Command {
 
 		qm.updateTopic();
 
-		if (qm.hasPlayerJustFinished(caller.getUser())) {
+		if (qm.hasPlayerJustFinished(caller)) {
 			this.response = Utils.createMessage(queueMsg,
 					String.format("Your game has just finished, you will be randomized into the queue after %d seconds",
 							server.getSettings().getQueueFinishTimer()),

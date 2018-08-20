@@ -41,18 +41,18 @@ public class CmdSub extends Command {
 			substitute = server.getMember(args[1]);
 		}
 
-		if (qm.isPlayerIngame(substitute.getUser())) {
+		if (qm.isPlayerIngame(substitute)) {
 			throw new InvalidUseException(substitute.getEffectiveName() + " is already in-game");
 		}
 
-		if (!qm.isPlayerIngame(target.getUser())) {
+		if (!qm.isPlayerIngame(target)) {
 			throw new InvalidUseException(target.getEffectiveName() + " is not in-game");
 		}
 
-		Game game = qm.getPlayersGame(target.getUser());
+		Game game = qm.getPlayersGame(target);
 
-		game.sub(target.getUser(), substitute.getUser());
-		qm.purgeQueue(substitute.getUser());
+		game.sub(target, substitute);
+		qm.purgeQueue(substitute);
 
 		this.response = Utils.createMessage(String.format("`%s has been substituted with %s`",
 				target.getEffectiveName(), substitute.getEffectiveName()));

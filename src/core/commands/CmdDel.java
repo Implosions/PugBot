@@ -23,13 +23,13 @@ public class CmdDel extends Command {
 	public Message execCommand(Member caller, String[] args) {
 		QueueManager qm = server.getQueueManager();
 
-		if (!qm.isPlayerInQueue(caller.getUser()) && !qm.isPlayerWaiting(caller.getUser())) {
+		if (!qm.isPlayerInQueue(caller) && !qm.isPlayerWaiting(caller)) {
 			throw new InvalidUseException("You are not in any queue");
 		}
 
 		if (args.length == 0) {
 			for (Queue queue : qm.getQueueList()) {
-				queue.delete(caller.getUser());
+				queue.delete(caller);
 			}
 
 			this.response = Utils.createMessage(String.format("%s deleted from all queues", caller.getEffectiveName()),
@@ -37,7 +37,7 @@ public class CmdDel extends Command {
 		} else {
 			String queueNames = "";
 			for (Queue queue : qm.getListOfQueuesFromStringArgs(args)) {
-				queue.delete(caller.getUser());
+				queue.delete(caller);
 				queueNames += queue.getName() + ", ";
 			}
 

@@ -29,7 +29,7 @@ public class CmdDeleteNotification extends Command {
 
 		if (args.length == 0) {
 			for (Queue queue : qm.getQueueList()) {
-				queue.removeNotification(caller.getUser());
+				queue.removeNotification(caller);
 			}
 
 			this.response = Utils.createMessage("All notifications removed", "", true);
@@ -46,7 +46,7 @@ public class CmdDeleteNotification extends Command {
 			if (queue == null) {
 				throw new InvalidUseException("Queue does not exist");
 			}
-			queue.removeNotification(caller.getUser());
+			queue.removeNotification(caller);
 
 			this.response = Utils.createMessage(String.format("Notification in queue '%s' removed", queue.getName()),
 					"", true);

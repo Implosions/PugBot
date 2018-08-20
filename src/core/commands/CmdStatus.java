@@ -11,7 +11,6 @@ import core.exceptions.InvalidUseException;
 import core.util.Utils;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.Message;
-import net.dv8tion.jda.core.entities.User;
 
 public class CmdStatus extends Command {
 	
@@ -54,8 +53,8 @@ public class CmdStatus extends Command {
 			// Get players in queue
 			if (q.getCurrentPlayersCount() > 0) {
 				String names = ""; 
-				for (User u : q.getPlayersInQueue()) {
-					names += u.getName() + ", ";
+				for (Member m : q.getPlayersInQueue()) {
+					names += m.getEffectiveName() + ", ";
 				}
 				names = names.substring(0, names.lastIndexOf(","));
 				statusMsg += String.format("**IN QUEUE**: %s%n", names);
@@ -65,8 +64,8 @@ public class CmdStatus extends Command {
 			if (q.getNumberOfGames() > 0) {
 				for (Game g : q.getGames()) {
 					String names = "";
-					for (User u : g.getPlayers()) {
-						names += u.getName() + ", ";
+					for (Member m : g.getPlayers()) {
+						names += m.getEffectiveName() + ", ";
 					}
 					names = names.substring(0, names.lastIndexOf(","));
 					statusMsg += String.format("**IN GAME**: %s @ %d minutes ago%n", names, (System.currentTimeMillis() - g.getTimestamp()) / 60000);

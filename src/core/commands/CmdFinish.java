@@ -24,7 +24,7 @@ public class CmdFinish extends Command {
 	public Message execCommand(Member caller, String[] args) {
 		QueueManager qm = server.getQueueManager();
 
-		if (!qm.isPlayerIngame(caller.getUser())) {
+		if (!qm.isPlayerIngame(caller)) {
 			throw new InvalidUseException("You are not in-game");
 		}
 

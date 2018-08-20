@@ -34,14 +34,14 @@ public class CmdRemove extends Command {
 		Member m = server.getMember(args[0]);
 
 		if (args.length == 1) {
-			qm.purgeQueue(m.getUser());
+			qm.purgeQueue(m);
 			this.response = Utils.createMessage(String.format("%s removed from all queues", m.getEffectiveName()),
 					qm.getHeader(), true);
 		} else {
 			String queueNames = "";
 			
 			for (Queue queue : qm.getListOfQueuesFromStringArgs(Arrays.copyOfRange(args, 1, args.length))) {
-				queue.delete(m.getUser());
+				queue.delete(m);
 				queueNames += queue.getName() + ", ";
 			}
 

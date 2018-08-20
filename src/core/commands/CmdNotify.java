@@ -50,7 +50,7 @@ public class CmdNotify extends Command {
 			throw new InvalidUseException("Player count must be greater than zero and less than the maximum amount of players");
 		}
 
-		queue.addNotification(caller.getUser(), playerCount);
+		queue.addNotification(caller, playerCount);
 		this.response = Utils.createMessage(
 				String.format("`Notification added to queue '%s' at %d players`", queue.getName(), playerCount));
 
