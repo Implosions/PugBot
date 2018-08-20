@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 
 import core.commands.Command;
+import core.entities.MenuRouter;
 import core.entities.Server;
 import core.entities.ServerManager;
 import core.util.Utils;
@@ -20,6 +21,7 @@ import net.dv8tion.jda.core.events.guild.GuildLeaveEvent;
 import net.dv8tion.jda.core.events.guild.member.GuildMemberJoinEvent;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.core.events.message.guild.react.GenericGuildMessageReactionEvent;
+import net.dv8tion.jda.core.events.message.priv.react.PrivateMessageReactionAddEvent;
 import net.dv8tion.jda.core.events.user.UserOnlineStatusUpdateEvent;
 import net.dv8tion.jda.core.exceptions.InsufficientPermissionException;
 import net.dv8tion.jda.core.hooks.ListenerAdapter;
@@ -154,5 +156,11 @@ public class EventHandler extends ListenerAdapter {
 	public void onGuildMemberJoin(GuildMemberJoinEvent event) {
 		// Inserts new player into database
 		Database.insertPlayer(event.getUser().getIdLong(), event.getMember().getEffectiveName());
+	}
+	
+	public void onPrivateMessageReactionAdd(PrivateMessageReactionAddEvent event){
+		if(!event.getUser().isBot()){
+			MenuRouter.newReactionEvent(event.getMessageIdLong(), event.getReactionEmote().getName());
+		}
 	}
 }

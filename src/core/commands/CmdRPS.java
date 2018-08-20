@@ -2,11 +2,9 @@ package core.commands;
 
 import core.Constants;
 import core.entities.Server;
-import core.entities.Timer;
-import core.entities.menus.RPSMenu;
+import core.entities.menus.RPSMenuController;
 import core.exceptions.BadArgumentsException;
 import core.exceptions.InvalidUseException;
-import core.util.Trigger;
 import core.util.Utils;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.Message;
@@ -32,15 +30,14 @@ public class CmdRPS extends Command {
 			throw new InvalidUseException("Cannot RPS a bot");
 		}
 
-		Trigger t = () -> System.out.println("RPS completed");
-		RPSMenu rps = new RPSMenu(caller.getUser(), m.getUser(), t);
-		t = () -> {
-			if (!rps.finished()) {
-				rps.complete();
+		new Thread(new Runnable(){
+			public void run(){
+				RPSMenuController controller = new RPSMenuController(caller, m);
+				controller.start();
 			}
-		};
+		}).start();
+		
 
-		new Timer(180, t).start();
 		this.response = Utils.createMessage("`Challenge sent`");
 
 		return response;
