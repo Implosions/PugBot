@@ -13,10 +13,10 @@ public class RPSTeam extends MenuManager<RPSMenuController, RPSMenu> {
 	}
 
 	@Override
-	protected RPSMenu createMenu() {
+	protected void createMenu() {
 		MessageChannel channel = owner.getUser().openPrivateChannel().complete();
 
-		return new RPSMenu(channel, this);
+		menu = new RPSMenu(channel, this);
 	}
 
 	@Override

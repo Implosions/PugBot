@@ -22,9 +22,6 @@ public class RPSMenuController extends MenuController<RPSTeam> {
 
 		manager1 = new RPSTeam(p1, this);
 		manager2 = new RPSTeam(p2, this);
-
-		manager1.menu = manager1.createMenu();
-		manager2.menu = manager2.createMenu();
 	}
 
 	public Member getWinner() {

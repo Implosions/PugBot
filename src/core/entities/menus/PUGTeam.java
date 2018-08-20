@@ -18,10 +18,10 @@ public class PUGTeam extends MenuManager<PUGPickMenuController, PUGPickMenu> {
 	}
 
 	@Override
-	protected PUGPickMenu createMenu() {
+	protected void createMenu() {
 		MessageChannel channel = owner.getUser().openPrivateChannel().complete();
 		
-		return new PUGPickMenu(channel, this, controller.getPlayerPool());
+		menu = new PUGPickMenu(channel, this, controller.getPlayerPool());
 	}
 
 	@Override

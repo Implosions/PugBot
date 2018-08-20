@@ -44,7 +44,7 @@ public abstract class MenuManager<Controller extends MenuController<?>, Menu ext
 		return controller.getPage(index);
 	}
 
-	protected abstract Menu createMenu();
+	protected abstract void createMenu();
 
 	protected abstract <T> void menuAction(T action);
 

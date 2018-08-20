@@ -14,6 +14,9 @@ public abstract class MenuController<Manager extends MenuManager<?, ?>> {
 	protected int pageSize = 0;
 
 	public synchronized void start() {
+		manager1.createMenu();
+		manager2.createMenu();
+		
 		boolean condition = true;
 
 		while (condition) {

@@ -18,10 +18,7 @@ public class PUGPickMenuController extends MenuController<PUGTeam>{
 		this.playerPool = new ArrayList<Member>(playerPool);
 		generatePages();
 		
-		manager1.nextTurn();
-		manager1.menu = manager1.createMenu();
-		manager2.menu = manager2.createMenu();
-		
+		manager1.nextTurn();		
 		updateMenus();
 	}
 	
