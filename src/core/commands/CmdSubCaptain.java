@@ -10,7 +10,6 @@ import core.exceptions.InvalidUseException;
 import core.util.Utils;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.Message;
-import net.dv8tion.jda.core.entities.User;
 
 public class CmdSubCaptain extends Command {
 
@@ -45,11 +44,11 @@ public class CmdSubCaptain extends Command {
 			throw new InvalidUseException("Picking has finished");
 		}
 
-		if (game.getCaptains()[0] == target || game.getCaptains()[1] == target) {
+		if (game.getCaptain1() == target || game.getCaptain2() == target) {
 			throw new InvalidUseException(target.getEffectiveName() + " is not a captain in your game");
 		}
 
-		if (game.getCaptains()[0] != caller && game.getCaptains()[1] != caller) {
+		if (game.getCaptain1() != caller && game.getCaptain2() != caller) {
 			throw new InvalidUseException("You are already a captain");
 		}
 

@@ -32,7 +32,9 @@ public class CmdFinish extends Command {
 			for (Game game : queue.getGames()) {
 				if (game.getPlayers().contains(caller.getUser())) {
 					queue.finish(game);
-					this.response = Utils.createMessage(String.format("`Game '%s' finished`", game.getName()));
+					
+					this.response = Utils.createMessage(String.format("`Game '%s' finished`", game.getQueueName()));
+					
 					break;
 				}
 			}

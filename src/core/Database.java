@@ -11,6 +11,7 @@ import core.commands.CustomCommand;
 import core.entities.Queue;
 import core.entities.ServerManager;
 import core.entities.Setting;
+import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.Role;
 import net.dv8tion.jda.core.entities.User;
@@ -736,9 +737,10 @@ public class Database {
 			while(rs.next()){
 				Queue q = new Queue(rs.getString(2), rs.getInt(3), serverId, rs.getInt(1));
 				
-				for(User p : getPlayersInQueue(serverId, q.getId())){
-					q.addPlayerToQueueDirectly(p);
+				for(Member player : getPlayersInQueue(serverId, q.getId())){
+					q.addPlayerToQueueDirectly(player);
 				}
+				
 				fillQueueNotifications(serverId, q.getId(), q);
 				queueList.add(q);
 			}
@@ -836,8 +838,8 @@ public class Database {
 	 * @param queueId The id of the player
 	 * @return A list of users that are in a specified queue
 	 */
-	public static List<User> getPlayersInQueue(long serverId, int queueId){
-		List<User> playerList = new ArrayList<User>();
+	public static List<Member> getPlayersInQueue(long serverId, int queueId){
+		List<Member> playerList = new ArrayList<Member>();
 		try{
 			PreparedStatement pStatement = conn.prepareStatement("SELECT playerId FROM PlayerInQueue "
 					+ "WHERE serverId = ? AND queueId = ?");
@@ -845,8 +847,10 @@ public class Database {
 			pStatement.setInt(2, queueId);
 			
 			ResultSet rs = pStatement.executeQuery();
+			Guild guild = ServerManager.getGuild(serverId);
 			while(rs.next()){
-				User player = ServerManager.getGuild(String.valueOf(serverId)).getMemberById(rs.getLong(1)).getUser();
+				Member player = guild.getMemberById(rs.getLong(1));
+				
 				playerList.add(player);
 			}
 			rs.close();
@@ -956,7 +960,7 @@ public class Database {
 			while(rs.next()){
 				Member member = ServerManager.getGuild(String.valueOf(serverId)).getMemberById(rs.getLong(2));
 				if(member != null){
-					queue.addNotification(member.getUser(), rs.getInt(1));
+					queue.addNotification(member, rs.getInt(1));
 				}
 			}
 			

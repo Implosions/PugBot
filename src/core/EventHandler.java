@@ -125,7 +125,7 @@ public class EventHandler extends ListenerAdapter {
 			}
 		}
 		// Updates Server.activityList
-		server.updateActivityList(event.getAuthor());
+		server.updateActivityList(event.getMember());
 	}
 
 	public void onUserOnlineStatusUpdate(UserOnlineStatusUpdateEvent event) {
@@ -150,7 +150,7 @@ public class EventHandler extends ListenerAdapter {
 
 	public void onGenericGuildMessageReaction(GenericGuildMessageReactionEvent event) {
 		// Updates activity list with the user
-		ServerManager.getServer(event.getGuild().getIdLong()).updateActivityList(event.getUser());
+		ServerManager.getServer(event.getGuild().getIdLong()).updateActivityList(event.getMember());
 	}
 
 	public void onGuildMemberJoin(GuildMemberJoinEvent event) {

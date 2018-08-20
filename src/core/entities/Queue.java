@@ -167,7 +167,7 @@ public class Queue {
 		// Generate captain string
 		String captainString = "";
 		if(settings.randomizeCaptains()){
-			captainString = String.format("**Captains:** <@%s> & <@%s>", newGame.getCaptains()[0].getUser().getId(), newGame.getCaptains()[1].getUser().getId());
+			captainString = String.format("**Captains:** <@%s> & <@%s>", newGame.getCaptain1().getUser().getId(), newGame.getCaptain2().getUser().getId());
 		}
 		
 		// Send game start message to pug channel
