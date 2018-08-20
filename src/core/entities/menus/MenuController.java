@@ -59,6 +59,11 @@ public abstract class MenuController<Manager extends MenuManager<?, ?>> {
 			pages.remove(page);
 		}
 	}
+	
+	public void cancel(){
+		manager1.cancel();
+		manager2.cancel();
+	}
 
 	protected abstract void managerActionTaken(Manager manager);
 
