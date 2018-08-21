@@ -9,12 +9,23 @@ import java.util.Set;
 
 import core.commands.CustomCommand;
 import core.entities.Queue;
+import core.entities.QueueManager;
 import core.entities.ServerManager;
-import core.entities.Setting;
+import core.entities.settings.QueueSettingsManager;
+import core.entities.settings.ServerSettingsManager;
+import core.entities.settings.queuesettings.SettingMinGamesPlayedToCaptain;
+import core.entities.settings.queuesettings.SettingPickPattern;
+import core.entities.settings.queuesettings.SettingVoiceChannelCategory;
+import core.entities.settings.serversettings.SettingAFKTimeout;
+import core.entities.settings.serversettings.SettingCreateTeamVoiceChannels;
+import core.entities.settings.serversettings.SettingDCTimeout;
+import core.entities.settings.serversettings.SettingPUGChannel;
+import core.entities.settings.serversettings.SettingQueueFinishTimer;
+import net.dv8tion.jda.core.entities.Category;
 import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.Role;
-import net.dv8tion.jda.core.entities.User;
+import net.dv8tion.jda.core.entities.TextChannel;
 
 public class Database {
 	
@@ -35,7 +46,6 @@ public class Database {
 	private void createTables(){
 		try{
 			Statement statement = conn.createStatement();
-			statement.setQueryTimeout(30);
 			
 			statement.executeUpdate("CREATE TABLE IF NOT EXISTS "
 					+ "DiscordServer("
@@ -43,10 +53,9 @@ public class Database {
 					+ "name VARCHAR(50) NOT NULL, "
 					+ "setting_AFKTimeout INTEGER NOT NULL DEFAULT 120, "
 					+ "setting_DCTimeout INTEGER NOT NULL DEFAULT 5, "
-					+ "setting_PUGChannel VARCHAR(50) NOT NULL DEFAULT 'pugs', "
+					+ "setting_PUGChannel INTEGER NOT NULL DEFAULT 0, "
 					+ "setting_QueueFinishTimer INTEGER NOT NULL DEFAULT 90, "
-					+ "setting_postPickedTeamsToPugChannel VARCHAR(5) DEFAULT 'true', "
-					+ "setting_createDiscordVoiceChannels VARCHAR(5) DEFAULT 'true', "
+					+ "setting_createTeamVoiceChannels VARCHAR(5) DEFAULT 'true', "
 					+ "PRIMARY KEY (id)"
 					+ ")");
 			
@@ -64,10 +73,9 @@ public class Database {
 					+ "name VARCHAR(50) NOT NULL, "
 					+ "maxPlayers INTEGER NOT NULL, "
 					+ "active INTEGER NOT NULL DEFAULT 1, "
-					+ "setting_minNumberOfGamesToCaptain INTEGER NOT NULL DEFAULT 15, "
-					+ "setting_randomizeCaptains VARCHAR(5) NOT NULL DEFAULT 'true', "
-					+ "setting_snakePick VARCHAR(5) NOT NULL DEFAULT 'false', "
-					+ "setting_voiceChannelCategoryId INTEGER NOT NULL DEFAULT 0, "
+					+ "setting_MinGamesPlayedToCaptain INTEGER NOT NULL DEFAULT 15, "
+					+ "setting_PickPattern VARCHAR(15) NOT NULL DEFAULT '1', "
+					+ "setting_VoiceChannelCategory INTEGER NOT NULL DEFAULT 0, "
 					+ "PRIMARY KEY (id, serverId), "
 					+ "FOREIGN KEY (serverId) REFERENCES DiscordServer(id)"
 					+ ")");
@@ -609,39 +617,30 @@ public class Database {
 	 * @param serverId The id of the server
 	 * @return A list of settings for the specified server
 	 */
-	public static List<Setting> getServerSettings(long serverId){
-		List<Setting> settings = new ArrayList<Setting>();
+	public static void loadServerSettings(ServerSettingsManager manager){		
 		try{
 			PreparedStatement pStatement = conn.prepareStatement("SELECT "
 					+ "setting_AFKTimeout, "
 					+ "setting_DCTimeout, "
 					+ "setting_PUGChannel, "
 					+ "setting_QueueFinishTimer, "
-					+ "setting_postPickedTeamsToPugChannel, "
-					+ "setting_createDiscordVoiceChannels "
+					+ "setting_createTeamVoiceChannels "
 					+ "FROM DiscordServer WHERE id = ?");
-			pStatement.setLong(1, serverId);
+			pStatement.setLong(1, manager.getServer().getId());
 			
 			ResultSet rs = pStatement.executeQuery();
-
-			settings.add(new Setting("AFKTimeout", rs.getInt(1),
-					"minutes", "The amount of time before a user is removed from all queues if no input is detected"));
-			settings.add(new Setting("DCTimeout", rs.getInt(2),
-					"minutes", "The amount of time before a user is removed from all queues after a disconnect is detected"));
-			settings.add(new Setting("PUGChannel", rs.getString(3),
-					null, "The channel that PUG related input and output will be focused in"));
-			settings.add(new Setting("queueFinishTimer", rs.getInt(4),
-					"seconds", "The amount of time for allowing users to re-add to queues after finishing a game"));
-			settings.add(new Setting("postPickedTeamsToPugChannel", Boolean.valueOf(rs.getString(5)),
-					null, "Post the picked teams to the PUG channel"));
-			settings.add(new Setting("createDiscordVoiceChannels", Boolean.valueOf(rs.getString(6)),
-					null, "Create discord voice channels for teams on game start"));
+			TextChannel channel = manager.getServer().getGuild().getTextChannelById(rs.getLong(3));
+			
+			manager.addSetting(new SettingAFKTimeout(rs.getInt(1)));
+			manager.addSetting(new SettingDCTimeout(rs.getInt(2)));
+			manager.addSetting(new SettingPUGChannel(channel));
+			manager.addSetting(new SettingQueueFinishTimer(rs.getInt(4)));
+			manager.addSetting(new SettingCreateTeamVoiceChannels(rs.getBoolean(5)));
 			
 			rs.close();
 		}catch(SQLException ex){
 			ex.printStackTrace();
 		}
-		return settings;
 	}
 	
 	/**
@@ -649,33 +648,27 @@ public class Database {
 	 * @param id The id of the queue
 	 * @return A list of settings for the specified queue
 	 */
-	public static List<Setting> getQueueSettings(long serverId, int id){
-		List<Setting> settings = new ArrayList<Setting>();
+	public static void loadQueueSettings(QueueSettingsManager manager){
 		try{
-			PreparedStatement pStatement = conn.prepareStatement("SELECT setting_minNumberOfGamesToCaptain, "
-					+ "setting_randomizeCaptains, "
-					+ "setting_snakePick, "
-					+ "setting_voiceChannelCategoryId "
+			PreparedStatement pStatement = conn.prepareStatement("SELECT "
+					+ "setting_MinGamesPlayedToCaptain, "
+					+ "setting_PickPattern, "
+					+ "setting_VoiceChannelCategory "
 					+ "FROM Queue WHERE serverId = ? AND id = ?");
-			pStatement.setLong(1, serverId);
-			pStatement.setInt(2, id);
+			pStatement.setLong(1, manager.getServer().getId());
+			pStatement.setInt(2, manager.getParentQueue().getId());
 			
 			ResultSet rs = pStatement.executeQuery();
+			Category category = manager.getServer().getGuild().getCategoryById(rs.getLong(3));
 			
-			settings.add(new Setting("minNumberOfGamesToCaptain", rs.getInt(1),
-					null, "The minimum number of games played for a player to be able to captain"));
-			settings.add(new Setting("randomizeCaptains", Boolean.valueOf(rs.getString(2)),
-					null, "Enables the bot to randomly select captains and allow picking through discord"));
-			settings.add(new Setting("snakePick", Boolean.valueOf(rs.getString(3)),
-					null, "Enables a snake at the end of picking"));
-			settings.add(new Setting("voiceChannelCategoryId", rs.getLong(4),
-					null, "The ID of the channel category to put generated voice channels in"));
+			manager.addSetting(new SettingMinGamesPlayedToCaptain(rs.getInt(1)));
+			manager.addSetting(new SettingPickPattern(rs.getString(2)));
+			manager.addSetting(new SettingVoiceChannelCategory(category));
 			
 			rs.close();
 		}catch(SQLException ex){
 			ex.printStackTrace();
 		}
-		return settings;
 	}
 	
 	/**
@@ -724,8 +717,8 @@ public class Database {
 	 * @param serverId The id of the server
 	 * @return A list of active queues in the specified server
 	 */
-	public static List<Queue> getServerQueueList(long serverId){
-		List<Queue> queueList = new ArrayList<Queue>();
+	public static void loadServerQueues(QueueManager qm){
+		long serverId = qm.getServerId();
 		
 		try{
 			PreparedStatement pStatement = conn.prepareStatement("SELECT id, name, maxPlayers "
@@ -735,21 +728,19 @@ public class Database {
 			ResultSet rs = pStatement.executeQuery();
 			
 			while(rs.next()){
-				Queue q = new Queue(rs.getString(2), rs.getInt(3), serverId, rs.getInt(1));
+				Queue q = new Queue(rs.getString(2), rs.getInt(3), rs.getInt(1), qm);
 				
 				for(Member player : getPlayersInQueue(serverId, q.getId())){
 					q.addPlayerToQueueDirectly(player);
 				}
 				
 				fillQueueNotifications(serverId, q.getId(), q);
-				queueList.add(q);
+				qm.addQueue(q);
 			}
 			rs.close();
 		}catch(SQLException ex){
 			ex.printStackTrace();
 		}
-		
-		return queueList;
 	}
 	
 	/**

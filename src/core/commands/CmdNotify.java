@@ -37,9 +37,9 @@ public class CmdNotify extends Command {
 		}
 
 		try {
-			queue = qm.getQueue(Integer.valueOf(args[0]));
+			queue = qm.getQueueByIndex(Integer.valueOf(args[0]));
 		} catch (NumberFormatException ex) {
-			queue = qm.getQueue(args[0]);
+			queue = qm.getQueueByName(args[0]);
 		}
 
 		if (queue == null) {

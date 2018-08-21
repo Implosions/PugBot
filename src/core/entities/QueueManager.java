@@ -10,12 +10,12 @@ import net.dv8tion.jda.core.exceptions.PermissionException;
 public class QueueManager {
 	private List<Queue> queueList = new ArrayList<Queue>();
 	private List<Member> justFinished = new ArrayList<Member>();
-	private long serverId;
+	private Server server;
 
-	public QueueManager(long id) {
-		serverId = id;
-
-		queueList = Database.getServerQueueList(id);
+	public QueueManager(Server server) {
+		this.server = server;
+		
+		Database.loadServerQueues(this);
 	}
 
 	public void addQueue(Queue queue){
@@ -39,11 +39,7 @@ public class QueueManager {
 		List<Queue> queues = new ArrayList<Queue>();
 		Queue queue;
 		for(String arg : args){
-			try{
-				queue = getQueue(Integer.valueOf(arg));
-			}catch(NumberFormatException ex){
-				queue = getQueue(arg);
-			}
+			queue = getQueue(arg);
 			
 			if(queue != null){
 				queues.add(queue);
@@ -51,6 +47,18 @@ public class QueueManager {
 		}
 		
 		return queues;
+	}
+	
+	public Queue getQueue(String queueVal){
+		Queue queue;
+		
+		try{
+			queue = getQueueByIndex(Integer.valueOf(queueVal));
+		}catch(NumberFormatException ex){
+			queue = getQueueByName(queueVal);
+		}
+		
+		return queue;
 	}
 
 	/**
@@ -200,8 +208,8 @@ public class QueueManager {
 	 * 
 	 * @return the guild id associated with this QueueManager instance
 	 */
-	public long getId() {
-		return serverId;
+	public long getServerId() {
+		return server.getId();
 	}
 
 	/**
@@ -210,7 +218,7 @@ public class QueueManager {
 	 * @return the Server instance associated with this QueueManager instance
 	 */
 	public Server getServer() {
-		return ServerManager.getServer(serverId);
+		return server;
 	}
 
 	
@@ -246,12 +254,12 @@ public class QueueManager {
 	/**
 	 * Returns a specific queue.
 	 * 
-	 * @param name the name of the queue to return
+	 * @param queueName the name of the queue to return
 	 * @return Queue object matching the name param, null if no matches
 	 */
-	public Queue getQueue(String name){
+	public Queue getQueueByName(String queueName){
 		for(Queue q : queueList){
-			if(q.getName().equalsIgnoreCase(name)){
+			if(q.getName().equalsIgnoreCase(queueName)){
 				return q;
 			}
 		}
@@ -264,10 +272,11 @@ public class QueueManager {
 	 * @param index the one-based index of the queue to return
 	 * @return Queue object at the specified index, null if no matches
 	 */
-	public Queue getQueue(Integer index){
-		Integer i = --index;
-		if(doesQueueExist(i)){
-			return queueList.get(i);
+	public Queue getQueueByIndex(Integer index){
+		index--;
+		
+		if(doesQueueExist(index)){
+			return queueList.get(index);
 		}else{
 			return null;
 		}

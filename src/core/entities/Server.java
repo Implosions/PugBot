@@ -1,12 +1,12 @@
 package core.entities;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Set;
 
 import core.util.Utils;
 import core.Constants;
 import core.Database;
+import core.entities.settings.ServerSettingsManager;
 import core.exceptions.InvalidUseException;
 import core.util.Trigger;
 import net.dv8tion.jda.core.OnlineStatus;
@@ -21,7 +21,7 @@ import net.dv8tion.jda.core.managers.RoleManager;
 // Server class; Controls bot actions for each server
 public class Server {
 	private Guild guild;
-	private ServerSettings settings;
+	private ServerSettingsManager settingsManager;
 	private QueueManager qm;
 	private HashMap<Member, Long> activityList = new HashMap<Member, Long>();
 	private java.util.Queue<Message> messageCache = new java.util.LinkedList<Message>();
@@ -42,13 +42,15 @@ public class Server {
 			Database.insertPlayer(m.getUser().getIdLong(), m.getEffectiveName());
 			Database.insertPlayerServer(guild.getIdLong(), m.getUser().getIdLong());
 		}
-
+		
+		settingsManager = new ServerSettingsManager(this);
 		banList = Database.queryGetBanList(guild.getIdLong());
 		adminList = Database.queryGetAdminList(guild.getIdLong());
-		settings = new ServerSettings(guild.getIdLong());
-		qm = new QueueManager(guild.getIdLong());
-		qm.getQueueList().forEach((q) -> q.getPlayersInQueue().forEach((u) -> updateActivityList(u)));
+		qm = new QueueManager(this);
 		groupDict = Database.retrieveGroups(guild.getIdLong());
+		
+		qm.getQueueList().forEach((q) -> q.getPlayersInQueue().forEach((u) -> updateActivityList(u)));
+		
 
 		startAFKTimer();
 	}
@@ -61,18 +63,18 @@ public class Server {
 		return qm;
 	}
 
-	public ServerSettings getSettings() {
-		return settings;
+	public ServerSettingsManager getSettingsManager() {
+		return settingsManager;
 	}
 
 	public TextChannel getPugChannel() {
-		List<TextChannel> channels = guild.getTextChannelsByName(settings.getPUGChannel(), false);
+		TextChannel channel = settingsManager.getPUGChannel(); 
 
-		if (channels.isEmpty()) {
-			return guild.getDefaultChannel();
+		if(channel == null){
+			channel = guild.getDefaultChannel();
 		}
 
-		return channels.get(0);
+		return channel;
 	}
 
 	private void startAFKTimer() {
@@ -92,9 +94,9 @@ public class Server {
 				continue;
 			}
 
-			if ((System.currentTimeMillis() - time) / 60000 >= settings.getAFKTimeout()) {
+			if ((System.currentTimeMillis() - time) / 60000 >= settingsManager.getAFKTimeout()) {
 				String msg = String.format("<%d> has been removed from all queues after being inactive for %d minutes",
-						member.getUser().getId(), settings.getAFKTimeout());
+						member.getUser().getId(), settingsManager.getAFKTimeout());
 
 				getPugChannel().sendMessage(Utils.createMessage("", msg, false)).queue();
 				
@@ -111,7 +113,7 @@ public class Server {
 
 	private void startDcTimer(Member m) {
 		Trigger trigger = () -> dcTimerEnd(m);
-		Timer timer = new Timer(settings.getDCTimeout() * 60, trigger);
+		Timer timer = new Timer(settingsManager.getDCTimeout() * 60, trigger);
 		timer.start();
 	}
 
@@ -121,7 +123,7 @@ public class Server {
 			qm.updateTopic();
 
 			String msg = String.format("%s has been removed from all queues after being offline for %s minutes",
-					m.getEffectiveName(), settings.getDCTimeout());
+					m.getEffectiveName(), settingsManager.getDCTimeout());
 
 			getPugChannel().sendMessage(Utils.createMessage("", msg, false)).queue();
 		}

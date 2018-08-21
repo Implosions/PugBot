@@ -9,6 +9,7 @@ import java.util.concurrent.TimeUnit;
 
 import core.util.Utils;
 import core.Database;
+import core.entities.settings.QueueSettingsManager;
 import core.util.Trigger;
 import net.dv8tion.jda.core.OnlineStatus;
 import net.dv8tion.jda.core.entities.Member;
@@ -18,21 +19,21 @@ import net.dv8tion.jda.core.entities.TextChannel;
 public class Queue {
 	private Integer maxPlayers;
 	private String name;
-	private long serverId;
+	private QueueManager manager;
 	private int id;
 	private List<Member> playersInQueue = new ArrayList<Member>();;
 	private List<Game> games = new ArrayList<Game>();;
 	private List<Member> waitList = new ArrayList<Member>();
 	private HashMap<Integer, List<Member>> notifications = new HashMap<Integer, List<Member>>();
 	private Trigger t;
-	public QueueSettings settings;
+	private QueueSettingsManager settingsManager;
 	
-	public Queue(String name, int maxPlayers, long guildId, int id) {
+	public Queue(String name, int maxPlayers, int id, QueueManager manager) {
+		this.manager = manager;
 		this.name = name;
 		this.maxPlayers = maxPlayers;
-		this.serverId = guildId;
 		this.id = id;
-		this.settings = new QueueSettings(guildId, id);
+		this.settingsManager = new QueueSettingsManager(manager.getServer(), this);
 	}
 
 	/**
@@ -46,7 +47,7 @@ public class Queue {
 		if (!playersInQueue.contains(player) && !getManager().isPlayerIngame(player)) {
 			if(!getManager().hasPlayerJustFinished(player)){
 				playersInQueue.add(player);
-				Database.insertPlayerInQueue(serverId, id, player.getUser().getIdLong());
+				Database.insertPlayerInQueue(manager.getServerId(), id, player.getUser().getIdLong());
 				checkNotifications();
 				
 				if (playersInQueue.size() == maxPlayers) {
@@ -142,7 +143,7 @@ public class Queue {
 	private void popQueue() {
 		String names = "";
 		List<Member> players = new ArrayList<Member>(playersInQueue);
-		TextChannel pugChannel = ServerManager.getServer(serverId).getPugChannel();
+		TextChannel pugChannel = ServerManager.getServer(manager.getServerId()).getPugChannel();
 		
 		// Send alert to players and compile their names
 		for(Member m : players){
@@ -157,18 +158,15 @@ public class Queue {
 		names = names.substring(0, names.lastIndexOf(","));
 		
 		// Create Game and add to the list of active games
-		Game newGame = new Game(this, serverId, players);
+		Game newGame = new Game(this, manager.getServerId(), players);
 		games.add(newGame);
 		
 		// Remove players from all other queues
-		ServerManager.getServer(serverId).getQueueManager().purgeQueue(players);
-		Database.deletePlayersInQueueFromQueue(serverId, id);
+		ServerManager.getServer(manager.getServerId()).getQueueManager().purgeQueue(players);
+		Database.deletePlayersInQueueFromQueue(manager.getServerId(), id);
 		
 		// Generate captain string
-		String captainString = "";
-		if(settings.randomizeCaptains()){
-			captainString = String.format("**Captains:** <@%s> & <@%s>", newGame.getCaptain1().getUser().getId(), newGame.getCaptain2().getUser().getId());
-		}
+		String captainString = String.format("**Captains:** <@%s> & <@%s>", newGame.getCaptain1().getUser().getId(), newGame.getCaptain2().getUser().getId());
 		
 		// Send game start message to pug channel
 		pugChannel.sendMessage(Utils.createMessage(String.format("Game: %s starting%n", name), String.format("%s%n%s", names, captainString), Color.YELLOW)).queueAfter(2, TimeUnit.SECONDS);
@@ -186,11 +184,11 @@ public class Queue {
 	 */
 	public void finish(Game g) {
 		List<Member> players = new ArrayList<Member>(g.getPlayers());
-		ServerManager.getServer(serverId).getQueueManager().addToJustFinished(players);
+		ServerManager.getServer(manager.getServerId()).getQueueManager().addToJustFinished(players);
 		g.finish();
 		games.remove(g);
-		t = () -> ServerManager.getServer(serverId).getQueueManager().timerEnd(players);
-		Timer timer = new Timer(ServerManager.getServer(serverId).getSettings().getQueueFinishTimer(), t);
+		t = () -> ServerManager.getServer(manager.getServerId()).getQueueManager().timerEnd(players);
+		Timer timer = new Timer(ServerManager.getServer(manager.getServerId()).getSettingsManager().getQueueFinishTimer(), t);
 		timer.start();
 	}
 
@@ -202,7 +200,7 @@ public class Queue {
 	public void delete(Member member) {
 		if(playersInQueue.contains(member)){
 			playersInQueue.remove(member);
-			Database.deletePlayerInQueue(serverId, id, member.getUser().getIdLong());
+			Database.deletePlayerInQueue(manager.getServerId(), id, member.getUser().getIdLong());
 		}else if(waitList.contains(member)){
 			waitList.remove(member);
 		}
@@ -308,7 +306,7 @@ public class Queue {
 			notifications.put(playerCount, new ArrayList<Member>());
 			notifications.get(playerCount).add(player);
 		}
-		Database.insertQueueNotification(serverId, id, player.getUser().getIdLong(), playerCount);
+		Database.insertQueueNotification(manager.getServerId(), id, player.getUser().getIdLong(), playerCount);
 	}
 	
 	/**
@@ -347,7 +345,7 @@ public class Queue {
 		for(List<Member> list : notifications.values()){
 			list.remove(player);
 		}
-		Database.deleteQueueNotification(serverId, id, player.getUser().getIdLong());
+		Database.deleteQueueNotification(manager.getServerId(), id, player.getUser().getIdLong());
 	}
 	
 	/**
@@ -364,6 +362,10 @@ public class Queue {
 	}
 	
 	private QueueManager getManager(){
-		return ServerManager.getServer(serverId).getQueueManager();
+		return manager;
+	}
+	
+	public QueueSettingsManager getSettingsManager(){
+		return settingsManager;
 	}
 }

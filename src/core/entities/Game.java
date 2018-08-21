@@ -35,11 +35,7 @@ public class Game {
 		// Insert game into database
 		Database.insertGame(timestamp, queue.getId(), serverId);
 		
-		if (queue.settings.randomizeCaptains()) {
-			randomizeCaptains();
-		}else{
-			pickingComplete();
-		}
+		randomizeCaptains();
 	}
 	
 	public enum GameStatus{
@@ -192,16 +188,14 @@ public class Game {
 			}
 			
 			// Post teams to pug channel
-			if(ServerManager.getServer(serverId).getSettings().postTeamsToPugChannel()){
-				String s = String.format("`Game: %s`", parentQueue.getName());
-				ServerManager.getServer(serverId).getPugChannel()
-					.sendMessage(Utils.createMessage(s, String.format("Teams:%n%s", pickController.getTeamsString()), true))
-						.queue();
-			}
+			String s = String.format("`Game: %s`", parentQueue.getName());
+			
+			ServerManager.getServer(serverId).getPugChannel()
+				.sendMessage(Utils.createMessage(s, String.format("Teams:%n%s", pickController.getTeamsString()), true))
+					.queue();
 		}
 		
-		if(parentQueue.settings.randomizeCaptains() && 
-				ServerManager.getServer(serverId).getSettings().createDiscordVoiceChannels()){
+		if(ServerManager.getServer(serverId).getSettingsManager().getCreateTeamVoiceChannels()){
 			createVoiceChannels();
 		}
 		
@@ -217,9 +211,8 @@ public class Game {
 	
 	private void createVoiceChannel(Member member){
 		try{
-			long catId = parentQueue.settings.getVoiceChannelCategoryId();
 			Guild guild = ServerManager.getGuild(serverId);
-			Category category = guild.getCategoryById(catId);
+			Category category = parentQueue.getSettingsManager().getVoiceChannelCategory();
 			Channel channel = guild.getController().createVoiceChannel(member.getEffectiveName() + "'s team").complete();
 				
 			channel.getManager().setParent(category).queue();
@@ -283,7 +276,7 @@ public class Game {
 	 */
 	private List<Member> getCaptainPool() {
 		List<Member> captainPool = new ArrayList<Member>();
-		Integer minGames = parentQueue.settings.getMinNumberOfGamesPlayedToCaptain();
+		Integer minGames = parentQueue.getSettingsManager().getMinGamesPlayedToCaptain();
 		
 		for(Member m : players){
 			if(Database.queryGetTotalGamesPlayed(m.getUser().getIdLong()) >= minGames){

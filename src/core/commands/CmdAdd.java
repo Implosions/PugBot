@@ -59,7 +59,7 @@ public class CmdAdd extends Command {
 		if (qm.hasPlayerJustFinished(caller)) {
 			this.response = Utils.createMessage(queueMsg,
 					String.format("Your game has just finished, you will be randomized into the queue after %d seconds",
-							server.getSettings().getQueueFinishTimer()),
+							server.getSettingsManager().getQueueFinishTimer()),
 					true);
 		} else {
 			this.response = Utils.createMessage(queueMsg, qm.getHeader(), true);
