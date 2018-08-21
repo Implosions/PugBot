@@ -2,6 +2,7 @@ package core.entities;
 
 import java.util.HashMap;
 
+import core.entities.timers.AFKTimer;
 import core.util.Utils;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.entities.Guild;
@@ -18,6 +19,8 @@ public class ServerManager {
 		for(Guild guild : getJDAInstance().getGuilds()){
 			servers.put(guild.getIdLong(), new Server(guild));
 		}
+		
+		new AFKTimer(this).start();
 	}
 	
 	public ServerManager(JDA jda){
@@ -58,5 +61,11 @@ public class ServerManager {
 	
 	public static JDA getJDAInstance(){
 		return jdaInstance;
+	}
+	
+	public void checkServerActivityLists(){
+		for(Server server : servers.values()){
+			server.checkActivityList();
+		}
 	}
 }

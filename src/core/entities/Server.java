@@ -1,15 +1,17 @@
 package core.entities;
 
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 
 import core.util.Utils;
 import core.Constants;
 import core.Database;
 import core.entities.settings.ServerSettingsManager;
+import core.entities.timers.DCTimer;
 import core.exceptions.InvalidUseException;
-import core.util.Trigger;
 import net.dv8tion.jda.core.OnlineStatus;
 import net.dv8tion.jda.core.Permission;
 import net.dv8tion.jda.core.entities.Guild;
@@ -21,11 +23,13 @@ import net.dv8tion.jda.core.managers.RoleManager;
 
 // Server class; Controls bot actions for each server
 public class Server {
+	
 	private Guild guild;
 	private ServerSettingsManager settingsManager;
-	private QueueManager qm;
+	private QueueManager queueManager;
 	private ConcurrentHashMap<Member, Long> activityList = new ConcurrentHashMap<Member, Long>();
-	private java.util.Queue<Message> messageCache = new java.util.LinkedList<Message>();
+	private ConcurrentHashMap<Member, DCTimer> disconnectList = new ConcurrentHashMap<Member, DCTimer>();
+	private java.util.Queue<Message> messageCache = new LinkedList<Message>();
 	private Set<Long> banList;
 	private Set<Long> adminList;
 	private HashMap<String, Role> groupDict = new HashMap<String, Role>();
@@ -47,13 +51,10 @@ public class Server {
 		settingsManager = new ServerSettingsManager(this);
 		banList = Database.queryGetBanList(guild.getIdLong());
 		adminList = Database.queryGetAdminList(guild.getIdLong());
-		qm = new QueueManager(this);
+		queueManager = new QueueManager(this);
 		groupDict = Database.retrieveGroups(guild.getIdLong());
 		
-		qm.getQueueList().forEach((q) -> q.getPlayersInQueue().forEach((u) -> updateActivityList(u)));
-		
-
-		startAFKTimer();
+		queueManager.getQueueList().forEach((q) -> q.getPlayersInQueue().forEach((u) -> updateActivityList(u)));
 	}
 
 	public long getId() {
@@ -61,7 +62,7 @@ public class Server {
 	}
 
 	public QueueManager getQueueManager() {
-		return qm;
+		return queueManager;
 	}
 
 	public ServerSettingsManager getSettingsManager() {
@@ -78,27 +79,26 @@ public class Server {
 		return channel;
 	}
 
-	private void startAFKTimer() {
-		Trigger tt = () -> afkTimerEnd();
-		Timer afkTimer = new Timer(60, tt);
-		afkTimer.start();
-	}
-
-	private void afkTimerEnd() {
+	protected void checkActivityList() {
 		boolean update = false;
 		
 		for (Member member : activityList.keySet()) {
 			long time = activityList.get(member);
 
-			if (!qm.isPlayerInQueue(member)) {
+			if (!queueManager.isPlayerInQueue(member)) {
 				activityList.remove(member);
 				continue;
 			}
-
-			if ((System.currentTimeMillis() - time) / 60000 >= settingsManager.getAFKTimeout()) {
-				String msg = String.format("<%d> has been removed from all queues after being inactive for %d minutes",
+			
+			long timeDiffMs = System.currentTimeMillis() - time;
+			long minutes = TimeUnit.MINUTES.convert(timeDiffMs, TimeUnit.MILLISECONDS);
+			
+			if (minutes >= settingsManager.getAFKTimeout()) {
+				String msg = String.format("<@%s> has been removed from all queues after being inactive for %d minutes",
 						member.getUser().getId(), settingsManager.getAFKTimeout());
+				
 
+				queueManager.purgeQueue(member);
 				getPugChannel().sendMessage(Utils.createMessage("", msg, false)).queue();
 				
 				update = true;
@@ -106,41 +106,41 @@ public class Server {
 		}
 		
 		if(update){
-			qm.updateTopic();
+			queueManager.updateTopic();
 		}
-		
-		startAFKTimer();
 	}
 
-	private void startDcTimer(Member m) {
-		Trigger trigger = () -> dcTimerEnd(m);
-		Timer timer = new Timer(settingsManager.getDCTimeout() * 60, trigger);
-		timer.start();
-	}
-
-	private void dcTimerEnd(Member m) {
-		if (m.getOnlineStatus().equals(OnlineStatus.OFFLINE) && qm.isPlayerInQueue(m)) {
-			qm.purgeQueue(m);
-			qm.updateTopic();
+	public void dcTimerEnd(Member member) {
+		if (member.getOnlineStatus().equals(OnlineStatus.OFFLINE)) {
+			queueManager.purgeQueue(member);
+			queueManager.updateTopic();
 
 			String msg = String.format("%s has been removed from all queues after being offline for %s minutes",
-					m.getEffectiveName(), settingsManager.getDCTimeout());
+					member.getEffectiveName(), settingsManager.getDCTimeout());
 
 			getPugChannel().sendMessage(Utils.createMessage("", msg, false)).queue();
+			disconnectList.remove(member);
 		}
 	}
 
 	public void updateActivityList(Member m) {
-		if (qm.isPlayerInQueue(m) || qm.hasPlayerJustFinished(m)) {
+		if (queueManager.isPlayerInQueue(m) || queueManager.hasPlayerJustFinished(m)) {
 			activityList.put(m, System.currentTimeMillis());
 		} else if (activityList.containsKey(m)) {
 			activityList.remove(m);
 		}
 	}
 
-	public void playerDisconnect(Member m) {
-		if (qm.isPlayerInQueue(m) || qm.hasPlayerJustFinished(m)) {
-			startDcTimer(m);
+	public void playerDisconnect(Member member) {
+		if (queueManager.isPlayerInQueue(member) || queueManager.hasPlayerJustFinished(member)) {
+			DCTimer timer = new DCTimer(this, member);
+			
+			if(disconnectList.containsKey(member)){
+				disconnectList.get(member).interrupt();
+			}
+			
+			disconnectList.put(member, timer);
+			timer.start();
 		}
 	}
 
