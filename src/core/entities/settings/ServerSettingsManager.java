@@ -31,9 +31,8 @@ public class ServerSettingsManager extends SettingManager {
 		return (int)getSetting("QueueFinishTimer").getValue();
 	}
 
-	@SuppressWarnings("rawtypes")
 	@Override
-	protected void save(Setting setting) {
+	protected void save(Setting<?> setting) {
 		Database.updateServerSetting(getServer().getId(), setting.getName(), setting.getSaveString());
 	}
 }

@@ -635,7 +635,7 @@ public class Database {
 			manager.addSetting(new SettingDCTimeout(rs.getInt(2)));
 			manager.addSetting(new SettingPUGChannel(channel));
 			manager.addSetting(new SettingQueueFinishTimer(rs.getInt(4)));
-			manager.addSetting(new SettingCreateTeamVoiceChannels(rs.getBoolean(5)));
+			manager.addSetting(new SettingCreateTeamVoiceChannels(Boolean.valueOf(rs.getString(5))));
 			
 			rs.close();
 		}catch(SQLException ex){

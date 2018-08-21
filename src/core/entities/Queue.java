@@ -1,20 +1,15 @@
 package core.entities;
 
-import java.awt.Color;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
-import java.util.concurrent.TimeUnit;
 
-import core.util.Utils;
 import core.Database;
 import core.entities.settings.QueueSettingsManager;
 import core.util.Trigger;
 import net.dv8tion.jda.core.OnlineStatus;
 import net.dv8tion.jda.core.entities.Member;
-import net.dv8tion.jda.core.entities.PrivateChannel;
-import net.dv8tion.jda.core.entities.TextChannel;
 
 public class Queue {
 	private Integer maxPlayers;
@@ -141,40 +136,13 @@ public class Queue {
 	 * Sends notification to the pug channel and to each player in queue.
 	 */
 	private void popQueue() {
-		String names = "";
 		List<Member> players = new ArrayList<Member>(playersInQueue);
-		TextChannel pugChannel = ServerManager.getServer(manager.getServerId()).getPugChannel();
-		
-		// Send alert to players and compile their names
-		for(Member m : players){
-			names += m.getEffectiveName() + ", ";
-			try{
-				PrivateChannel c = m.getUser().openPrivateChannel().complete();
-				c.sendMessage(String.format("`Your game: %s has started!`", name)).queue();
-			}catch(Exception ex){
-				System.out.println("Error sending private message.\n" + ex.getMessage());
-			}
-		}
-		names = names.substring(0, names.lastIndexOf(","));
 		
 		// Create Game and add to the list of active games
-		Game newGame = new Game(this, manager.getServerId(), players);
-		games.add(newGame);
-		
-		// Remove players from all other queues
+		games.add(new Game(this, manager.getServerId(), players));
+
 		ServerManager.getServer(manager.getServerId()).getQueueManager().purgeQueue(players);
 		Database.deletePlayersInQueueFromQueue(manager.getServerId(), id);
-		
-		// Generate captain string
-		String captainString = String.format("**Captains:** <@%s> & <@%s>", newGame.getCaptain1().getUser().getId(), newGame.getCaptain2().getUser().getId());
-		
-		// Send game start message to pug channel
-		pugChannel.sendMessage(Utils.createMessage(String.format("Game: %s starting%n", name), String.format("%s%n%s", names, captainString), Color.YELLOW)).queueAfter(2, TimeUnit.SECONDS);
-		
-		/*String servers = new CmdPugServers().getServers(guildId, null);
-		if(!servers.equals("N/A")){
-			pugChannel.sendMessage(Utils.createMessage("`Pug servers:`", servers, true)).queueAfter(2, TimeUnit.SECONDS);
-		}*/
 	}
 
 	/**

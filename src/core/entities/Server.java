@@ -2,6 +2,7 @@ package core.entities;
 
 import java.util.HashMap;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import core.util.Utils;
 import core.Constants;
@@ -23,7 +24,7 @@ public class Server {
 	private Guild guild;
 	private ServerSettingsManager settingsManager;
 	private QueueManager qm;
-	private HashMap<Member, Long> activityList = new HashMap<Member, Long>();
+	private ConcurrentHashMap<Member, Long> activityList = new ConcurrentHashMap<Member, Long>();
 	private java.util.Queue<Message> messageCache = new java.util.LinkedList<Message>();
 	private Set<Long> banList;
 	private Set<Long> adminList;

@@ -5,21 +5,20 @@ import java.util.HashMap;
 import core.entities.Server;
 import core.exceptions.InvalidUseException;
 
-@SuppressWarnings("rawtypes")
 public abstract class SettingManager {
 	
 	private Server server;
-	private HashMap<String, Setting> settingMap = new HashMap<String, Setting>();
+	private HashMap<String, Setting<?>> settingMap = new HashMap<String, Setting<?>>();
 	
 	public SettingManager(Server server){
 		this.server = server;
 	}
 	
-	public Setting getSetting(String settingName){
+	public Setting<?> getSetting(String settingName){
 		return settingMap.get(settingName.toLowerCase());
 	}
 	
-	public void addSetting(Setting setting){
+	public void addSetting(Setting<?> setting){
 		setting.setManager(this);
 		settingMap.put(setting.getName().toLowerCase(), setting);
 	}
@@ -30,7 +29,7 @@ public abstract class SettingManager {
 		if(!settingMap.containsKey(settingName)){
 			throw new InvalidUseException(String.format("Setting '%s' does not exist", settingName));
 		}
-		Setting setting = settingMap.get(settingName);
+		Setting<?> setting = settingMap.get(settingName);
 		
 		setting.set(args);
 		save(setting);		
@@ -51,5 +50,5 @@ public abstract class SettingManager {
 		return builder.toString();
 	}
 	
-	protected abstract void save(Setting setting);
+	protected abstract void save(Setting<?> setting);
 }

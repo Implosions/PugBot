@@ -28,12 +28,11 @@ public class QueueSettingsManager extends SettingManager {
 	}
 	
 	public Category getVoiceChannelCategory(){
-		return (Category)getSetting("MinGamesPlayedToCaptain").getValue();
+		return (Category)getSetting("VoiceChannelCategory").getValue();
 	}
 
-	@SuppressWarnings("rawtypes")
 	@Override
-	protected void save(Setting setting) {
+	protected void save(Setting<?> setting) {
 		Database.updateQueueSetting(getServer().getId(), queue.getId(), setting.getName(), setting.getSaveString());
 	}
 }
