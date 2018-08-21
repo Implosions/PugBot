@@ -317,7 +317,7 @@ public class Game {
 				try{
 					PrivateChannel pc = m.getUser().openPrivateChannel().complete();
 					
-					pc.sendMessage(dm);
+					pc.sendMessage(dm).queue();
 				}catch(Exception ex){
 					System.out.println("Error sending private message.\n" + ex.getMessage());
 				}

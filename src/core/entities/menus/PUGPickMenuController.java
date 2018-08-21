@@ -54,11 +54,15 @@ public class PUGPickMenuController extends MenuController<PUGTeam>{
 	
 	@Override
 	protected boolean checkCondition() {
-		return playerPool.size() != 0;
+		return playerPool.size() > 1;
 	}
 
 	@Override
 	protected void complete() {
+		if(playerPool.size() == 1){
+			autoassignLastPick();
+		}
+		
 		manager1.complete();
 		manager2.complete();
 	}
@@ -147,5 +151,13 @@ public class PUGPickMenuController extends MenuController<PUGTeam>{
 		}
 		
 		return pickIterator.next();
+	}
+	
+	private void autoassignLastPick(){
+		PUGTeam team = manager1.isPicking() ? manager1 : manager2;
+		
+		team.addPlayer(playerPool.get(0));
+		playerPool.clear();
+		generatePages();
 	}
 }

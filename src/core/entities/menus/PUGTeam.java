@@ -65,6 +65,10 @@ public class PUGTeam extends MenuManager<PUGPickMenuController, PUGPickMenu> {
 		return players.get(players.size() - 1);
 	}
 	
+	protected void addPlayer(Member player){
+		players.add(player);
+	}
+	
 	@Override
 	public String toString(){
 		StringBuilder builder = new StringBuilder();
