@@ -155,6 +155,15 @@ public class Database {
 					+ "FOREIGN KEY (serverId) REFERENCES DiscordServer(id)"
 					+ ")");
 			
+			statement.executeUpdate("CREATE TABLE IF NOT EXISTS "
+					+ "RPSGame("
+					+ "timestamp INTEGER NOT NULL, "
+					+ "playerId INTEGER NOT NULL, "
+					+ "result INTEGER, "
+					+ "PRIMARY KEY (timestamp, playerId), "
+					+ "FOREIGN KEY (playerId) REFERENCES Player(id)"
+					+ ")");
+			
 		}catch(Exception ex){
 			ex.printStackTrace();
 		}
@@ -1013,5 +1022,168 @@ public class Database {
 		}
 		
 		return dict;
+	}
+	
+	public static void insertRPSGame(long timestamp, long playerId, int result){
+		try{
+			PreparedStatement pStatement = conn.prepareStatement(
+					  "INSERT OR IGNORE INTO RPSGame "
+					+ "(timestamp, playerId, result)"
+					+ "VALUES(?, ?, ?)");
+			pStatement.setLong(1, timestamp);
+			pStatement.setLong(2, playerId);
+			pStatement.setInt(3, result);
+			
+			pStatement.executeUpdate();
+		}catch(SQLException ex){
+			ex.printStackTrace();
+		}
+	}
+	
+	public static int queryGetServerTotalGames(long serverId, long timeframe){
+		int result = 0;
+		
+		try{
+			PreparedStatement pStatement = conn.prepareStatement(
+					  "SELECT count(timestamp) "
+					+ "FROM Game WHERE serverId = ? "
+					+ "AND timestamp >= ?");
+			
+			pStatement.setLong(1, serverId);
+			pStatement.setLong(2, timeframe);
+			
+			ResultSet rs = pStatement.executeQuery();
+			result = rs.getInt(1);
+			
+			rs.close();
+		}catch(SQLException ex){
+			ex.printStackTrace();
+		}
+		
+		return result;
+	}
+	
+	public static int queryGetServerUniquePlayerCount(long serverId, long timeframe){
+		int result = 0;
+		
+		try{
+			PreparedStatement pStatement = conn.prepareStatement(
+					  "SELECT count(DISTINCT playerId) "
+					+ "FROM PlayerGame WHERE serverId = ? "
+					+ "AND timestamp >= ?");
+			
+			pStatement.setLong(1, serverId);
+			pStatement.setLong(2, timeframe);
+			
+			ResultSet rs = pStatement.executeQuery();
+			result = rs.getInt(1);
+			
+			rs.close();
+		}catch(SQLException ex){
+			ex.printStackTrace();
+		}
+		
+		return result;
+	}
+	
+	public static int queryGetPlayerTotalCompletedGames(long serverId, long playerId){
+		int result = 0;
+		
+		try{
+			PreparedStatement pStatement = conn.prepareStatement(
+					  "SELECT count(playerId) "
+					+ "FROM PlayerGame JOIN Game ON PlayerGame.timestamp = Game.timestamp "
+					+ "WHERE Game.serverId = ? "
+					+ "AND playerId = ? "
+					+ "AND completion_timestamp > 0");
+			
+			pStatement.setLong(1, serverId);
+			pStatement.setLong(2, playerId);
+			
+			ResultSet rs = pStatement.executeQuery();
+			result = rs.getInt(1);
+			
+			rs.close();
+		}catch(SQLException ex){
+			ex.printStackTrace();
+		}
+		
+		return result;
+	}
+	
+	public static int queryGetPlayerTotalWins(long serverId, long playerId){
+		int result = 0;
+		
+		try{
+			PreparedStatement pStatement = conn.prepareStatement(
+					  "SELECT count(winning_team) "
+					+ "FROM PlayerGame JOIN Game ON PlayerGame.timestamp = Game.timestamp "
+					+ "WHERE Game.serverId = ? "
+					+ "AND playerId = ? "
+					+ "AND completion_timestamp > 0 "
+					+ "AND winning_team = team");
+			
+			pStatement.setLong(1, serverId);
+			pStatement.setLong(2, playerId);
+			
+			ResultSet rs = pStatement.executeQuery();
+			result = rs.getInt(1);
+			
+			rs.close();
+		}catch(SQLException ex){
+			ex.printStackTrace();
+		}
+		
+		return result;
+	}
+	
+	public static int queryGetPlayerTotalLosses(long serverId, long playerId){
+		int result = 0;
+		
+		try{
+			PreparedStatement pStatement = conn.prepareStatement(
+					  "SELECT count(team) "
+					+ "FROM PlayerGame JOIN Game ON PlayerGame.timestamp = Game.timestamp "
+					+ "WHERE Game.serverId = ? "
+					+ "AND playerId = ? "
+					+ "AND completion_timestamp > 0 "
+					+ "AND NOT winning_team = team");
+			
+			pStatement.setLong(1, serverId);
+			pStatement.setLong(2, playerId);
+			
+			ResultSet rs = pStatement.executeQuery();
+			result = rs.getInt(1);
+			
+			rs.close();
+		}catch(SQLException ex){
+			ex.printStackTrace();
+		}
+		
+		return result;
+	}
+	
+	public static int queryGetPlayerAvgPickPosition(long serverId, long playerId){
+		int result = 0;
+		
+		try{
+			PreparedStatement pStatement = conn.prepareStatement(
+					  "SELECT (sum(pickOrder) / count(pickOrder)) "
+					+ "FROM PlayerGame "
+					+ "WHERE serverId = ? "
+					+ "AND playerId = ?");
+			
+			pStatement.setLong(1, serverId);
+			pStatement.setLong(2, playerId);
+			
+			ResultSet rs = pStatement.executeQuery();
+			result = rs.getInt(1);
+			
+			rs.close();
+		}catch(SQLException ex){
+			ex.printStackTrace();
+		}
+		
+		return result;
 	}
 }

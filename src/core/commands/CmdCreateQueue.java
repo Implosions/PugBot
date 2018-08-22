@@ -52,8 +52,8 @@ public class CmdCreateQueue extends Command {
 		long timestamp = System.currentTimeMillis();
 		
 		Database.insertQueue(server.getId(), timestamp, queueName, playerCount);
-		Queue queue = new Queue(queueName, playerCount, timestamp, qm);
-		qm.addQueue(queue);
+
+		qm.addQueue(new Queue(queueName, playerCount, timestamp, qm));
 		qm.updateTopic();
 
 		return response;

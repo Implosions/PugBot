@@ -146,6 +146,10 @@ public class Constants {
 	public final static String FINISHGAME_HELP = "!finishgame <win/loss/tie>";
 	public final static String FINISHGAME_DESC = "Completes a game and records the result";
 	
+	public final static String STATS_NAME = "stats";
+	public final static String STATS_HELP = "!stats | !stats <name>";
+	public final static String STATS_DESC = "Posts general stats";
+	
 	public static class Emoji {
 		public final static String CHECKMARK = "\u2705";
 		public final static String PUNCH = "\uD83D\uDC4A";

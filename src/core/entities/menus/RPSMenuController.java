@@ -3,6 +3,7 @@ package core.entities.menus;
 import java.util.Arrays;
 
 import core.Constants;
+import core.Database;
 import net.dv8tion.jda.core.entities.Member;
 
 public class RPSMenuController extends MenuController<RPSTeam> {
@@ -60,6 +61,9 @@ public class RPSMenuController extends MenuController<RPSTeam> {
 
 	@Override
 	protected void complete() {
+		Long timestamp = System.currentTimeMillis();
+		Member loser;
+		
 		if (winner == manager1.getOwner()) {
 			manager1.getMenu().updateWin();
 
@@ -68,6 +72,8 @@ public class RPSMenuController extends MenuController<RPSTeam> {
 			} else {
 				manager2.getMenu().updateLoss();
 			}
+			
+			loser = manager2.getOwner();
 		} else {
 			manager2.getMenu().updateWin();
 
@@ -76,10 +82,15 @@ public class RPSMenuController extends MenuController<RPSTeam> {
 			} else {
 				manager1.getMenu().updateLoss();
 			}
+			
+			loser = manager1.getOwner();
 		}
 
 		manager1.complete();
 		manager2.complete();
+		
+		Database.insertRPSGame(timestamp, winner.getUser().getIdLong(), 1);
+		Database.insertRPSGame(timestamp, loser.getUser().getIdLong(), 0);
 	}
 
 	public Member determineWinner(RPSTeam t1, RPSTeam t2) {

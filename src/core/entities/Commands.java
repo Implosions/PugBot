@@ -54,6 +54,7 @@ public class Commands {
 		cmdList.put(Constants.JOINGROUP_NAME, new CmdJoinGroup(server));
 		cmdList.put(Constants.LEAVEGROUP_NAME, new CmdLeaveGroup(server));
 		cmdList.put(Constants.FINISHGAME_NAME, new CmdFinishGame(server));
+		cmdList.put(Constants.STATS_NAME, new CmdStats(server));
 		
 		populateLists();	
 		loadCustomCommands(server.getId());
