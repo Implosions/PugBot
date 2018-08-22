@@ -85,7 +85,7 @@ public class Database {
 					+ "serverId INTEGER NOT NULL, "
 					+ "completion_timestamp INTEGER, "
 					+ "winning_team INTEGER, "
-					+ "PRIMARY KEY (timestamp, queueId, serverId), "
+					+ "PRIMARY KEY (timestamp, serverId), "
 					+ "FOREIGN KEY (serverId) REFERENCES Queue(serverId)"
 					+ "FOREIGN KEY (queueId) REFERENCES Queue(id)"
 					+ ")");
@@ -172,7 +172,7 @@ public class Database {
 			pStatement.setLong(1, id);
 			pStatement.setString(2, name);
 			
-			pStatement.execute();
+			pStatement.executeUpdate();
 		}catch(SQLException ex){
 			ex.printStackTrace();
 		}
@@ -190,34 +190,10 @@ public class Database {
 			pStatement.setLong(1, id);
 			pStatement.setString(2, name);
 			
-			pStatement.execute();
+			pStatement.executeUpdate();
 		}catch(SQLException ex){
 			ex.printStackTrace();
 		}
-	}
-	
-	/**
-	 * The count of queues stored for a server
-	 * 
-	 * @param serverId The id of the server
-	 * @return The number of queues saved for a server
-	 */
-	public static int getQueueCount(long serverId){
-		int count = 0;
-		
-		try{
-			PreparedStatement pStatement = conn.prepareStatement("SELECT count(id) FROM Queue WHERE serverId = ?");
-			pStatement.setLong(1, serverId);
-			
-			
-			ResultSet rs = pStatement.executeQuery();
-			count = rs.getInt(1);
-			
-			rs.close();
-		}catch(SQLException ex){
-			ex.printStackTrace();
-		}
-		return count;
 	}
 	
 	/**
@@ -227,20 +203,20 @@ public class Database {
 	 * @param name the name of the queue
 	 * @return The id of the queue created
 	 */
-	public static int insertQueue(long serverId, String name, int maxPlayers){
-		int id = getQueueCount(serverId);
+	public static void insertQueue(long serverId, long queueId, String name, int maxPlayers){
 		try{
-			PreparedStatement pStatement = conn.prepareStatement("INSERT OR IGNORE INTO Queue(serverId, id, name, maxPlayers) VALUES(?, ?, ?, ?)");
+			PreparedStatement pStatement = conn.prepareStatement(
+					"INSERT OR IGNORE INTO Queue(serverId, id, name, maxPlayers) VALUES(?, ?, ?, ?)");
+			
 			pStatement.setLong(1, serverId);
-			pStatement.setInt(2, id);
+			pStatement.setLong(2, queueId);
 			pStatement.setString(3, name);
 			pStatement.setInt(4, maxPlayers);
 			
-			pStatement.execute();
+			pStatement.executeUpdate();
 		}catch(SQLException ex){
 			ex.printStackTrace();
 		}
-		return id;
 	}
 	
 	/**
@@ -250,23 +226,23 @@ public class Database {
 	 * @param queueName the name of the queue
 	 * @param serverId the server id
 	 */
-	public static void insertGame(long timestamp, int queueId, long serverId){
+	public static void insertGame(long timestamp, long queueId, long serverId){
 		try{
 			PreparedStatement pStatement = conn.prepareStatement(
 					  "INSERT OR IGNORE INTO Game "
 					+ "(timestamp, queueId, serverId)"
 					+ "VALUES(?, ?, ?)");
 			pStatement.setLong(1, timestamp);
-			pStatement.setInt(2, queueId);
+			pStatement.setLong(2, queueId);
 			pStatement.setLong(3, serverId);
 			
-			pStatement.execute();
+			pStatement.executeUpdate();
 		}catch(SQLException ex){
 			ex.printStackTrace();
 		}
 	}
 	
-	public static void updateGameInfo(long timestamp, int queueId, long serverId, long finishTime, int winningTeam){
+	public static void updateGameInfo(long timestamp, long queueId, long serverId, long finishTime, int winningTeam){
 		try{
 			PreparedStatement pStatement = conn.prepareStatement(
 					  "UPDATE Game "
@@ -278,10 +254,10 @@ public class Database {
 			pStatement.setLong(1, finishTime);
 			pStatement.setInt(2, winningTeam);
 			pStatement.setLong(3, timestamp);
-			pStatement.setInt(4, queueId);
+			pStatement.setLong(4, queueId);
 			pStatement.setLong(5, serverId);
 			
-			pStatement.execute();
+			pStatement.executeUpdate();
 		}catch(SQLException ex){
 			ex.printStackTrace();
 		}
@@ -300,7 +276,7 @@ public class Database {
 			pStatement.setInt(4, pickOrder);
 			pStatement.setInt(5, team);
 			
-			pStatement.execute();
+			pStatement.executeUpdate();
 		}catch(SQLException ex){
 			ex.printStackTrace();
 		}
@@ -318,7 +294,7 @@ public class Database {
 			pStatement.setLong(3, serverId);
 			pStatement.setInt(4, team);
 			
-			pStatement.execute();
+			pStatement.executeUpdate();
 		}catch(SQLException ex){
 			ex.printStackTrace();
 		}
@@ -418,7 +394,7 @@ public class Database {
 			pStatement.setInt(3, 0);
 			pStatement.setInt(4, 0);
 			
-			pStatement.execute();
+			pStatement.executeUpdate();
 		}catch(SQLException ex){
 			ex.printStackTrace();
 		}
@@ -499,7 +475,7 @@ public class Database {
 			pStatement.setLong(2, serverId);
 			pStatement.setLong(3, playerId);
 			
-			pStatement.execute();
+			pStatement.executeUpdate();
 		}catch(SQLException ex){
 			ex.printStackTrace();
 		}
@@ -526,7 +502,7 @@ public class Database {
 			pStatement.setLong(2, serverId);
 			pStatement.setLong(3, playerId);
 			
-			pStatement.execute();
+			pStatement.executeUpdate();
 		}catch(SQLException ex){
 			ex.printStackTrace();
 		}
@@ -537,14 +513,14 @@ public class Database {
 	 * @param name The name of the command
 	 * @param message The output of the command
 	 */
-	public static void insertServerCustomCommand(Long serverId, String name, String message){
+	public static void insertServerCustomCommand(long serverId, String name, String message){
 		try{
 			PreparedStatement pStatement = conn.prepareStatement("INSERT INTO ServerCustomCommand VALUES(?, ?, ?)");
 			pStatement.setLong(1, serverId);
 			pStatement.setString(2, name);
 			pStatement.setString(3, message);
 			
-			pStatement.execute();
+			pStatement.executeUpdate();
 		}catch(SQLException ex){
 			ex.printStackTrace();
 		}
@@ -568,8 +544,8 @@ public class Database {
 				
 				cmds.add(new CustomCommand(name, message));
 			}
-			rs.close();
 			
+			rs.close();
 		}catch(SQLException ex){
 			ex.printStackTrace();
 		}
@@ -586,7 +562,7 @@ public class Database {
 			pStatement.setLong(1, serverId);
 			pStatement.setString(2, name);
 			
-			pStatement.execute();
+			pStatement.executeUpdate();
 		}catch(SQLException ex){
 			ex.printStackTrace();
 		}
@@ -605,6 +581,7 @@ public class Database {
 					+ "setting_QueueFinishTimer, "
 					+ "setting_createTeamVoiceChannels "
 					+ "FROM DiscordServer WHERE id = ?");
+			
 			pStatement.setLong(1, manager.getServer().getId());
 			
 			ResultSet rs = pStatement.executeQuery();
@@ -634,8 +611,9 @@ public class Database {
 					+ "setting_PickPattern, "
 					+ "setting_VoiceChannelCategory "
 					+ "FROM Queue WHERE serverId = ? AND id = ?");
+			
 			pStatement.setLong(1, manager.getServer().getId());
-			pStatement.setInt(2, manager.getParentQueue().getId());
+			pStatement.setLong(2, manager.getParentQueue().getId());
 			
 			ResultSet rs = pStatement.executeQuery();
 			Category category = manager.getServer().getGuild().getCategoryById(rs.getLong(3));
@@ -678,13 +656,13 @@ public class Database {
 	 * @param setting The setting to update
 	 * @param value The new value of the setting
 	 */
-	public static void updateQueueSetting(long serverId, int queueId, String setting, String value){
+	public static void updateQueueSetting(long serverId, long queueId, String setting, String value){
 		try{
 			PreparedStatement pStatement = conn.prepareStatement(
 					String.format("UPDATE Queue SET setting_%s = ? WHERE serverId = ? AND id = ?", setting));
 			pStatement.setString(1, value);
 			pStatement.setLong(2, serverId);
-			pStatement.setInt(3, queueId);
+			pStatement.setLong(3, queueId);
 			
 			pStatement.executeUpdate();
 		}catch(SQLException ex){
@@ -698,7 +676,7 @@ public class Database {
 	 */
 	public static void loadServerQueues(QueueManager qm){
 		long serverId = qm.getServerId();
-		
+
 		try{
 			PreparedStatement pStatement = conn.prepareStatement("SELECT id, name, maxPlayers "
 					+ "FROM Queue WHERE serverId = ? AND active = 1 ORDER BY id");
@@ -707,7 +685,7 @@ public class Database {
 			ResultSet rs = pStatement.executeQuery();
 			
 			while(rs.next()){
-				Queue q = new Queue(rs.getString(2), rs.getInt(3), rs.getInt(1), qm);
+				Queue q = new Queue(rs.getString(2), rs.getInt(3), rs.getLong(1), qm);
 				
 				for(Member player : getPlayersInQueue(serverId, q.getId())){
 					q.addPlayerToQueueDirectly(player);
@@ -716,6 +694,7 @@ public class Database {
 				fillQueueNotifications(serverId, q.getId(), q);
 				qm.addQueue(q);
 			}
+			
 			rs.close();
 		}catch(SQLException ex){
 			ex.printStackTrace();
@@ -729,11 +708,11 @@ public class Database {
 	 * @param queueId The id of the queue
 	 * @param playerId The id of the player
 	 */
-	public static void insertPlayerInQueue(long serverId, int queueId, long playerId){
+	public static void insertPlayerInQueue(long serverId, long queueId, long playerId){
 		try{
 			PreparedStatement pStatement = conn.prepareStatement("INSERT OR IGNORE INTO PlayerInQueue VALUES(?, ?, ?)");
 			pStatement.setLong(1, serverId);
-			pStatement.setInt(2, queueId);
+			pStatement.setLong(2, queueId);
 			pStatement.setLong(3, playerId);
 			
 			pStatement.executeUpdate();
@@ -749,12 +728,12 @@ public class Database {
 	 * @param queueId The id of the queue
 	 * @param playerId The id of the player
 	 */
-	public static void deletePlayerInQueue(long serverId, int queueId, long playerId){
+	public static void deletePlayerInQueue(long serverId, long queueId, long playerId){
 		try{
 			PreparedStatement pStatement = conn.prepareStatement("DELETE FROM PlayerInQueue "
 					+ "WHERE serverId = ? AND queueId = ? AND playerId = ?");
 			pStatement.setLong(1, serverId);
-			pStatement.setInt(2, queueId);
+			pStatement.setLong(2, queueId);
 			pStatement.setLong(3, playerId);
 			
 			pStatement.executeUpdate();
@@ -769,14 +748,14 @@ public class Database {
 	 * @param serverId The id of the server
 	 * @param queueId The id of the queue
 	 */
-	public static void deletePlayersInQueueFromQueue(long serverId, int queueId){
+	public static void deletePlayersInQueueFromQueue(long serverId, long queueId){
 		try{
 			PreparedStatement pStatement = conn.prepareStatement("DELETE FROM PlayerInQueue "
 					+ "WHERE serverId = ? AND playerId IN("
 					+ "SELECT playerId FROM PlayerInQueue WHERE serverId = ? AND queueId = ?)");
 			pStatement.setLong(1, serverId);
 			pStatement.setLong(2, serverId);
-			pStatement.setInt(3, queueId);
+			pStatement.setLong(3, queueId);
 			
 			pStatement.executeUpdate();
 		}catch(SQLException ex){
@@ -808,13 +787,13 @@ public class Database {
 	 * @param queueId The id of the player
 	 * @return A list of users that are in a specified queue
 	 */
-	public static List<Member> getPlayersInQueue(long serverId, int queueId){
+	public static List<Member> getPlayersInQueue(long serverId, long queueId){
 		List<Member> playerList = new ArrayList<Member>();
 		try{
 			PreparedStatement pStatement = conn.prepareStatement("SELECT playerId FROM PlayerInQueue "
 					+ "WHERE serverId = ? AND queueId = ?");
 			pStatement.setLong(1, serverId);
-			pStatement.setInt(2, queueId);
+			pStatement.setLong(2, queueId);
 			
 			ResultSet rs = pStatement.executeQuery();
 			Guild guild = ServerManager.getGuild(serverId);
@@ -836,12 +815,12 @@ public class Database {
 	 * @param serverId The id of the server
 	 * @param queueId The id of the queue
 	 */
-	public static void deactivateQueue(long serverId, int queueId){
+	public static void deactivateQueue(long serverId, long queueId){
 		try{
 			PreparedStatement pStatement = conn.prepareStatement("UPDATE Queue SET active = 0 "
 					+ "WHERE serverId = ? AND id = ?");
 			pStatement.setLong(1, serverId);
-			pStatement.setInt(2, queueId);
+			pStatement.setLong(2, queueId);
 			
 			pStatement.executeUpdate();
 		}catch(SQLException ex){
@@ -857,11 +836,11 @@ public class Database {
 	 * @param playerId The id of the player
 	 * @param playerCount The player count that the notification will trigger
 	 */
-	public static void insertQueueNotification(long serverId, int queueId, long playerId, int playerCount){
+	public static void insertQueueNotification(long serverId, long queueId, long playerId, int playerCount){
 		try{
 			PreparedStatement pStatement = conn.prepareStatement("INSERT OR IGNORE INTO QueueNotification VALUES(?, ?, ?, ?)");
 			pStatement.setLong(1, serverId);
-			pStatement.setInt(2, queueId);
+			pStatement.setLong(2, queueId);
 			pStatement.setLong(3, playerId);
 			pStatement.setInt(4, playerCount);
 			
@@ -878,12 +857,12 @@ public class Database {
 	 * @param queueId The id of the queue
 	 * @param playerId The id of the player
 	 */
-	public static void deleteQueueNotification(long serverId, int queueId, long playerId){
+	public static void deleteQueueNotification(long serverId, long queueId, long playerId){
 		try{
 			PreparedStatement pStatement = conn.prepareStatement("DELETE FROM QueueNotification "
 					+ "WHERE serverId = ? AND queueId = ? AND playerId = ?");
 			pStatement.setLong(1, serverId);
-			pStatement.setInt(2, queueId);
+			pStatement.setLong(2, queueId);
 			pStatement.setLong(3, playerId);
 			
 			pStatement.executeUpdate();
@@ -918,12 +897,12 @@ public class Database {
 	 * @param queueId The id of the queue
 	 * @param queue The queue to add notifications to
 	 */
-	public static void fillQueueNotifications(long serverId, int queueId, Queue queue){
+	public static void fillQueueNotifications(long serverId, long queueId, Queue queue){
 		try{
 			PreparedStatement pStatement = conn.prepareStatement("SELECT playerCount, playerId FROM QueueNotification "
 					+ "WHERE serverId = ? AND queueId = ? ORDER BY playerCount");
 			pStatement.setLong(1, serverId);
-			pStatement.setInt(2, queueId);
+			pStatement.setLong(2, queueId);
 			
 			ResultSet rs = pStatement.executeQuery();
 			
@@ -948,14 +927,14 @@ public class Database {
 	 * @param name The name of the queue
 	 * @param playerCount The maximum number of players
 	 */
-	public static void updateQueue(long serverId, int queueId, String name, int playerCount){
+	public static void updateQueue(long serverId, long queueId, String name, int playerCount){
 		try{
 			PreparedStatement pStatement = conn.prepareStatement("UPDATE Queue SET name = ?, maxPlayers = ? "
 					+ "WHERE serverId = ? AND id = ?");
 			pStatement.setString(1, name);
 			pStatement.setInt(2, playerCount);
 			pStatement.setLong(3, serverId);
-			pStatement.setInt(4, queueId);
+			pStatement.setLong(4, queueId);
 			
 			pStatement.executeUpdate();
 		}catch(SQLException ex){

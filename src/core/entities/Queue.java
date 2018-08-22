@@ -14,14 +14,14 @@ public class Queue {
 	private Integer maxPlayers;
 	private String name;
 	private QueueManager manager;
-	private int id;
+	private long id;
 	private List<Member> playersInQueue = new ArrayList<Member>();;
 	private List<Game> games = new ArrayList<Game>();;
 	private List<Member> waitlist = new ArrayList<Member>();
 	private HashMap<Integer, List<Member>> notifications = new HashMap<Integer, List<Member>>();
 	private QueueSettingsManager settingsManager;
 	
-	public Queue(String name, int maxPlayers, int id, QueueManager manager) {
+	public Queue(String name, int maxPlayers, long id, QueueManager manager) {
 		this.manager = manager;
 		this.name = name;
 		this.maxPlayers = maxPlayers;
@@ -296,7 +296,7 @@ public class Queue {
 		return notifications;
 	}
 	
-	public int getId(){
+	public long getId(){
 		return id;
 	}
 	

@@ -47,10 +47,11 @@ public class CmdCreateQueue extends Command {
 			throw new InvalidUseException("Max players must be greater than 1");
 		}
 
-		int queueId = Database.insertQueue(server.getId(), queueName, playerCount);
 		this.response = Utils.createMessage(String.format("`Queue %s created`", queueName));
 
-		qm.addQueue(new Queue(queueName, playerCount, queueId, qm));
+		Queue queue = new Queue(queueName, playerCount, System.currentTimeMillis(), qm);
+		qm.addQueue(queue);
+		Database.insertQueue(server.getId(), queue.getId(), queueName, playerCount);
 		qm.updateTopic();
 
 		return response;
