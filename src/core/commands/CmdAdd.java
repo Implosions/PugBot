@@ -1,5 +1,7 @@
 package core.commands;
 
+import java.util.List;
+
 import core.Constants;
 import core.entities.Queue;
 import core.entities.QueueManager;
@@ -31,38 +33,41 @@ public class CmdAdd extends Command {
 			throw new InvalidUseException("You are already in-game");
 		}
 
-		String queueMsg;
-
+		List<Queue> queueList;
+		
 		if (args.length == 0) {
-			for (Queue queue : qm.getQueueList()) {
-				queue.add(caller);
-			}
-
-			queueMsg = caller.getEffectiveName() + " added to all queues";
+			queueList = qm.getQueueList();
 		} else {
-			String queueNames = "";
-			for (Queue queue : qm.getListOfQueuesFromStringArgs(args)) {
-				queue.add(caller);
-				queueNames += queue.getName() + ", ";
-			}
+			queueList = qm.getListOfQueuesFromStringArgs(args);
 
-			if (queueNames.isEmpty()) {
+			if (queueList.isEmpty()) {
 				throw new InvalidUseException("No valid queues named");
 			}
-
-			queueNames = queueNames.substring(0, queueNames.length() - 2);
-			queueMsg = caller.getEffectiveName() + " added to " + queueNames;
 		}
-
+		
+		boolean justFinished = qm.hasPlayerJustFinished(caller);
+		StringBuilder stringBuilder = new StringBuilder(caller.getEffectiveName() + " added to: ");
+		
+		for(Queue queue : queueList){
+			stringBuilder.append(queue.getName() + ", ");
+			
+			if(justFinished){
+				queue.addToWaitList(caller);
+			}else{
+				queue.addToQueue(caller);
+			}
+		}
+		
+		stringBuilder.delete(stringBuilder.length() - 2, stringBuilder.length());
 		qm.updateTopic();
 
-		if (qm.hasPlayerJustFinished(caller)) {
-			this.response = Utils.createMessage(queueMsg,
-					String.format("Your game has just finished, you will be randomized into the queue after %d seconds",
-							server.getSettingsManager().getQueueFinishTimer()),
-					true);
+		if (justFinished) {
+			String s = String.format("Your game has just finished, you will be randomized into the queue in %d seconds",
+					qm.getWaitTimeRemaining(caller));
+			
+			this.response = Utils.createMessage(stringBuilder.toString(), s, true);
 		} else {
-			this.response = Utils.createMessage(queueMsg, qm.getHeader(), true);
+			this.response = Utils.createMessage(stringBuilder.toString(), qm.getHeader(), true);
 		}
 
 		return response;

@@ -7,7 +7,6 @@ import java.util.Random;
 
 import core.Database;
 import core.entities.settings.QueueSettingsManager;
-import core.util.Trigger;
 import net.dv8tion.jda.core.OnlineStatus;
 import net.dv8tion.jda.core.entities.Member;
 
@@ -18,9 +17,8 @@ public class Queue {
 	private int id;
 	private List<Member> playersInQueue = new ArrayList<Member>();;
 	private List<Game> games = new ArrayList<Game>();;
-	private List<Member> waitList = new ArrayList<Member>();
+	private List<Member> waitlist = new ArrayList<Member>();
 	private HashMap<Integer, List<Member>> notifications = new HashMap<Integer, List<Member>>();
-	private Trigger t;
 	private QueueSettingsManager settingsManager;
 	
 	public Queue(String name, int maxPlayers, int id, QueueManager manager) {
@@ -38,18 +36,14 @@ public class Queue {
 	 * 
 	 * @param player the player to be added
 	 */
-	public void add(Member player) {
-		if (!playersInQueue.contains(player) && !getManager().isPlayerIngame(player)) {
-			if(!getManager().hasPlayerJustFinished(player)){
-				playersInQueue.add(player);
-				Database.insertPlayerInQueue(manager.getServerId(), id, player.getUser().getIdLong());
-				checkNotifications();
+	public void addToQueue(Member player) {
+		if (!playersInQueue.contains(player)) {
+			playersInQueue.add(player);
+			Database.insertPlayerInQueue(manager.getServerId(), id, player.getUser().getIdLong());
+			checkNotifications();
 				
-				if (playersInQueue.size() == maxPlayers) {
-					popQueue();
-				}
-			}else{
-				addToWaitList(player);
+			if (playersInQueue.size() == maxPlayers) {
+				popQueue();
 			}
 		}
 	}
@@ -141,7 +135,7 @@ public class Queue {
 		// Create Game and add to the list of active games
 		games.add(new Game(this, manager.getServerId(), players));
 
-		ServerManager.getServer(manager.getServerId()).getQueueManager().purgeQueue(players);
+		manager.getServer().getQueueManager().purgeQueue(players);
 		Database.deletePlayersInQueueFromQueue(manager.getServerId(), id);
 	}
 
@@ -150,14 +144,10 @@ public class Queue {
 	 * 
 	 * @param g the game to finish
 	 */
-	public void finish(Game g) {
-		List<Member> players = new ArrayList<Member>(g.getPlayers());
-		ServerManager.getServer(manager.getServerId()).getQueueManager().addToJustFinished(players);
-		g.finish();
-		games.remove(g);
-		t = () -> ServerManager.getServer(manager.getServerId()).getQueueManager().timerEnd(players);
-		Timer timer = new Timer(ServerManager.getServer(manager.getServerId()).getSettingsManager().getQueueFinishTimer(), t);
-		timer.start();
+	public void finish(Game game) {
+		game.finish();
+		manager.addToJustFinished(game);
+		games.remove(game);
 	}
 
 	/**
@@ -169,8 +159,8 @@ public class Queue {
 		if(playersInQueue.contains(member)){
 			playersInQueue.remove(member);
 			Database.deletePlayerInQueue(manager.getServerId(), id, member.getUser().getIdLong());
-		}else if(waitList.contains(member)){
-			waitList.remove(member);
+		}else if(waitlist.contains(member)){
+			waitlist.remove(member);
 		}
 	}
 
@@ -181,7 +171,7 @@ public class Queue {
 	 */
 	public void purge(List<Member> players) {
 		for(Member player : players){
-			if(playersInQueue.contains(player) || waitList.contains(player)){
+			if(playersInQueue.contains(player) || waitlist.contains(player)){
 				delete(player);
 			}
 		}
@@ -203,36 +193,24 @@ public class Queue {
 	}
 
 	/**
-	 * Returns a Member object matching the provided name
-	 * 
-	 * @param name the name to match to a player
-	 * @return Member object matching the provided name, null if no matches
-	 */
-//	public Member getPlayer(String name) {
-//		for (Member u : playersInQueue) {
-//			if (u.getEffectiveName().equalsIgnoreCase(name)) {
-//				return u;
-//			}
-//		}
-//		return null;
-//	}
-
-	/**
 	 * Randomizes players waiting after finishing a game into queue
 	 * 
 	 * @param players the players to allow to add to queue
 	 */
 	public void addPlayersWaiting(List<Member> players) {
-		if(waitList.size() > 0){
+		if(waitlist.size() > 0){
 			Random random = new Random();
 			List<Member> playersToAdd = new ArrayList<Member>(players);
+			
 			while(playersToAdd.size() > 0){
 				Integer i = random.nextInt(playersToAdd.size());
 				Member player = playersToAdd.get(i);
-				if(waitList.contains(player)){
-					add(player);
-					waitList.remove(player);
+				
+				if(waitlist.contains(player)){
+					addToQueue(player);
+					waitlist.remove(player);
 				}
+				
 				playersToAdd.remove(player);
 			}
 		}
@@ -244,8 +222,8 @@ public class Queue {
 	 * @param player the player to add to the wait list
 	 */
 	public void addToWaitList(Member player){
-		if(!waitList.contains(player)){
-			waitList.add(player);
+		if(!waitlist.contains(player)){
+			waitlist.add(player);
 		}
 	}
 	
@@ -255,8 +233,8 @@ public class Queue {
 	 * @param player the player to check
 	 * @return true if the player is in the wait list
 	 */
-	public boolean isPlayerWaiting(Member player){
-		return waitList.contains(player);
+	public boolean isPlayerInWaitlist(Member player){
+		return waitlist.contains(player);
 	}
 
 	/**
@@ -329,7 +307,7 @@ public class Queue {
 		return id;
 	}
 	
-	private QueueManager getManager(){
+	public QueueManager getManager(){
 		return manager;
 	}
 	

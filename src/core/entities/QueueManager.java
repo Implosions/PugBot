@@ -1,15 +1,18 @@
 package core.entities;
 
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 
 import core.Database;
+import core.entities.timers.QueueFinishTimer;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.exceptions.PermissionException;
 
 public class QueueManager {
 	private List<Queue> queueList = new ArrayList<Queue>();
-	private List<Member> justFinished = new ArrayList<Member>();
+	private ConcurrentHashMap<Game, QueueFinishTimer> finishedGameMap = new ConcurrentHashMap<Game, QueueFinishTimer>();
 	private Server server;
 
 	public QueueManager(Server server) {
@@ -154,28 +157,37 @@ public class QueueManager {
 		return null;
 	}
 
-	/**
-	 * Adds a list of players to justFinished.
-	 * 
-	 * @param players the players to be added to the list
-	 */
-	public void addToJustFinished(List<Member> players) {
-		justFinished.addAll(players);
+	public void addToJustFinished(Game game) {
+		QueueFinishTimer timer = new QueueFinishTimer(this, game);
+		
+		finishedGameMap.put(game, timer);
+		timer.start();
 	}
 	
-	/**
-	 * Removes a List of players from justFinished after the finish timer ends and.
-	 * then adds them if they are waiting to join a queue.
-	 * 
-	 * @param players the players to be removed from justFinished and added to their respective queues
-	 */
-	public void timerEnd(List<Member> players) {
-		justFinished.removeAll(players);
+	public void queueFinishTimerEnd(Game game) {
+		finishedGameMap.remove(game);
+		
 		for (Queue q : queueList) {
-			q.addPlayersWaiting(players);
+			q.addPlayersWaiting(game.getPlayers());
 		}
-		System.out.println("Finish timer completed");
+
 		updateTopic();
+	}
+	
+	public int getWaitTimeRemaining(Member player){
+		Enumeration<Game> e = finishedGameMap.keys();
+		
+		while(e.hasMoreElements()){
+			Game game = e.nextElement();
+			
+			if(game.containsPlayer(player)){
+				QueueFinishTimer timer = finishedGameMap.get(game);
+				
+				return timer.getTimeRemaining();
+			}
+		}
+		
+		return 0;
 	}
 
 	/**
@@ -193,14 +205,18 @@ public class QueueManager {
 		return false;
 	}
 
-	/**
-	 * Returns boolean based on if the player has just finished a game or not.
-	 * 
-	 * @param player the player to check
-	 * @return true if the player has just finished, false if not
-	 */
 	public boolean hasPlayerJustFinished(Member player) {
-		return justFinished.contains(player);
+		Enumeration<Game> e = finishedGameMap.keys();
+		
+		while(e.hasMoreElements()){
+			Game game = e.nextElement();
+			
+			if(game.containsPlayer(player)){
+				return true;
+			}
+		}
+		
+		return false;
 	}
 
 	/**
@@ -291,7 +307,7 @@ public class QueueManager {
 	 */
 	public boolean isPlayerWaiting(Member player){
 		for(Queue q : queueList){
-			if(q.isPlayerWaiting(player)){
+			if(q.isPlayerInWaitlist(player)){
 				return true;
 			}
 		}
