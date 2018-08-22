@@ -157,7 +157,7 @@ public class QueueManager {
 		return null;
 	}
 
-	public void addToJustFinished(Game game) {
+	private void addToJustFinished(Game game) {
 		QueueFinishTimer timer = new QueueFinishTimer(this, game);
 		
 		finishedGameMap.put(game, timer);
@@ -320,5 +320,20 @@ public class QueueManager {
 				game.finish();
 			}
 		}
+	}
+	
+	public void finishGame(Game game, Integer winningTeam){
+		Queue queue = game.getParentQueue();
+		
+		queue.removeGame(game);
+		game.finish();
+		
+		if(winningTeam == null){
+			return;
+		}
+		
+		Database.updateGameInfo(game.getTimestamp(), queue.getId(), 
+				getServerId(), System.currentTimeMillis(), winningTeam);
+		addToJustFinished(game);
 	}
 }

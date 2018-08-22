@@ -138,15 +138,8 @@ public class Queue {
 		manager.getServer().getQueueManager().purgeQueue(players);
 		Database.deletePlayersInQueueFromQueue(manager.getServerId(), id);
 	}
-
-	/**
-	 * Ends game, adds players to justFinished list, starts finish timer
-	 * 
-	 * @param g the game to finish
-	 */
-	public void finish(Game game) {
-		game.finish();
-		manager.addToJustFinished(game);
+	
+	protected void removeGame(Game game){
 		games.remove(game);
 	}
 

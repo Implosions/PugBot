@@ -118,6 +118,10 @@ public class Game {
 		return parentQueue.getName();
 	}
 	
+	public Queue getParentQueue(){
+		return parentQueue;
+	}
+	
 	/**
 	 * @return the current status of this game
 	 */
@@ -167,9 +171,8 @@ public class Game {
 	private void pickingComplete(){
 		status = GameStatus.PLAYING;		
 		
+		insertCaptains();
 		insertPlayersInGame();
-		updateCaptains();
-		insertPickOrder();
 		createVoiceChannels();
 		postTeamsToPUGChannel();
 		
@@ -177,27 +180,19 @@ public class Game {
 	}
 	
 	private void insertPlayersInGame(){
-		for(Member m : players){
-			Database.insertPlayerGame(m.getUser().getIdLong(), timestamp, serverId);
+		List<Member> pickedPlayers = pickController.getPickedPlayers();
+		
+		for(int i = 0;i < pickedPlayers.size();i++){
+			Member player = pickedPlayers.get(i);
+			int team = pickController.getTeam(player);
+			
+			Database.insertPlayerGame(player.getUser().getIdLong(), timestamp, serverId, i+1, team);
 		}
 	}
 	
-	private void updateCaptains(){
-		if(captain1 != null && captain2 != null){
-			Database.updatePlayerGameCaptain(captain1.getUser().getIdLong(), timestamp, serverId, true);
-			Database.updatePlayerGameCaptain(captain2.getUser().getIdLong(), timestamp, serverId, true);
-		}
-	}
-	
-	private void insertPickOrder(){
-		if(pickController != null){
-			List<Member> picks = pickController.getPickedPlayers();
-			for(int i = 0; i < picks.size();i++){
-				Member player = picks.get(i);
-				
-				Database.updatePlayerGamePickOrder(player.getUser().getIdLong(), timestamp, serverId, i + 1);
-			}
-		}
+	private void insertCaptains(){
+		Database.insertPlayerGameCaptain(captain1.getUser().getIdLong(), timestamp, serverId, 1);
+		Database.insertPlayerGameCaptain(captain2.getUser().getIdLong(), timestamp, serverId, 2);
 	}
 	
 	private void postTeamsToPUGChannel(){
@@ -244,7 +239,7 @@ public class Game {
 		}
 	}
 	
-	public void finish(){
+	protected void finish(){
 		cancelMenus();
 		deleteVoiceChannels();
 		

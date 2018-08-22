@@ -160,4 +160,8 @@ public class PUGPickMenuController extends MenuController<PUGTeam>{
 		playerPool.clear();
 		generatePages();
 	}
+	
+	public int getTeam(Member player){
+		return manager1.getPlayers().contains(player) ? 1 : 2;
+	}
 }

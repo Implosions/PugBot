@@ -108,9 +108,11 @@ public class EventHandler extends ListenerAdapter {
 						}
 
 						try {
-							Message sentMsg = channel.sendMessage(response).complete();
+							if(response != null){
+								Message sentMsg = channel.sendMessage(response).complete();
 
-							cmdObj.setLastResponseId(sentMsg.getId());
+								cmdObj.setLastResponseId(sentMsg.getId());
+							}
 						} catch (Exception ex) {
 							System.out.println("Error sending message.\n" + ex.getMessage());
 						}

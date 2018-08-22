@@ -40,9 +40,7 @@ public class Database {
 			ex.printStackTrace();
 		}
 	}
-	/**
-	 * Creates database tables if they do not already exist
-	 */
+
 	private void createTables(){
 		try{
 			Statement statement = conn.createStatement();
@@ -85,6 +83,8 @@ public class Database {
 					+ "timestamp INTEGER NOT NULL, "
 					+ "queueId INTEGER NOT NULL, "
 					+ "serverId INTEGER NOT NULL, "
+					+ "completion_timestamp INTEGER, "
+					+ "winning_team INTEGER, "
 					+ "PRIMARY KEY (timestamp, queueId, serverId), "
 					+ "FOREIGN KEY (serverId) REFERENCES Queue(serverId)"
 					+ "FOREIGN KEY (queueId) REFERENCES Queue(id)"
@@ -97,23 +97,11 @@ public class Database {
 					+ "serverId INTEGER NOT NULL, "
 					+ "pickOrder INTEGER, "
 					+ "captain INTEGER DEFAULT 0, "
+					+ "team INTEGER, "
 					+ "PRIMARY KEY (playerId, timestamp, serverId), "
 					+ "FOREIGN KEY (playerId) REFERENCES Player(id), "
 					+ "FOREIGN KEY (serverId) REFERENCES Game(serverId), "
 					+ "FOREIGN KEY (timestamp) REFERENCES Game(timestamp)"
-					+ ")");
-			
-			statement.executeUpdate("CREATE TABLE IF NOT EXISTS "
-					+ "PugServer("
-					+ "serverId INTEGER NOT NULL, "
-					+ "ip VARCHAR(20) NOT NULL, "
-					+ "port INTEGER, "
-					+ "name VARCHAR(30), "
-					+ "password VARCHAR(30), "
-					+ "region VARCHAR(10), "
-					+ "gameId INTEGER NOT NULL, "
-					+ "PRIMARY KEY (ip, serverId), "
-					+ "FOREIGN KEY (serverId) REFERENCES DiscordServer(id)"
 					+ ")");
 			
 			statement.executeUpdate("CREATE TABLE IF NOT EXISTS "
@@ -264,8 +252,11 @@ public class Database {
 	 */
 	public static void insertGame(long timestamp, int queueId, long serverId){
 		try{
-			PreparedStatement pStatement = conn.prepareStatement("INSERT OR IGNORE INTO Game VALUES(?, ?, ?)");
-			pStatement.setLong(1, timestamp / 1000);
+			PreparedStatement pStatement = conn.prepareStatement(
+					  "INSERT OR IGNORE INTO Game "
+					+ "(timestamp, queueId, serverId)"
+					+ "VALUES(?, ?, ?)");
+			pStatement.setLong(1, timestamp);
 			pStatement.setInt(2, queueId);
 			pStatement.setLong(3, serverId);
 			
@@ -275,19 +266,39 @@ public class Database {
 		}
 	}
 	
-	/**
-	 * Inserts a new record into the PlayerGame table
-	 * 
-	 * @param playerId the id of the player
-	 * @param timestamp the time of the game start
-	 * @param serverId the id of the server
-	 */
-	public static void insertPlayerGame(Long playerId, Long timestamp, Long serverId){
+	public static void updateGameInfo(long timestamp, int queueId, long serverId, long finishTime, int winningTeam){
 		try{
-			PreparedStatement pStatement = conn.prepareStatement("INSERT OR IGNORE INTO PlayerGame (playerId, timestamp, serverId) VALUES(?, ?, ?)");
+			PreparedStatement pStatement = conn.prepareStatement(
+					  "UPDATE Game "
+					+ "SET completion_timestamp = ?, winning_team = ? "
+					+ "WHERE timestamp = ? "
+					+ "AND queueId = ? "
+					+ "AND serverId = ?");
+			
+			pStatement.setLong(1, finishTime);
+			pStatement.setInt(2, winningTeam);
+			pStatement.setLong(3, timestamp);
+			pStatement.setInt(4, queueId);
+			pStatement.setLong(5, serverId);
+			
+			pStatement.execute();
+		}catch(SQLException ex){
+			ex.printStackTrace();
+		}
+	}
+	
+	public static void insertPlayerGame(long playerId, long timestamp, long serverId, int pickOrder, int team){
+		try{
+			PreparedStatement pStatement = conn.prepareStatement(
+					  "INSERT OR IGNORE INTO PlayerGame "
+					+ "(playerId, timestamp, serverId, pickOrder, team) "
+					+ "VALUES(?, ?, ?, ?, ?)");
+			
 			pStatement.setLong(1, playerId);
-			pStatement.setLong(2, timestamp / 1000);
+			pStatement.setLong(2, timestamp);
 			pStatement.setLong(3, serverId);
+			pStatement.setInt(4, pickOrder);
+			pStatement.setInt(5, team);
 			
 			pStatement.execute();
 		}catch(SQLException ex){
@@ -295,50 +306,17 @@ public class Database {
 		}
 	}
 	
-	/**
-	 * Updates a PlayerGame record with a new pickOrder
-	 * 
-	 * @param playerId the id of the player
-	 * @param timestamp the time of the game start
-	 * @param serverId the id of the server
-	 * @param pickOrder the pick order of the player
-	 */
-	public static void updatePlayerGamePickOrder(Long playerId, Long timestamp, Long serverId, Integer pickOrder){
+	public static void insertPlayerGameCaptain(long playerId, long timestamp, long serverId, int team){
 		try{
-			PreparedStatement pStatement = conn.prepareStatement("UPDATE PlayerGame SET pickOrder = ? "
-					+ "WHERE playerId = ? AND timestamp = ? AND serverId = ?");
-			pStatement.setInt(1, pickOrder);
-			pStatement.setLong(2, playerId);
-			pStatement.setLong(3, timestamp / 1000);
-			pStatement.setLong(4, serverId);
+			PreparedStatement pStatement = conn.prepareStatement(
+					  "INSERT OR IGNORE INTO PlayerGame "
+					+ "(playerId, timestamp, serverId, captain, team) "
+					+ "VALUES(?, ?, ?, 1, ?)");
 			
-			pStatement.execute();
-		}catch(SQLException ex){
-			ex.printStackTrace();
-		}
-	}
-	
-	/**
-	 * Updates a record in PlayerGame with captain information
-	 * 
-	 * @param playerId the id of the player
-	 * @param timestamp the time of the game start
-	 * @param serverId the id of the server
-	 * @param captain true if the player is a captain
-	 */
-	public static void updatePlayerGameCaptain(Long playerId, Long timestamp, Long serverId, boolean captain){
-		Integer captainInt = 0;
-		if(captain){
-			captainInt = 1;
-		}
-		try{
-			PreparedStatement pStatement = conn.prepareStatement("UPDATE PlayerGame SET captain = ? "
-					+ "WHERE playerId = ? AND timestamp = ? AND serverId = ?");
-			
-			pStatement.setInt(1, captainInt);
-			pStatement.setLong(2, playerId);
-			pStatement.setLong(3, timestamp / 1000);
-			pStatement.setLong(4, serverId);
+			pStatement.setLong(1, playerId);
+			pStatement.setLong(2, timestamp);
+			pStatement.setLong(3, serverId);
+			pStatement.setInt(4, team);
 			
 			pStatement.execute();
 		}catch(SQLException ex){
@@ -350,7 +328,7 @@ public class Database {
 	 * @param playerId the id of the player
 	 * @return the number of games the player has participated in
 	 */
-	public static Integer queryGetTotalGamesPlayed(Long playerId){
+	public static int queryGetTotalGamesPlayed(long playerId){
 		try{
 			PreparedStatement pStatement = conn.prepareStatement("SELECT count(playerId) FROM PlayerGame "
 				+ "WHERE playerId = ?");
@@ -360,6 +338,7 @@ public class Database {
 		}catch(SQLException ex){
 			ex.printStackTrace();
 		}
+		
 		return 0;
 	}
 	

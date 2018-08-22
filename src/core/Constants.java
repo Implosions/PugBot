@@ -17,7 +17,7 @@ public class Constants {
 	public final static String ADD_DESC = "Adds player to the specified queue";
 	
 	public final static String FINISH_NAME = "finish";
-	public final static String FINISH_HELP = "!finish";
+	public final static String FINISH_HELP = "Deprecated, use !finishgame instead";
 	public final static String FINISH_DESC = "Completes a game so players can re-add";
 	
 	public final static String DEL_NAME = "del";
@@ -141,6 +141,10 @@ public class Constants {
 	public final static String LEAVEGROUP_NAME = "leavegroup";
 	public final static String LEAVEGROUP_HELP = "!leavegroup <name>";
 	public final static String LEAVEGROUP_DESC = "Leaves the specified group and removes the associated role";
+	
+	public final static String FINISHGAME_NAME = "finishgame";
+	public final static String FINISHGAME_HELP = "!finishgame <win/loss/tie>";
+	public final static String FINISHGAME_DESC = "Completes a game and records the result";
 	
 	public static class Emoji {
 		public final static String CHECKMARK = "\u2705";

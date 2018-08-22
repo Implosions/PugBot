@@ -1,11 +1,7 @@
 package core.commands;
 
 import core.Constants;
-import core.entities.Game;
-import core.entities.Queue;
-import core.entities.QueueManager;
 import core.entities.Server;
-import core.exceptions.InvalidUseException;
 import core.util.Utils;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.Message;
@@ -22,24 +18,11 @@ public class CmdFinish extends Command {
 
 	@Override
 	public Message execCommand(Member caller, String[] args) {
-		QueueManager qm = server.getQueueManager();
-
-		if (!qm.isPlayerIngame(caller)) {
-			throw new InvalidUseException("You are not in-game");
-		}
-
-		for (Queue queue : qm.getQueueList()) {
-			for (Game game : queue.getGames()) {
-				if (game.containsPlayer(caller)) {
-					this.response = Utils.createMessage(String.format("`Game '%s' finished`", game.getQueueName()));
-					
-					queue.finish(game);
-					qm.updateTopic();
-					
-					break;
-				}
-			}
-		}
+		
+		response = Utils.createMessage(
+				  "Deprecated command",
+				  "This command has been deprecated, use `finishgame` instead\n"
+				+ "See `!help finishgame` for more information", false);
 
 		return response;
 	}
