@@ -149,7 +149,7 @@ public class Server {
 	}
 
 	public boolean isAdmin(Member m) {
-		if (adminList.contains(m.getUser().getId()) || m.hasPermission(Permission.KICK_MEMBERS)
+		if (adminList.contains(m.getUser().getIdLong()) || m.hasPermission(Permission.KICK_MEMBERS)
 				|| m.getUser().getId().equals(Constants.OWNER_ID)) {
 			return true;
 		}
@@ -157,7 +157,7 @@ public class Server {
 	}
 
 	public boolean isBanned(Member m) {
-		return banList.contains(m.getUser().getId());
+		return banList.contains(m.getUser().getIdLong());
 	}
 
 	public Member getMember(String member) {
