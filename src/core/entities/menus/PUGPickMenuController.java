@@ -155,8 +155,10 @@ public class PUGPickMenuController extends MenuController<PUGTeam>{
 	
 	private void autoassignLastPick(){
 		PUGTeam team = manager1.isPicking() ? manager1 : manager2;
+		Member lastPlayer = playerPool.get(0);
 		
-		team.addPlayer(playerPool.get(0));
+		team.addPlayer(lastPlayer);
+		pickedPlayers.add(lastPlayer);
 		playerPool.clear();
 		generatePages();
 	}
