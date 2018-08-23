@@ -10,14 +10,15 @@ import net.dv8tion.jda.core.entities.Role;
 
 public class CmdLeaveGroup extends Command{
 
-	public CmdLeaveGroup(){
+	public CmdLeaveGroup(Server server){
 		this.name = Constants.LEAVEGROUP_NAME;
 		this.description = Constants.LEAVEGROUP_DESC;
 		this.helpMsg = Constants.LEAVEGROUP_HELP;
+		this.server = server;
 	}
 	
 	@Override
-	public Message execCommand(Server server, Member member, String[] args) {
+	public Message execCommand(Member caller, String[] args) {
 		if(args.length == 0){
 			throw new BadArgumentsException("No group specified");
 		}
@@ -25,9 +26,9 @@ public class CmdLeaveGroup extends Command{
 		String groupName = String.join(" ", args);
 		Role role = server.getGroup(groupName);
 		
-		server.getGuild().getController().removeSingleRoleFromMember(member, role).queue();
+		server.getGuild().getController().removeSingleRoleFromMember(caller, role).queue();
 		
-		response = Utils.createMessage(String.format("`%s left the group: %s`", member.getEffectiveName(), groupName));
+		response = Utils.createMessage(String.format("`%s left the group: %s`", caller.getEffectiveName(), groupName));
 		
 		return response;
 	}

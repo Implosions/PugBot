@@ -9,15 +9,16 @@ import net.dv8tion.jda.core.entities.Message;
 
 public class CmdDeleteGroup extends Command{
 
-	public CmdDeleteGroup(){
+	public CmdDeleteGroup(Server server){
 		this.name = Constants.DELETEGROUP_NAME;
 		this.description = Constants.DELETEGROUP_DESC;
 		this.helpMsg = Constants.DELETEGROUP_HELP;
 		this.adminRequired = true;
+		this.server = server;
 	}
 	
 	@Override
-	public Message execCommand(Server server, Member member, String[] args) {
+	public Message execCommand(Member caller, String[] args) {
 		if(args.length == 0){
 			throw new BadArgumentsException("Must specify at least one group name");
 		}

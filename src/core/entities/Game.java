@@ -1,79 +1,67 @@
 package core.entities;
 
+import java.awt.Color;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.TimeUnit;
 
 import core.Database;
-import core.entities.menus.RPSMenu;
-import core.entities.menus.TeamPickerMenu;
+import core.entities.menus.PUGPickMenuController;
+import core.entities.menus.RPSMenuController;
 import core.util.MatchMaker;
-import core.util.Trigger;
 import core.util.Utils;
 import net.dv8tion.jda.core.entities.Category;
 import net.dv8tion.jda.core.entities.Channel;
-import net.dv8tion.jda.core.entities.User;
+import net.dv8tion.jda.core.entities.Guild;
+import net.dv8tion.jda.core.entities.Member;
+import net.dv8tion.jda.core.entities.Message;
+import net.dv8tion.jda.core.entities.PrivateChannel;
+import net.dv8tion.jda.core.entities.TextChannel;
 
 public class Game {
-	private Queue parent;
+	private Queue parentQueue;
 	private long serverId;
 	private long timestamp;
-	private List<User> players;
-	private User[] captains = new User[] { null, null };
-	private Channel[] teamVoiceChannels = new Channel[2];
-	private RPSMenu rps = null;
-	private TeamPickerMenu pickMenu = null;
+	private List<Member> players;
+	private Member captain1;
+	private Member captain2;
+	private List<Channel> teamVoiceChannels;
 	private GameStatus status = GameStatus.PICKING;
+	private PUGPickMenuController pickController;
+	private RPSMenuController rpsController;
 
-	public Game(Queue parent, long serverId, List<User> players) {
-		this.parent = parent;
+	public Game(Queue queue, long serverId, List<Member> players) {
+		this.parentQueue = queue;
 		this.serverId = serverId;
 		this.timestamp = System.currentTimeMillis();
-		this.players = new ArrayList<User>(players);
+		this.players = new ArrayList<Member>(players);
 		
 		// Insert game into database
-		Database.insertGame(timestamp, parent.getId(), serverId);
+		Database.insertGame(timestamp, queue.getId(), serverId);
 		
-		if (parent.settings.randomizeCaptains()) {
-			randomizeCaptains();
-		}else{
-			pickingComplete();
-		}
+		randomizeCaptains();
+		sendGameStartMessages();
 	}
 	
 	public enum GameStatus{
 		PICKING,
-		PLAYING;
+		PLAYING,
+		FINISHED
 	}
 
 	/**
 	 * @return the list of players in this game
 	 */
-	public List<User> getPlayers() {
+	public List<Member> getPlayers() {
 		return players;
 	}
 
 	/**
 	 * @return the start time of this game in milliseconds
 	 */
-	public Long getTimestamp() {
+	public long getTimestamp() {
 		return timestamp;
-	}
-
-	/**
-	 * Checks if a player matching a specific name exists in this game
-	 * 
-	 * @param name the name of the player
-	 * @return the player matching the name
-	 */
-	public User getPlayer(String name) {
-		for (User u : players) {
-			if (u.getName().equalsIgnoreCase(name)) {
-				return u;
-			}
-		}
-		return null;
 	}
 	
 	/**
@@ -82,74 +70,56 @@ public class Game {
 	 * @param target the player to replace
 	 * @param substitute the player that will replace the target
 	 */
-	public void sub(User target, User substitute){
+	public void sub(Member target, Member substitute){
 		players.remove(target);
 		players.add(substitute);
 		
-		// If the target is a captain and the picking has not started or has not finished yet call subCaptain
-		for(User c : captains) {
-			if (c == target && (pickMenu == null || pickMenu != null && !pickMenu.finished())) {
+		if(status == GameStatus.PICKING){
+			if(target == captain1 || target == captain2){
 				subCaptain(substitute, target);
+			}else{
+				if(pickController != null){
+					pickController.cancel();
+					startPUGPicking();
+				}
 			}
-		}
-		
-		// If picking has not finished yet substitute the target in the pickMenu
-		if(pickMenu != null && !pickMenu.finished()){
-			pickMenu.sub(target, substitute);
-		}
+		}		
 	}
-
-	/**
-	 * Checks if a player by the specified name is in this game
-	 * 
-	 * @param name the name of the player
-	 * @return true if the player is in this game
-	 */
-	public boolean containsPlayer(String name) {
-		for (User u : players) {
-			if (u.getName().equalsIgnoreCase(name)) {
-				return true;
-			}
-		}
-		return false;
+	
+	public boolean containsPlayer(Member player){
+		return players.contains(player);
 	}
 
 	/**
 	 * Chooses two random captains from the captainPool
-	 * Creates the rps menu if there are more than 2 players
 	 */
 	private void randomizeCaptains() {
 		Random random = new Random();
-		List<User> captainPool = getCaptainPool();
+		List<Member> captainPool = getCaptainPool();
+		captain1 = captainPool.get(random.nextInt(captainPool.size()));
+		captainPool.remove(captain1);
+		captain2 = MatchMaker.getMatch(captain1, captainPool);
 		
-		captains[0] = captainPool.get(random.nextInt(captainPool.size()));
-		
-		captains[1] = new MatchMaker(serverId, captainPool).getMatch(captains[0]);
-		
-		if(players.size() > 2){
-			// Create RPS menu on a new thread
-			new Thread(new Runnable(){
-				public void run(){
-					createRPSMenu();
-				}
-			}).start();
-		}else{
-			pickingComplete();
-		}
+		startRPSGame();
 	}
-
-	/**
-	 * @return array of captains
-	 */
-	public User[] getCaptains() {
-		return captains;
+	
+	public Member getCaptain1(){
+		return captain1;
+	}
+	
+	public Member getCaptain2(){
+		return captain2;
 	}
 
 	/**
 	 * @return the name of the queue that this game is from
 	 */
-	public String getName() {
-		return parent.getName();
+	public String getQueueName() {
+		return parentQueue.getName();
+	}
+	
+	public Queue getParentQueue(){
+		return parentQueue;
 	}
 	
 	/**
@@ -159,116 +129,133 @@ public class Game {
 		return status;
 	}
 	
-	/**
-	 * Sets the game's status
-	 * 
-	 * @param status the status to change to
-	 */
-	private void setStatus(GameStatus status){
-		this.status = status;
+	public void startRPSGame(){
+		new Thread(new Runnable(){
+			public void run(){
+				rpsController = new RPSMenuController(captain1, captain2);
+				rpsController.start();
+				
+				Member winner = rpsController.getWinner();
+				
+				if(captain2 == winner){
+					captain2 = captain1;
+					captain1 = winner;
+				}
+				
+				rpsController = null;
+				startPUGPicking();
+			}
+		}).start();
 	}
 	
-	/**
-	 * Creates a new RPSMenu
-	 */
-	public void createRPSMenu(){
-		Trigger trigger = () -> createPickMenu();
-		rps = new RPSMenu(captains[0], captains[1], trigger);
-	}
-	
-	/**
-	 * Creates a new TeamPickerMenu
-	 */
-	public void createPickMenu(){
-		List<User> nonCaptainPlayers = new ArrayList<User>(players);
-		nonCaptainPlayers.removeAll(Arrays.asList(captains));
-		captains = rps.getResult();
-		Trigger trigger = () -> pickingComplete();
-		pickMenu = new TeamPickerMenu(captains, nonCaptainPlayers, trigger, parent.settings.snakePick());
+	public void startPUGPicking(){
+		new Thread(new Runnable(){
+			public void run(){
+				List<Member> playerPool = new ArrayList<Member>(players);
+				String pickingPattern = parentQueue.getSettingsManager().getPickPattern();
+				
+				playerPool.remove(captain1);
+				playerPool.remove(captain2);
+				
+				pickController = new PUGPickMenuController(captain1, captain2, playerPool, pickingPattern);
+				pickController.start();
+				
+				pickingComplete();
+			}
+		}).start();
 	}
 	
 	/**
 	 * Inserts information into the database
 	 */
 	private void pickingComplete(){
-		setStatus(GameStatus.PLAYING);		
+		status = GameStatus.PLAYING;		
 		
-		// Insert players in game into database
-		for(User u : players){
-			Database.insertPlayerGame(u.getIdLong(), timestamp, serverId);
-		}
+		insertCaptains();
+		insertPlayersInGame();
+		createVoiceChannels();
+		postTeamsToPUGChannel();
 		
-		// Update captains
-		for(User c : captains){
-			if(c != null){
-				Database.updatePlayerGameCaptain(c.getIdLong(), timestamp, serverId, true);
-			}
-		}
+		pickController = null;
+	}
+	
+	private void insertPlayersInGame(){
+		List<Member> pickedPlayers = pickController.getPickedPlayers();
 		
-		// Add player pick order to database
-		if(pickMenu != null){
-			Integer count = 1;
-			for (String id : pickMenu.getPickOrder()) {
-				Database.updatePlayerGamePickOrder(Long.valueOf(id), timestamp, serverId, count);
-				count++;
-			}
+		for(int i = 0;i < pickedPlayers.size();i++){
+			Member player = pickedPlayers.get(i);
+			int team = pickController.getTeam(player);
 			
-			// Post teams to pug channel
-			if(ServerManager.getServer(serverId).getSettings().postTeamsToPugChannel()){
-				String s = String.format("`Game: %s`", parent.getName());
-				ServerManager.getServer(serverId).getPugChannel()
-				.sendMessage(Utils.createMessage(s, pickMenu.getPickedTeamsString(), true)).queue();
-			}
+			Database.insertPlayerGame(player.getUser().getIdLong(), timestamp, serverId, i+1, team);
 		}
+	}
+	
+	private void insertCaptains(){
+		Database.insertPlayerGameCaptain(captain1.getUser().getIdLong(), timestamp, serverId, 1);
+		Database.insertPlayerGameCaptain(captain2.getUser().getIdLong(), timestamp, serverId, 2);
+	}
+	
+	private void postTeamsToPUGChannel(){
+		TextChannel pugChannel = ServerManager.getServer(serverId).getPugChannel();
+		Message message = Utils.createMessage(String.format("Game '%s' starting", getQueueName()),
+											  String.format("Teams:%n%s", pickController.getTeamsString()),
+											  true);
 		
-		if(parent.settings.randomizeCaptains() && 
-				ServerManager.getServer(serverId).getSettings().createDiscordVoiceChannels()){
-			createVoiceChannels();
-		}
+		pugChannel.sendMessage(message).queue();
 	}
 	
 	private void createVoiceChannels() {
-		try{
-			long catId = parent.settings.getVoiceChannelCategoryId();
-			Category category = ServerManager.getGuild(String.valueOf(serverId)).getCategoryById(catId);
-			
-			for(int x = 0;x < captains.length;x++){	
-				teamVoiceChannels[x] = ServerManager.getGuild(String.valueOf(serverId))
-						.getController().createVoiceChannel(captains[x].getName() + "'s team").complete();
-				
-				teamVoiceChannels[x].getManager().setParent(category).queue();
-			}	
-		}catch(Exception ex){
-				System.out.println(ex.getMessage());
-		}
+		if(ServerManager.getServer(serverId).getSettingsManager().getCreateTeamVoiceChannels()){
+			teamVoiceChannels = new ArrayList<Channel>();
 		
+			createVoiceChannel(captain1);
+			createVoiceChannel(captain2);
+		}
+	}
+	
+	private void createVoiceChannel(Member member){
+		try{
+			Guild guild = ServerManager.getGuild(serverId);
+			Category category = parentQueue.getSettingsManager().getVoiceChannelCategory();
+			Channel channel = guild.getController().createVoiceChannel("Team " + member.getEffectiveName()).complete();
+				
+			channel.getManager().setParent(category).queue();
+			teamVoiceChannels.add(channel);
+		}catch(Exception ex){
+			//System.out.println(ex.getMessage());
+			ex.printStackTrace();
+		}
 	}
 	
 	private void deleteVoiceChannels(){
-		if(teamVoiceChannels[0] != null && teamVoiceChannels[1] != null){
+		if(teamVoiceChannels != null){
 			try{
-				teamVoiceChannels[0].delete().queue();
-				teamVoiceChannels[1].delete().queue();
+				for(Channel channel : teamVoiceChannels){
+					channel.delete().queue();
+				}
 			}catch(Exception ex){
 				System.out.println(ex.getMessage());
 			}
 		}
 	}
 	
-	public void finish(){
-		removeMenus();
+	protected void finish(){
+		cancelMenus();
 		deleteVoiceChannels();
+		
+		status = GameStatus.FINISHED;
 	}
 
 	/**
 	 * Removes all menus
 	 */
-	private void removeMenus(){
-		if(rps != null && !rps.finished()){
-			rps.complete();
+	private void cancelMenus(){
+		if(pickController != null){
+			pickController.cancel();
 		}
-		if(pickMenu != null && !pickMenu.finished()){
-			pickMenu.complete();
+		
+		if(rpsController != null){
+			rpsController.cancel();
 		}
 	}
 	
@@ -278,38 +265,67 @@ public class Game {
 	 * @param sub the player replacing a captain
 	 * @param target the captain to be replaced
 	 */
-	public void subCaptain(User sub, User target){
-		new Thread(new Runnable(){
-			public void run(){
-				for(Integer i = 0;i < 2;i++){
-					if(captains[i] == target){
-						captains[i] = sub;
-					}
-				}
-				removeMenus();
-				createRPSMenu();
-			}
-		}).start();
+	public void subCaptain(Member sub, Member target){
+		if(captain1 == target){
+			captain1 = sub;
+		}else{
+			captain2 = sub;
+		}
+		
+		cancelMenus();
+		startRPSGame();
 	}
 
 	/**
 	 * Adds eligible players to the captainPool
 	 * Returns players of not enough eligible players
 	 */
-	private List<User> getCaptainPool() {
-		List<User> captainPool = new ArrayList<User>();
-		Integer minGames = parent.settings.getMinNumberOfGamesPlayedToCaptain();
+	private List<Member> getCaptainPool() {
+		List<Member> captainPool = new ArrayList<Member>();
+		Integer minGames = parentQueue.getSettingsManager().getMinGamesPlayedToCaptain();
 		
-		for(User p : players){
-			if(Database.queryGetTotalGamesPlayed(p.getIdLong()) >= minGames){
-				captainPool.add(p);
+		for(Member m : players){
+			if(Database.queryGetTotalGamesPlayed(m.getUser().getIdLong()) >= minGames){
+				captainPool.add(m);
 			}
 		}
 		
-		if(captainPool.size() > 1){
-			return captainPool;
-		}else{
-			return players;
+		if(captainPool.size() < 2){
+			return new ArrayList<Member>(players);
 		}
+		
+		return captainPool;
+	}
+	
+	private void sendGameStartMessages(){
+		Message dm = Utils.createMessage("Game starting",
+				  			String.format("Your game '%s' has begun", getQueueName()), true);
+		TextChannel pugChannel = ServerManager.getServer(serverId).getPugChannel();
+		StringBuilder builder = new StringBuilder();
+		
+		builder.append(String.format("**Captains: <@%s> & <@%s>**%n",
+									 captain1.getUser().getId(),
+									 captain2.getUser().getId()));
+		
+		for(Member m : players){
+			if(m != captain1 && m != captain2){
+				try{
+					PrivateChannel pc = m.getUser().openPrivateChannel().complete();
+					
+					pc.sendMessage(dm).queue();
+				}catch(Exception ex){
+					System.out.println("Error sending private message.\n" + ex.getMessage());
+				}
+				
+				builder.append(m.getEffectiveName() + ", ");
+			}
+		}
+		
+		builder.delete(builder.length() - 2, builder.length());
+		
+		Message message = Utils.createMessage(String.format("Game '%s' has begun", getQueueName()),
+											  builder.toString(), Color.blue);
+		
+		pugChannel.sendMessage(message).queueAfter(2, TimeUnit.SECONDS);
 	}
 }

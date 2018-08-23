@@ -1,81 +1,60 @@
 package core.commands;
 
+import java.util.Arrays;
+
 import core.Constants;
 import core.entities.Queue;
-import core.entities.QueueManager;
 import core.entities.Server;
-import core.entities.Setting;
+import core.entities.settings.ISetting;
+import core.entities.settings.QueueSettingsManager;
 import core.exceptions.BadArgumentsException;
 import core.exceptions.InvalidUseException;
 import core.util.Utils;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.Message;
 
-public class CmdQueueSettings extends Command{
-	public CmdQueueSettings(){
+public class CmdQueueSettings extends Command {
+	public CmdQueueSettings(Server server) {
 		this.name = Constants.QUEUESETTINGS_NAME;
 		this.helpMsg = Constants.QUEUESETTINGS_HELP;
 		this.description = Constants.QUEUESETTINGS_DESC;
 		this.adminRequired = true;
+		this.server = server;
 	}
-	
+
 	@Override
-	public Message execCommand(Server server, Member member, String[] args) {
-		if(args.length == 1){
-			String s = "";
-			Queue queue = getQueue(server.getQueueManager(), args[0]);
-			for(Setting setting : queue.settings.getSettingsList()){
-				s += String.format("%s = %s", setting.getName(), setting.getValue().toString());
-				
-				if(setting.getDescriptor() != null){
-					s += String.format(" %s%n", setting.getDescriptor());
-				}else{
-					s += "\n";
-				}
-			}
-			
-			response = Utils.createMessage(String.format("Queue '%s' settings", queue.getName()), s, true);
-			
-		}else if(args.length == 2){
-			Queue queue = getQueue(server.getQueueManager(), args[0]);
-			Setting setting = queue.settings.getSetting(args[1]);
-			String s = String.format("%s = %s", setting.getName(), setting.getValue().toString());
-			
-			if(setting.getDescriptor() != null){
-				s += String.format(" %s%n", setting.getDescriptor());
-			}else{
-				s += "\n";
-			}
-			
-			s += setting.getDescription();
-			
-			response = Utils.createMessage(String.format("Queue '%s' settings", queue.getName()), s, true);
-			
-		}else if(args.length == 3){
-			Queue queue = getQueue(server.getQueueManager(), args[0]);
-			queue.settings.set(args[1], args[2]);
-			
-			response = Utils.createMessage(String.format("Queue '%s' settings", queue.getName()), "Queue setting updated", true);
-		}else{
+	public Message execCommand(Member caller, String[] args) {
+		if (args.length < 1) {
 			throw new BadArgumentsException();
 		}
 		
-		System.out.println(success());
-		return response;
-	}
-	
-	private Queue getQueue(QueueManager qm, String arg){
-		Queue queue;
-		try{
-			queue = qm.getQueue(Integer.valueOf(arg));
-		}catch(NumberFormatException ex){
-			queue = qm.getQueue(arg);
+		String queueVal = args[0];
+		Queue queue = server.getQueueManager().getQueue(queueVal);
+		
+		if(queue == null){
+			new InvalidUseException("Queue does not exist");
 		}
 		
-		if(queue != null){
-			return queue;
-		}else{
-			throw new InvalidUseException("Queue does not exist");
+		QueueSettingsManager settingsManager = queue.getSettingsManager();
+		String title = queue.getName() + " settings";
+		
+		if(args.length == 1){
+			response = Utils.createMessage(title, settingsManager.toString(), true);
+		}else if(args.length == 2){
+			ISetting setting = settingsManager.getSetting(args[1]);
+			
+			response = Utils.createMessage(title, 
+					String.format("%s: %s%n%s", setting.getName(), setting.getValueString(), setting.getDescription()), true);
+			
+		}else if(args.length > 2){
+			String[] settingArgs = Arrays.copyOfRange(args, 2, args.length);
+			String settingName = args[1];
+			
+			settingsManager.setSetting(args[1], settingArgs);
+			
+			response = Utils.createMessage(title, settingName + " updated", true);
 		}
+		
+		return response;
 	}
 }

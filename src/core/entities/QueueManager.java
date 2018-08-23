@@ -1,21 +1,24 @@
 package core.entities;
 
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 
 import core.Database;
-import net.dv8tion.jda.core.entities.User;
+import core.entities.timers.QueueFinishTimer;
+import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.exceptions.PermissionException;
 
 public class QueueManager {
 	private List<Queue> queueList = new ArrayList<Queue>();
-	private List<User> justFinished = new ArrayList<User>();
-	private long serverId;
+	private ConcurrentHashMap<Game, QueueFinishTimer> finishedGameMap = new ConcurrentHashMap<Game, QueueFinishTimer>();
+	private Server server;
 
-	public QueueManager(long id) {
-		serverId = id;
-
-		queueList = Database.getServerQueueList(id);
+	public QueueManager(Server server) {
+		this.server = server;
+		
+		Database.loadServerQueues(this);
 	}
 
 	public void addQueue(Queue queue){
@@ -39,11 +42,7 @@ public class QueueManager {
 		List<Queue> queues = new ArrayList<Queue>();
 		Queue queue;
 		for(String arg : args){
-			try{
-				queue = getQueue(Integer.valueOf(arg));
-			}catch(NumberFormatException ex){
-				queue = getQueue(arg);
-			}
+			queue = getQueue(arg);
 			
 			if(queue != null){
 				queues.add(queue);
@@ -51,6 +50,18 @@ public class QueueManager {
 		}
 		
 		return queues;
+	}
+	
+	public Queue getQueue(String queueVal){
+		Queue queue;
+		
+		try{
+			queue = getQueueByIndex(Integer.valueOf(queueVal));
+		}catch(NumberFormatException ex){
+			queue = getQueueByName(queueVal);
+		}
+		
+		return queue;
 	}
 
 	/**
@@ -87,9 +98,9 @@ public class QueueManager {
 	/**
 	 * Removes a list of players from all queues
 	 * 
-	 * @param players List of User to be removed
+	 * @param players List of Member to be removed
 	 */
-	public void purgeQueue(List<User> players) {
+	public void purgeQueue(List<Member> players) {
 		for (Queue q : queueList) {
 			q.purge(players);
 		}
@@ -100,7 +111,7 @@ public class QueueManager {
 	 * 
 	 * @param player the player to be removed
 	 */
-	public void purgeQueue(User player) {
+	public void purgeQueue(Member player) {
 		for (Queue q : queueList) {
 			q.delete(player);
 		}
@@ -124,7 +135,7 @@ public class QueueManager {
 	 * @param player the player to check
 	 * @return true if the player is in-game, false if not
 	 */
-	public boolean isPlayerIngame(User player) {
+	public boolean isPlayerIngame(Member player) {
 		for (Queue q : queueList) {
 			for (Game g : q.getGames()) {
 				if (g.getPlayers().contains(player)) {
@@ -135,7 +146,7 @@ public class QueueManager {
 		return false;
 	}
 	
-	public Game getPlayersGame(User player){
+	public Game getPlayersGame(Member player){
 		for (Queue q : queueList) {
 			for (Game g : q.getGames()) {
 				if (g.getPlayers().contains(player)) {
@@ -146,28 +157,37 @@ public class QueueManager {
 		return null;
 	}
 
-	/**
-	 * Adds a list of players to justFinished.
-	 * 
-	 * @param players the players to be added to the list
-	 */
-	public void addToJustFinished(List<User> players) {
-		justFinished.addAll(players);
+	private void addToJustFinished(Game game) {
+		QueueFinishTimer timer = new QueueFinishTimer(this, game);
+		
+		finishedGameMap.put(game, timer);
+		timer.start();
 	}
 	
-	/**
-	 * Removes a List of players from justFinished after the finish timer ends and.
-	 * then adds them if they are waiting to join a queue.
-	 * 
-	 * @param players the players to be removed from justFinished and added to their respective queues
-	 */
-	public void timerEnd(List<User> players) {
-		justFinished.removeAll(players);
+	public void queueFinishTimerEnd(Game game) {
+		finishedGameMap.remove(game);
+		
 		for (Queue q : queueList) {
-			q.addPlayersWaiting(players);
+			q.addPlayersWaiting(game.getPlayers());
 		}
-		System.out.println("Finish timer completed");
+
 		updateTopic();
+	}
+	
+	public int getWaitTimeRemaining(Member player){
+		Enumeration<Game> e = finishedGameMap.keys();
+		
+		while(e.hasMoreElements()){
+			Game game = e.nextElement();
+			
+			if(game.containsPlayer(player)){
+				QueueFinishTimer timer = finishedGameMap.get(game);
+				
+				return timer.getTimeRemaining();
+			}
+		}
+		
+		return 0;
 	}
 
 	/**
@@ -176,7 +196,7 @@ public class QueueManager {
 	 * @param player the player to be checked
 	 * @return true if the player is in a queue, false of not
 	 */
-	public boolean isPlayerInQueue(User player) {
+	public boolean isPlayerInQueue(Member player) {
 		for (Queue q : queueList) {
 			if (q.getPlayersInQueue().contains(player)) {
 				return true;
@@ -185,14 +205,18 @@ public class QueueManager {
 		return false;
 	}
 
-	/**
-	 * Returns boolean based on if the player has just finished a game or not.
-	 * 
-	 * @param player the player to check
-	 * @return true if the player has just finished, false if not
-	 */
-	public boolean hasPlayerJustFinished(User player) {
-		return justFinished.contains(player);
+	public boolean hasPlayerJustFinished(Member player) {
+		Enumeration<Game> e = finishedGameMap.keys();
+		
+		while(e.hasMoreElements()){
+			Game game = e.nextElement();
+			
+			if(game.containsPlayer(player)){
+				return true;
+			}
+		}
+		
+		return false;
 	}
 
 	/**
@@ -200,8 +224,8 @@ public class QueueManager {
 	 * 
 	 * @return the guild id associated with this QueueManager instance
 	 */
-	public long getId() {
-		return serverId;
+	public long getServerId() {
+		return server.getId();
 	}
 
 	/**
@@ -210,7 +234,7 @@ public class QueueManager {
 	 * @return the Server instance associated with this QueueManager instance
 	 */
 	public Server getServer() {
-		return ServerManager.getServer(serverId);
+		return server;
 	}
 
 	
@@ -246,12 +270,12 @@ public class QueueManager {
 	/**
 	 * Returns a specific queue.
 	 * 
-	 * @param name the name of the queue to return
+	 * @param queueName the name of the queue to return
 	 * @return Queue object matching the name param, null if no matches
 	 */
-	public Queue getQueue(String name){
+	public Queue getQueueByName(String queueName){
 		for(Queue q : queueList){
-			if(q.getName().equalsIgnoreCase(name)){
+			if(q.getName().equalsIgnoreCase(queueName)){
 				return q;
 			}
 		}
@@ -264,10 +288,11 @@ public class QueueManager {
 	 * @param index the one-based index of the queue to return
 	 * @return Queue object at the specified index, null if no matches
 	 */
-	public Queue getQueue(Integer index){
-		Integer i = --index;
-		if(doesQueueExist(i)){
-			return queueList.get(i);
+	public Queue getQueueByIndex(Integer index){
+		index--;
+		
+		if(doesQueueExist(index)){
+			return queueList.get(index);
 		}else{
 			return null;
 		}
@@ -280,9 +305,9 @@ public class QueueManager {
 	 * @return true if the player is in a queue's wait list
 	 * @see Queue
 	 */
-	public boolean isPlayerWaiting(User player){
+	public boolean isPlayerWaiting(Member player){
 		for(Queue q : queueList){
-			if(q.isPlayerWaiting(player)){
+			if(q.isPlayerInWaitlist(player)){
 				return true;
 			}
 		}
@@ -295,5 +320,20 @@ public class QueueManager {
 				game.finish();
 			}
 		}
+	}
+	
+	public void finishGame(Game game, Integer winningTeam){
+		Queue queue = game.getParentQueue();
+		
+		queue.removeGame(game);
+		game.finish();
+		
+		if(winningTeam == null){
+			return;
+		}
+		
+		Database.updateGameInfo(game.getTimestamp(), queue.getId(), 
+				getServerId(), System.currentTimeMillis(), winningTeam);
+		addToJustFinished(game);
 	}
 }

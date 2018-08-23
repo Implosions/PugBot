@@ -11,45 +11,47 @@ import net.dv8tion.jda.core.entities.Message;
 
 public class CmdDel extends Command {
 
-	public CmdDel() {
+	public CmdDel(Server server) {
 		this.helpMsg = Constants.DEL_HELP;
 		this.description = Constants.DEL_DESC;
 		this.name = Constants.DEL_NAME;
 		this.pugChannelOnlyCommand = true;
+		this.server = server;
 	}
 
 	@Override
-	public Message execCommand(Server server, Member member, String[] args) {
+	public Message execCommand(Member caller, String[] args) {
 		QueueManager qm = server.getQueueManager();
-		if (qm.isPlayerInQueue(member.getUser()) || qm.isPlayerWaiting(member.getUser())) {
-			if (args.length == 0) {
-				for(Queue queue : qm.getQueueList()){
-					queue.delete(member.getUser());
-				}
-				
-				this.response = Utils.createMessage(String.format("%s deleted from all queues", member.getEffectiveName()),
-						qm.getHeader(), true);
-			} else {
-				String queueNames = "";
-				for (Queue queue : qm.getListOfQueuesFromStringArgs(args)) {
-					queue.delete(member.getUser());
-					queueNames += queue.getName() + ", ";
-				}
-				
-				if(queueNames.isEmpty()){
-					throw new InvalidUseException("No valid queues named");
-				}
-				
-				queueNames = queueNames.substring(0, queueNames.length() - 2);
-				this.response = Utils.createMessage(String.format("%s deleted from %s", member.getEffectiveName(), queueNames),
-						qm.getHeader(), true);
-			}
-			qm.updateTopic();
-		} else {
+
+		if (!qm.isPlayerInQueue(caller) && !qm.isPlayerWaiting(caller)) {
 			throw new InvalidUseException("You are not in any queue");
 		}
-		System.out.println(success());
-		
+
+		if (args.length == 0) {
+			for (Queue queue : qm.getQueueList()) {
+				queue.delete(caller);
+			}
+
+			this.response = Utils.createMessage(String.format("%s deleted from all queues", caller.getEffectiveName()),
+					qm.getHeader(), true);
+		} else {
+			String queueNames = "";
+			for (Queue queue : qm.getListOfQueuesFromStringArgs(args)) {
+				queue.delete(caller);
+				queueNames += queue.getName() + ", ";
+			}
+
+			if (queueNames.isEmpty()) {
+				throw new InvalidUseException("No valid queues named");
+			}
+
+			queueNames = queueNames.substring(0, queueNames.length() - 2);
+			this.response = Utils.createMessage(
+					String.format("%s deleted from %s", caller.getEffectiveName(), queueNames), qm.getHeader(), true);
+		}
+
+		qm.updateTopic();
+
 		return response;
 	}
 }

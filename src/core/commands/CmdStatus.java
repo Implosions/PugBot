@@ -11,34 +11,34 @@ import core.exceptions.InvalidUseException;
 import core.util.Utils;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.Message;
-import net.dv8tion.jda.core.entities.User;
 
 public class CmdStatus extends Command {
 	
-	public CmdStatus() {
+	public CmdStatus(Server server) {
 		this.helpMsg = Constants.STATUS_HELP;
 		this.description = Constants.STATUS_DESC;
 		this.name = Constants.STATUS_NAME;
 		this.pugChannelOnlyCommand = true;
+		this.server = server;
 	}
 
 	@Override
-	public Message execCommand(Server server, Member member, String[] args) {
+	public Message execCommand(Member caller, String[] args) {
 		QueueManager qm = server.getQueueManager();
-		if (!qm.isQueueListEmpty()) {
-			if (args.length == 0) {
-				this.response = Utils.createMessage("", statusBuilder(qm.getQueueList()), true);
-			} else {
-				this.response = Utils.createMessage("", statusBuilder(qm.getListOfQueuesFromStringArgs(args)), true);
-			}
+		String statusMsg;
+		
+		if (args.length == 0) {
+			statusMsg = statusBuilder(qm.getQueueList());
 		} else {
-			throw new InvalidUseException("There are no active queues");
+			statusMsg = statusBuilder(qm.getListOfQueuesFromStringArgs(args));
 		}
+		
+		this.response = Utils.createMessage(null, statusMsg, true);
+		
 		// Delete last status message
 		if (lastResponseId != null) {
 			qm.getServer().getPugChannel().deleteMessageById(lastResponseId).complete();
 		}
-		System.out.println(success());
 		
 		return response;
 	}
@@ -53,8 +53,8 @@ public class CmdStatus extends Command {
 			// Get players in queue
 			if (q.getCurrentPlayersCount() > 0) {
 				String names = ""; 
-				for (User u : q.getPlayersInQueue()) {
-					names += u.getName() + ", ";
+				for (Member m : q.getPlayersInQueue()) {
+					names += m.getEffectiveName() + ", ";
 				}
 				names = names.substring(0, names.lastIndexOf(","));
 				statusMsg += String.format("**IN QUEUE**: %s%n", names);
@@ -64,8 +64,8 @@ public class CmdStatus extends Command {
 			if (q.getNumberOfGames() > 0) {
 				for (Game g : q.getGames()) {
 					String names = "";
-					for (User u : g.getPlayers()) {
-						names += u.getName() + ", ";
+					for (Member m : g.getPlayers()) {
+						names += m.getEffectiveName() + ", ";
 					}
 					names = names.substring(0, names.lastIndexOf(","));
 					statusMsg += String.format("**IN GAME**: %s @ %d minutes ago%n", names, (System.currentTimeMillis() - g.getTimestamp()) / 60000);
@@ -73,9 +73,11 @@ public class CmdStatus extends Command {
 			}
 			statusMsg += System.lineSeparator();
 		}
+		
 		if (statusMsg.isEmpty()) {
 			throw new InvalidUseException("Queue does not exist");
 		}
+		
 		return statusMsg;
 	}
 }

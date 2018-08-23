@@ -13,36 +13,37 @@ import net.dv8tion.jda.core.entities.Message;
 
 public class CmdRemoveQueue extends Command {
 
-	public CmdRemoveQueue() {
+	public CmdRemoveQueue(Server server) {
 		this.helpMsg = Constants.REMOVEQUEUE_HELP;
 		this.description = Constants.REMOVEQUEUE_DESC;
 		this.name = Constants.REMOVEQUEUE_NAME;
 		this.adminRequired = true;
 		this.pugChannelOnlyCommand = true;
+		this.server = server;
 	}
 
 	@Override
-	public Message execCommand(Server server, Member member, String[] args) {
+	public Message execCommand(Member caller, String[] args) {
 		QueueManager qm = server.getQueueManager();
-		if (args.length > 0) {
-			String queueNames = "";
-			for (Queue queue : qm.getListOfQueuesFromStringArgs(args)) {
-				qm.removeQueue(queue);
-				Database.deactivateQueue(server.getid(), queue.getId());
-				queueNames += queue.getName() + ", ";
-			}
-			
-			if(queueNames.isEmpty()){
-				throw new InvalidUseException("No valid queue named");
-			}
-			
-			queueNames = queueNames.substring(0, queueNames.length() - 2);
-			qm.updateTopic();
-			this.response = Utils.createMessage(String.format("Queues: %s removed", queueNames), null, true);
-		} else {
+		
+		if (args.length == 0) {
 			throw new BadArgumentsException();
 		}
-		System.out.println(success());
+		
+		String queueNames = "";
+		for (Queue queue : qm.getListOfQueuesFromStringArgs(args)) {
+			qm.removeQueue(queue);
+			Database.deactivateQueue(server.getId(), queue.getId());
+			queueNames += queue.getName() + ", ";
+		}
+		
+		if(queueNames.isEmpty()){
+			throw new InvalidUseException("No valid queue named");
+		}
+		
+		queueNames = queueNames.substring(0, queueNames.length() - 2);
+		qm.updateTopic();
+		this.response = Utils.createMessage(String.format("`Queue: %s removed`", queueNames));
 		
 		return response;
 	}

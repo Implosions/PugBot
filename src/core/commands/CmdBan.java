@@ -8,36 +8,34 @@ import core.util.Utils;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.Message;
 
-public class CmdBan extends Command{
+public class CmdBan extends Command {
 
-	public CmdBan(){
+	public CmdBan(Server server) {
 		this.name = Constants.BAN_NAME;
 		this.description = Constants.BAN_DESC;
 		this.helpMsg = Constants.BAN_HELP;
 		this.adminRequired = true;
+		this.server = server;
 	}
-	
+
 	@Override
-	public Message execCommand(Server server, Member member, String[] args) {
-		String pName;
-		if (args.length == 1) {
-			Member m = server.getMember(args[0]);
-			if (m != null) {
-				pName = m.getEffectiveName();
-				if (!server.isAdmin(m)) {
-					server.banUser(m.getUser().getId());
-				} else {
-					throw new InvalidUseException("Cannot ban an admin");
-				}
-			} else {
-				throw new InvalidUseException("User does not exist");
-			}
-		} else {
+	public Message execCommand(Member caller, String[] args) {
+
+		if (args.length != 1) {
 			throw new BadArgumentsException();
 		}
-		this.response = Utils.createMessage(String.format("`%s banned`", pName));
-		System.out.println(success());
-		
+
+		String username = args[0];
+		Member m = server.getMember(username);
+
+		if (server.isAdmin(m)) {
+			throw new InvalidUseException("Cannot ban an admin");
+		}
+
+		server.banUser(m.getUser().getIdLong());
+
+		this.response = Utils.createMessage(String.format("`%s banned`", m.getEffectiveName()));
+
 		return response;
 	}
 }

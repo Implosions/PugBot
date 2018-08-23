@@ -9,32 +9,31 @@ import core.util.Utils;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.Message;
 
-public class CmdDeleteCommand extends Command{
-	
-	public CmdDeleteCommand(){
+public class CmdDeleteCommand extends Command {
+
+	public CmdDeleteCommand(Server server) {
 		this.name = Constants.DELETECOMMAND_NAME;
 		this.helpMsg = Constants.DELETECOMMAND_HELP;
 		this.description = Constants.DELETECOMMAND_DESC;
 		this.adminRequired = true;
-	}
-	
-	@Override
-	public Message execCommand(Server server, Member member, String[] args) {
-		if(args.length == 1){
-			String name = args[0].toLowerCase();
-			
-			if(server.cmds.getCustomCmds().contains(name)){
-				server.cmds.removeCommand(name);
-				Database.deleteCustomCommand(Long.valueOf(server.getid()), name);
-			}else{
-				throw new InvalidUseException(String.format("'%s' is not a custom command", name));
-			}
-		}else{
-			throw new BadArgumentsException();
-		}
-		
-		System.out.println(success());
-		return Utils.createMessage(String.format("Command '%s' deleted", args[0].toLowerCase()));
+		this.server = server;
 	}
 
+	@Override
+	public Message execCommand(Member caller, String[] args) {
+		if (args.length != 1) {
+			throw new BadArgumentsException();
+		}
+
+		String cmdName = args[0].toLowerCase();
+
+		if (!server.cmds.getCustomCmds().contains(cmdName)) {
+			throw new InvalidUseException(String.format("'%s' is not a custom command", cmdName));
+		}
+
+		server.cmds.removeCommand(cmdName);
+		Database.deleteCustomCommand(Long.valueOf(server.getId()), cmdName);
+
+		return Utils.createMessage(String.format("Command '%s' deleted", cmdName));
+	}
 }
