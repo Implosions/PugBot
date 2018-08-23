@@ -68,11 +68,16 @@ public class CmdFinishGame extends Command {
 		
 		long msDiff = System.currentTimeMillis() - game.getTimestamp();
 		long duration = TimeUnit.MINUTES.convert(msDiff, TimeUnit.MILLISECONDS);
-		Member winner = (winningTeam == 1) ? game.getCaptain1() : game.getCaptain2();
-		String teamName = "Team " + winner.getEffectiveName();
 		
-		response = Utils.createMessage(title, String.format("**Winner:** %s%n**Duration:** %d Minutes",
-				teamName, duration), true);
+		if(winningTeam != 0){
+			Member winner = (winningTeam == 1) ? game.getCaptain1() : game.getCaptain2();
+			String teamName = "Team " + winner.getEffectiveName();
+			
+			response = Utils.createMessage(title, String.format("**Winner:** %s%n**Duration:** %d Minutes",
+					teamName, duration), true);
+		}else{
+			response = Utils.createMessage(title, String.format("**Tie game**%n**Duration:** %d Minutes", duration), true);
+		}
 		
 		return response;
 	}

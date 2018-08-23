@@ -1147,7 +1147,8 @@ public class Database {
 					+ "WHERE Game.serverId = ? "
 					+ "AND playerId = ? "
 					+ "AND completion_timestamp > 0 "
-					+ "AND NOT winning_team = team");
+					+ "AND NOT winning_team = team "
+					+ "AND NOT winning_team = 0");
 			
 			pStatement.setLong(1, serverId);
 			pStatement.setLong(2, playerId);

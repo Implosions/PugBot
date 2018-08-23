@@ -45,7 +45,7 @@ public class CmdStats extends Command {
 			int completedGames = Database.queryGetPlayerTotalCompletedGames(server.getId(), player.getUser().getIdLong());
 			int wins = Database.queryGetPlayerTotalWins(server.getId(), player.getUser().getIdLong());
 			int losses = Database.queryGetPlayerTotalLosses(server.getId(), player.getUser().getIdLong());
-			int ties = completedGames - wins - losses;
+			int ties = (completedGames - wins) - losses;
 			int avgPickPosition = Database.queryGetPlayerAvgPickPosition(server.getId(), player.getUser().getIdLong());
 			
 			embedBuilder.addField("Games Played", String.valueOf(completedGames), true)
