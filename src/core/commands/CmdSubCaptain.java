@@ -34,21 +34,17 @@ public class CmdSubCaptain extends Command {
 			throw new InvalidUseException("You are not in-game");
 		}
 
-		if (qm.isPlayerIngame(target)) {
-			throw new InvalidUseException(target.getEffectiveName() + " is not in-game");
-		}
-
 		Game game = qm.getPlayersGame(caller);
 
 		if (game.getStatus() != GameStatus.PICKING) {
-			throw new InvalidUseException("Picking has finished");
+			throw new InvalidUseException("Picking has already finished");
 		}
 
-		if (game.getCaptain1() == target || game.getCaptain2() == target) {
+		if (!(game.getCaptain1() == target || game.getCaptain2() == target)) {
 			throw new InvalidUseException(target.getEffectiveName() + " is not a captain in your game");
 		}
 
-		if (game.getCaptain1() != caller && game.getCaptain2() != caller) {
+		if (game.getCaptain1() == caller || game.getCaptain2() == caller) {
 			throw new InvalidUseException("You are already a captain");
 		}
 
