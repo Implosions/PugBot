@@ -124,7 +124,7 @@ public class Server {
 	}
 
 	public void updateActivityList(Member m) {
-		if (queueManager.isPlayerInQueue(m) || queueManager.hasPlayerJustFinished(m)) {
+		if (queueManager.isPlayerInQueue(m)) {
 			activityList.put(m, System.currentTimeMillis());
 		} else if (activityList.containsKey(m)) {
 			activityList.remove(m);
@@ -132,7 +132,7 @@ public class Server {
 	}
 
 	public void playerDisconnect(Member member) {
-		if (queueManager.isPlayerInQueue(member) || queueManager.hasPlayerJustFinished(member)) {
+		if (queueManager.isPlayerInQueue(member)) {
 			DCTimer timer = new DCTimer(this, member);
 			
 			if(disconnectList.containsKey(member)){

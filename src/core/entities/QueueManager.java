@@ -198,7 +198,7 @@ public class QueueManager {
 	 */
 	public boolean isPlayerInQueue(Member player) {
 		for (Queue q : queueList) {
-			if (q.getPlayersInQueue().contains(player)) {
+			if (q.getPlayersInQueue().contains(player) || q.isPlayerInWaitlist(player)) {
 				return true;
 			}
 		}
