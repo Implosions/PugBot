@@ -368,25 +368,25 @@ public class Database {
 	}
 	
 	/**
-	 * @param serverId the discord server
-	 * @param p1 the first player to compare
-	 * @param p2 the second player to compare
-	 * @return number representing the difference in pick order + the avg size of games played
+	 * @param serverId the discord server id
+	 * @param p1 the id of first player to compare
+	 * @param p2 the id of second player to compare
+	 * @return the difference in pick order between p1 and p2
 	 */
-	public static double queryGetPickOrderDiff(Long serverId, Long p1, Long p2){
+	public static double queryGetPickOrderDiff(long serverId, long p1, long p2){
 		try{
-			PreparedStatement pStatement = conn.prepareStatement("SELECT avg(p2.pickOrder - p1.pickOrder) "
-					+ "+ (select avg(playerCount) FROM (SELECT count(timestamp) as playerCount from playergame where timestamp = p1.timestamp AND timestamp = p2.timestamp group by timestamp)) "
-					+ "FROM (select * from playergame where playerid = ? AND serverId = ?) AS p1 "
-					+ "JOIN (select * from playergame where playerid = ? AND serverId = ?) AS p2 "
+			PreparedStatement pStatement = conn.prepareStatement(
+					  "SELECT avg(p2.pickOrder - p1.pickOrder) "
+					+ "FROM (select pickOrder, timestamp from playergame where playerid = ? AND serverId = ? AND captain = 0) AS p1 "
+					+ "JOIN (select pickOrder, timestamp from playergame where playerid = ? AND serverId = ? AND captain = 0) AS p2 "
 					+ "ON p1.timestamp = p2.timestamp "
-					+ "WHERE p1.captain = 0 AND p2.captain = 0 AND p1.pickorder > 0 AND p2.pickorder > 0");
+					+ "ORDER BY timestamp DESC "
+					+ "LIMIT 10");
 			
 			pStatement.setLong(1, p1);
 			pStatement.setLong(3, p2);
 			pStatement.setLong(2, serverId);
 			pStatement.setLong(4, serverId);
-			pStatement.setQueryTimeout(10);
 			
 			return pStatement.executeQuery().getDouble(1);
 		}catch(SQLException ex){
