@@ -1,6 +1,5 @@
 package core.commands;
 
-import core.Constants;
 import core.Database;
 import core.entities.Queue;
 import core.entities.QueueManager;
@@ -14,12 +13,7 @@ import net.dv8tion.jda.core.entities.Message;
 public class CmdCreateQueue extends Command {
 
 	public CmdCreateQueue(Server server) {
-		this.helpMsg = Constants.CREATEQUEUE_HELP;
-		this.description = Constants.CREATEQUEUE_DESC;
-		this.name = Constants.CREATEQUEUE_NAME;
-		this.adminRequired = true;
-		this.pugChannelOnlyCommand = true;
-		this.server = server;
+		super(server);
 	}
 
 	@Override
@@ -57,5 +51,30 @@ public class CmdCreateQueue extends Command {
 		qm.updateTopic();
 
 		return response;
+	}
+
+	@Override
+	public boolean isAdminRequired() {
+		return true;
+	}
+
+	@Override
+	public boolean isGlobalCommand() {
+		return false;
+	}
+
+	@Override
+	public String getName() {
+		return "CreateQueue";
+	}
+
+	@Override
+	public String getDescription() {
+		return "Creates a new game queue that users can join and leave from";
+	}
+
+	@Override
+	public String getHelp() {
+		return getBaseCommand() + " <queue name> <queue size>";
 	}
 }

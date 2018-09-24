@@ -2,7 +2,6 @@ package core.commands;
 
 import java.util.List;
 
-import core.Constants;
 import core.entities.Queue;
 import core.entities.QueueManager;
 import core.entities.Server;
@@ -14,11 +13,7 @@ import net.dv8tion.jda.core.entities.Message;
 public class CmdAdd extends Command {
 
 	public CmdAdd(Server server) {
-		this.helpMsg = Constants.ADD_HELP;
-		this.description = Constants.ADD_DESC;
-		this.name = Constants.ADD_NAME;
-		this.pugChannelOnlyCommand = true;
-		this.server = server;
+		super(server);
 	}
 
 	@Override
@@ -71,5 +66,32 @@ public class CmdAdd extends Command {
 		}
 
 		return response;
+	}
+
+	@Override
+	public boolean isAdminRequired() {
+		return false;
+	}
+
+	@Override
+	public boolean isGlobalCommand() {
+		return false;
+	}
+
+	@Override
+	public String getName() {
+		return "Add";
+	}
+
+	@Override
+	public String getDescription() {
+		return "Adds yourself to a game queue";
+	}
+
+	@Override
+	public String getHelp() {
+		return  getBaseCommand() + " - Joins all available queues\n" +
+				getBaseCommand() + " <queue name>... - Joins all queues named\n" +
+				getBaseCommand() + " <index>... - Joins all queues at the specified indices";
 	}
 }

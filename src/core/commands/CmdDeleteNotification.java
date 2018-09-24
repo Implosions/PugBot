@@ -1,6 +1,5 @@
 package core.commands;
 
-import core.Constants;
 import core.entities.Queue;
 import core.entities.QueueManager;
 import core.entities.Server;
@@ -13,10 +12,7 @@ import net.dv8tion.jda.core.entities.Message;
 public class CmdDeleteNotification extends Command {
 
 	public CmdDeleteNotification(Server server) {
-		this.helpMsg = Constants.DELETENOTIFICATION_HELP;
-		this.description = Constants.DELETENOTIFICATION_DESC;
-		this.name = Constants.DELETENOTIFICATION_NAME;
-		this.server = server;
+		super(server);
 	}
 
 	@Override
@@ -54,5 +50,31 @@ public class CmdDeleteNotification extends Command {
 		}
 
 		return response;
+	}
+
+	@Override
+	public boolean isAdminRequired() {
+		return false;
+	}
+
+	@Override
+	public boolean isGlobalCommand() {
+		return false;
+	}
+
+	@Override
+	public String getName() {
+		return "DeleteNotification";
+	}
+
+	@Override
+	public String getDescription() {
+		return "Deletes queue notifications";
+	}
+
+	@Override
+	public String getHelp() {
+		return  getBaseCommand() + " - Deletes all notifications\n" +
+				getBaseCommand() + " <queue name|queue index> - Deletes all notifications for a specific queue";
 	}
 }

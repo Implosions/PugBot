@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import core.Constants;
 import core.entities.Server;
 import core.exceptions.BadArgumentsException;
 import core.util.Utils;
@@ -18,12 +17,9 @@ public class CmdBully extends Command {
 
 	private List<String> actionList = getActionList();
 	private Random random = new Random();
-
+	
 	public CmdBully(Server server) {
-		this.helpMsg = Constants.BULLY_HELP;
-		this.description = Constants.BULLY_DESC;
-		this.name = Constants.BULLY_NAME;
-		this.server = server;
+		super(server);
 	}
 
 	@Override
@@ -31,7 +27,7 @@ public class CmdBully extends Command {
 		if (args.length != 1) {
 			throw new BadArgumentsException();
 		}
-
+		
 		Member m = server.getMember(args[0]);
 		String action = actionList.get(random.nextInt(actionList.size()));
 
@@ -57,5 +53,30 @@ public class CmdBully extends Command {
 		}
 
 		return actionList;
+	}
+
+	@Override
+	public boolean isAdminRequired() {
+		return false;
+	}
+
+	@Override
+	public boolean isGlobalCommand() {
+		return true;
+	}
+
+	@Override
+	public String getName() {
+		return "Bully";
+	}
+
+	@Override
+	public String getDescription() {
+		return "Banter another user";
+	}
+
+	@Override
+	public String getHelp() {
+		return getBaseCommand() + " <user>";
 	}
 }

@@ -1,6 +1,5 @@
 package core.commands;
 
-import core.Constants;
 import core.entities.Server;
 import core.exceptions.BadArgumentsException;
 import core.exceptions.InvalidUseException;
@@ -11,11 +10,7 @@ import net.dv8tion.jda.core.entities.Message;
 public class CmdRemoveAdmin extends Command {
 
 	public CmdRemoveAdmin(Server server) {
-		this.name = Constants.REMOVEADMIN_NAME;
-		this.description = Constants.REMOVEADMIN_DESC;
-		this.helpMsg = Constants.REMOVEADMIN_HELP;
-		this.adminRequired = true;
-		this.server = server;
+		super(server);
 	}
 
 	@Override
@@ -35,6 +30,31 @@ public class CmdRemoveAdmin extends Command {
 		this.response = Utils.createMessage(String.format("`%s's admin removed`", m.getEffectiveName()));
 
 		return response;
+	}
+
+	@Override
+	public boolean isAdminRequired() {
+		return true;
+	}
+
+	@Override
+	public boolean isGlobalCommand() {
+		return true;
+	}
+
+	@Override
+	public String getName() {
+		return "RemoveAdmin";
+	}
+
+	@Override
+	public String getDescription() {
+		return "Removes a user's bot admin privileges";
+	}
+
+	@Override
+	public String getHelp() {
+		return getBaseCommand() + " <username>";
 	}
 
 }

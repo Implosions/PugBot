@@ -1,6 +1,5 @@
 package core.commands;
 
-import core.Constants;
 import core.Database;
 import core.entities.Queue;
 import core.entities.QueueManager;
@@ -14,12 +13,7 @@ import net.dv8tion.jda.core.entities.Message;
 public class CmdEditQueue extends Command {
 
 	public CmdEditQueue(Server server) {
-		this.helpMsg = Constants.EDITQUEUE_HELP;
-		this.description = Constants.EDITQUEUE_DESC;
-		this.name = Constants.EDITQUEUE_NAME;
-		this.adminRequired = true;
-		this.pugChannelOnlyCommand = true;
-		this.server = server;
+		super(server);
 	}
 
 	@Override
@@ -63,5 +57,31 @@ public class CmdEditQueue extends Command {
 		qm.updateTopic();
 
 		return response;
+	}
+
+	@Override
+	public boolean isAdminRequired() {
+		return true;
+	}
+
+	@Override
+	public boolean isGlobalCommand() {
+		return false;
+	}
+
+	@Override
+	public String getName() {
+		return "EditQueue";
+	}
+
+	@Override
+	public String getDescription() {
+		return "Edits an active queue's name and max player count";
+	}
+
+	@Override
+	public String getHelp() {
+		return  getBaseCommand() + " <queue name> <new queue name> <new max players>\n" +
+				getBaseCommand() + " <queue index> <new queue name> <new max players>";
 	}
 }

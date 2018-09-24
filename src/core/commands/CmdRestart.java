@@ -1,6 +1,5 @@
 package core.commands;
 
-import core.Constants;
 import core.entities.Server;
 import core.entities.ServerManager;
 import core.util.Utils;
@@ -10,11 +9,7 @@ import net.dv8tion.jda.core.entities.Message;
 public class CmdRestart extends Command {
 
 	public CmdRestart(Server server) {
-		this.name = Constants.RESTART_NAME;
-		this.description = Constants.RESTART_DESC;
-		this.helpMsg = Constants.RESTART_HELP;
-		this.adminRequired = true;
-		this.server = server;
+		super(server);
 	}
 
 	@Override
@@ -26,6 +21,31 @@ public class CmdRestart extends Command {
 		this.response = Utils.createMessage("`Server instance restarted`");
 
 		return response;
+	}
+
+	@Override
+	public boolean isAdminRequired() {
+		return true;
+	}
+
+	@Override
+	public boolean isGlobalCommand() {
+		return true;
+	}
+
+	@Override
+	public String getName() {
+		return "Restart";
+	}
+
+	@Override
+	public String getDescription() {
+		return "Restarts this bot's instance";
+	}
+
+	@Override
+	public String getHelp() {
+		return getBaseCommand();
 	}
 
 }

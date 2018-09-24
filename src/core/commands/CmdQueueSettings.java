@@ -2,7 +2,6 @@ package core.commands;
 
 import java.util.Arrays;
 
-import core.Constants;
 import core.entities.Queue;
 import core.entities.Server;
 import core.entities.settings.ISetting;
@@ -14,12 +13,9 @@ import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.Message;
 
 public class CmdQueueSettings extends Command {
+	
 	public CmdQueueSettings(Server server) {
-		this.name = Constants.QUEUESETTINGS_NAME;
-		this.helpMsg = Constants.QUEUESETTINGS_HELP;
-		this.description = Constants.QUEUESETTINGS_DESC;
-		this.adminRequired = true;
-		this.server = server;
+		super(server);
 	}
 
 	@Override
@@ -56,5 +52,32 @@ public class CmdQueueSettings extends Command {
 		}
 		
 		return response;
+	}
+
+	@Override
+	public boolean isAdminRequired() {
+		return true;
+	}
+
+	@Override
+	public boolean isGlobalCommand() {
+		return false;
+	}
+
+	@Override
+	public String getName() {
+		return "QueueSettings";
+	}
+
+	@Override
+	public String getDescription() {
+		return "Sets or gets a game queue's settings";
+	}
+
+	@Override
+	public String getHelp() {
+		return  getBaseCommand() + " <queue name|queue index> - Lists this queue's settings\n" +
+				getBaseCommand() + " <queue name|queue index> <setting> - Lists a setting and its description\n" +
+				getBaseCommand() + " <queue name|queue index> <setting> <args> - Updates a setting";
 	}
 }

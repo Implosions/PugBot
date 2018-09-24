@@ -1,20 +1,16 @@
 package core.commands;
 
-import core.Constants;
 import core.entities.Server;
 import core.util.Utils;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.Message;
 
 public class CmdGroups extends Command{
-
-	public CmdGroups(Server server){
-		this.name = Constants.GROUPS_NAME;
-		this.description = Constants.GROUPS_DESC;
-		this.helpMsg = Constants.GROUPS_HELP;
-		this.server = server;
-	}
 	
+	public CmdGroups(Server server) {
+		super(server);
+	}
+
 	@Override
 	public Message execCommand(Member caller, String[] args) {
 		String formattedNames = String.join(", ", server.getGroupNames());
@@ -26,6 +22,31 @@ public class CmdGroups extends Command{
 		response = Utils.createMessage("Available groups:", formattedNames, true);
 		
 		return response;
+	}
+
+	@Override
+	public boolean isAdminRequired() {
+		return false;
+	}
+
+	@Override
+	public boolean isGlobalCommand() {
+		return false;
+	}
+
+	@Override
+	public String getName() {
+		return "Groups";
+	}
+
+	@Override
+	public String getDescription() {
+		return "Lists the currenty available groups";
+	}
+
+	@Override
+	public String getHelp() {
+		return getBaseCommand();
 	}
 
 }

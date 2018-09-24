@@ -1,6 +1,5 @@
 package core.commands;
 
-import core.Constants;
 import core.entities.Queue;
 import core.entities.QueueManager;
 import core.entities.Server;
@@ -13,10 +12,7 @@ import net.dv8tion.jda.core.entities.Message;
 public class CmdNotify extends Command {
 
 	public CmdNotify(Server server) {
-		this.helpMsg = Constants.NOTIFY_HELP;
-		this.description = Constants.NOTIFY_DESC;
-		this.name = Constants.NOTIFY_NAME;
-		this.server = server;
+		super(server);
 	}
 
 	@Override
@@ -55,5 +51,31 @@ public class CmdNotify extends Command {
 				String.format("`Notification added to queue '%s' at %d players`", queue.getName(), playerCount));
 
 		return response;
+	}
+
+	@Override
+	public boolean isAdminRequired() {
+		return false;
+	}
+
+	@Override
+	public boolean isGlobalCommand() {
+		return false;
+	}
+
+	@Override
+	public String getName() {
+		return "Notify";
+	}
+
+	@Override
+	public String getDescription() {
+		return "Adds a notification to a game queue so that you will be messaged when a specified player count is reached";
+	}
+
+	@Override
+	public String getHelp() {
+		return  getBaseCommand() + " <queue name> <player count>\n" +
+				getBaseCommand() + " <queue index> <player count>";
 	}
 }

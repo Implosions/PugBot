@@ -1,6 +1,5 @@
 package core.commands;
 
-import core.Constants;
 import core.entities.Server;
 import core.exceptions.BadArgumentsException;
 import core.util.Utils;
@@ -9,14 +8,11 @@ import net.dv8tion.jda.core.entities.Message;
 import net.dv8tion.jda.core.entities.Role;
 
 public class CmdJoinGroup extends Command{
-
-	public CmdJoinGroup(Server server){
-		this.name = Constants.JOINGROUP_NAME;
-		this.description = Constants.JOINGROUP_DESC;
-		this.helpMsg = Constants.JOINGROUP_HELP;
-		this.server = server;
-	}
 	
+	public CmdJoinGroup(Server server) {
+		super(server);
+	}
+
 	@Override
 	public Message execCommand(Member caller, String[] args) {
 		if(args.length == 0){
@@ -31,6 +27,31 @@ public class CmdJoinGroup extends Command{
 		response = Utils.createMessage(String.format("`%s joined the group: %s`", caller.getEffectiveName(), groupName));
 		
 		return response;
+	}
+
+	@Override
+	public boolean isAdminRequired() {
+		return false;
+	}
+
+	@Override
+	public boolean isGlobalCommand() {
+		return false;
+	}
+
+	@Override
+	public String getName() {
+		return "JoinGroup";
+	}
+
+	@Override
+	public String getDescription() {
+		return "Grants you this group's pingable role";
+	}
+
+	@Override
+	public String getHelp() {
+		return getBaseCommand() + " <group name>";
 	}
 
 }

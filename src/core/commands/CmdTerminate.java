@@ -7,11 +7,9 @@ import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.Message;
 
 public class CmdTerminate extends Command {
+
 	public CmdTerminate(Server server) {
-		this.name = Constants.TERMINATE_NAME;
-		this.helpMsg = Constants.TERMINATE_HELP;
-		this.description = Constants.TERMINATE_DESC;
-		this.server = server;
+		super(server);
 	}
 
 	@Override
@@ -23,5 +21,30 @@ public class CmdTerminate extends Command {
 		System.exit(0);
 
 		return null;
+	}
+
+	@Override
+	public boolean isAdminRequired() {
+		return true;
+	}
+
+	@Override
+	public boolean isGlobalCommand() {
+		return true;
+	}
+
+	@Override
+	public String getName() {
+		return "Terminate";
+	}
+
+	@Override
+	public String getDescription() {
+		return "Shuts down the bot";
+	}
+
+	@Override
+	public String getHelp() {
+		return getBaseCommand();
 	}
 }

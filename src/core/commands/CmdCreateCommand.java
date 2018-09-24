@@ -2,7 +2,6 @@ package core.commands;
 
 import java.util.Arrays;
 
-import core.Constants;
 import core.Database;
 import core.entities.Server;
 import core.exceptions.BadArgumentsException;
@@ -14,11 +13,7 @@ import net.dv8tion.jda.core.entities.Message;
 public class CmdCreateCommand extends Command {
 
 	public CmdCreateCommand(Server server) {
-		this.name = Constants.CREATECOMMAND_NAME;
-		this.helpMsg = Constants.CREATECOMMAND_HELP;
-		this.description = Constants.CREATECOMMAND_DESC;
-		this.adminRequired = true;
-		this.server = server;
+		super(server);
 	}
 
 	@Override
@@ -29,15 +24,40 @@ public class CmdCreateCommand extends Command {
 
 		String cmdName = args[0].toLowerCase();
 
-		if (server.cmds.validateCommand(cmdName)) {
+		if (server.getCommandManager().doesCommandExist(cmdName)) {
 			throw new InvalidUseException(String.format("Command '%s' already exists", cmdName));
 		}
 
 		String cmdResponse = String.join(" ", Arrays.copyOfRange(args, 1, args.length));
 
-		server.cmds.addCommand(new CustomCommand(cmdName, cmdResponse));
+		server.getCommandManager().addCommand(new CustomCommand(server, cmdName, cmdResponse));
 		Database.insertServerCustomCommand(Long.valueOf(server.getId()), cmdName, cmdResponse);
 
 		return Utils.createMessage(String.format("Command '%s' created", cmdName));
+	}
+
+	@Override
+	public boolean isAdminRequired() {
+		return true;
+	}
+
+	@Override
+	public boolean isGlobalCommand() {
+		return false;
+	}
+
+	@Override
+	public String getName() {
+		return "CreateCommand";
+	}
+
+	@Override
+	public String getDescription() {
+		return "Creates a new command that will output a set message when invoked";
+	}
+
+	@Override
+	public String getHelp() {
+		return getBaseCommand() + " <command name> <command output>";
 	}
 }

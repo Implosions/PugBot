@@ -1,6 +1,5 @@
 package core.commands;
 
-import core.Constants;
 import core.entities.Server;
 import core.exceptions.BadArgumentsException;
 import core.exceptions.InvalidUseException;
@@ -11,11 +10,7 @@ import net.dv8tion.jda.core.entities.Message;
 public class CmdBan extends Command {
 
 	public CmdBan(Server server) {
-		this.name = Constants.BAN_NAME;
-		this.description = Constants.BAN_DESC;
-		this.helpMsg = Constants.BAN_HELP;
-		this.adminRequired = true;
-		this.server = server;
+		super(server);
 	}
 
 	@Override
@@ -37,5 +32,30 @@ public class CmdBan extends Command {
 		this.response = Utils.createMessage(String.format("`%s banned`", m.getEffectiveName()));
 
 		return response;
+	}
+
+	@Override
+	public boolean isAdminRequired() {
+		return true;
+	}
+
+	@Override
+	public boolean isGlobalCommand() {
+		return true;
+	}
+
+	@Override
+	public String getName() {
+		return "Ban";
+	}
+
+	@Override
+	public String getDescription() {
+		return "Bans a user from interacting with the bot";
+	}
+
+	@Override
+	public String getHelp() {
+		return getBaseCommand() + " <user>";
 	}
 }

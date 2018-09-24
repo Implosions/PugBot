@@ -1,6 +1,5 @@
 package core.commands;
 
-import core.Constants;
 import core.entities.Game;
 import core.entities.QueueManager;
 import core.entities.Server;
@@ -13,11 +12,7 @@ import net.dv8tion.jda.core.entities.Message;
 public class CmdSub extends Command {
 
 	public CmdSub(Server server) {
-		this.helpMsg = Constants.SUB_HELP;
-		this.description = Constants.SUB_DESC;
-		this.name = Constants.SUB_NAME;
-		this.pugChannelOnlyCommand = true;
-		this.server = server;
+		super(server);
 	}
 
 	@Override
@@ -60,5 +55,31 @@ public class CmdSub extends Command {
 		qm.updateTopic();
 
 		return response;
+	}
+
+	@Override
+	public boolean isAdminRequired() {
+		return false;
+	}
+
+	@Override
+	public boolean isGlobalCommand() {
+		return false;
+	}
+
+	@Override
+	public String getName() {
+		return "Sub";
+	}
+
+	@Override
+	public String getDescription() {
+		return "Substites a player currently in-game";
+	}
+
+	@Override
+	public String getHelp() {
+		return  getBaseCommand() + " <username> - Substitutes a player in-game for yourself\n" +
+				getBaseCommand() + " <target username> <substitute username> - Substitues a player for another (Admin required)";
 	}
 }

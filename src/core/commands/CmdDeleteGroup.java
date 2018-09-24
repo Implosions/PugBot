@@ -1,6 +1,5 @@
 package core.commands;
 
-import core.Constants;
 import core.entities.Server;
 import core.exceptions.BadArgumentsException;
 import core.util.Utils;
@@ -8,15 +7,11 @@ import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.Message;
 
 public class CmdDeleteGroup extends Command{
-
-	public CmdDeleteGroup(Server server){
-		this.name = Constants.DELETEGROUP_NAME;
-		this.description = Constants.DELETEGROUP_DESC;
-		this.helpMsg = Constants.DELETEGROUP_HELP;
-		this.adminRequired = true;
-		this.server = server;
-	}
 	
+	public CmdDeleteGroup(Server server) {
+		super(server);
+	}
+
 	@Override
 	public Message execCommand(Member caller, String[] args) {
 		if(args.length == 0){
@@ -29,6 +24,31 @@ public class CmdDeleteGroup extends Command{
 		response = Utils.createMessage(String.format("`Group '%s' deleted`", groupName));
 		
 		return response;
+	}
+
+	@Override
+	public boolean isAdminRequired() {
+		return true;
+	}
+
+	@Override
+	public boolean isGlobalCommand() {
+		return false;
+	}
+
+	@Override
+	public String getName() {
+		return "DeleteGroup";
+	}
+
+	@Override
+	public String getDescription() {
+		return "Deletes a group";
+	}
+
+	@Override
+	public String getHelp() {
+		return getBaseCommand() + " <group name>";
 	}
 
 }

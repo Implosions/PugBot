@@ -3,7 +3,6 @@ package core.commands;
 import java.awt.Color;
 import java.util.concurrent.TimeUnit;
 
-import core.Constants;
 import core.Database;
 import core.entities.Server;
 import net.dv8tion.jda.core.EmbedBuilder;
@@ -12,14 +11,11 @@ import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.Message;
 
 public class CmdStats extends Command {
-
-	public CmdStats(Server server){
-		this.name = Constants.STATS_NAME;
-		this.description = Constants.STATS_DESC;
-		this.helpMsg = Constants.STATS_HELP;
-		this.server = server;
-	}
 	
+	public CmdStats(Server server) {
+		super(server);
+	}
+
 	@Override
 	public Message execCommand(Member caller, String[] args) {
 		EmbedBuilder embedBuilder = new EmbedBuilder().setColor(Color.green);
@@ -56,6 +52,32 @@ public class CmdStats extends Command {
 		}
 				
 		return response;
+	}
+
+	@Override
+	public boolean isAdminRequired() {
+		return false;
+	}
+
+	@Override
+	public boolean isGlobalCommand() {
+		return false;
+	}
+
+	@Override
+	public String getName() {
+		return "Stats";
+	}
+
+	@Override
+	public String getDescription() {
+		return "Retrieves server or player stats";
+	}
+
+	@Override
+	public String getHelp() {
+		return  getBaseCommand() + " - Lists general server stats\n" +
+				getBaseCommand() + " <username> - Lists a player's stats";
 	}
 
 }

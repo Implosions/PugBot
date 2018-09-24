@@ -33,12 +33,11 @@ public class Server {
 	private Set<Long> banList;
 	private Set<Long> adminList;
 	private HashMap<String, Role> groupDict = new HashMap<String, Role>();
-
-	public Commands cmds;
+	private CommandManager commandManager;
 
 	public Server(Guild guild) {
 		this.guild = guild;
-		cmds = new Commands(this);
+		commandManager = new CommandManager(this);
 
 		// Insert guild into database
 		Database.insertDiscordServer(getId(), guild.getName());
@@ -307,5 +306,9 @@ public class Server {
 		}
 
 		return groupDict.get(groupName.toLowerCase());
+	}
+	
+	public CommandManager getCommandManager(){
+		return commandManager;
 	}
 }

@@ -1,6 +1,5 @@
 package core.commands;
 
-import core.Constants;
 import core.entities.Server;
 import core.entities.menus.RPSMenuController;
 import core.exceptions.BadArgumentsException;
@@ -12,10 +11,7 @@ import net.dv8tion.jda.core.entities.Message;
 public class CmdRPS extends Command {
 
 	public CmdRPS(Server server) {
-		this.name = Constants.RPS_NAME;
-		this.description = Constants.RPS_DESC;
-		this.helpMsg = Constants.RPS_HELP;
-		this.server = server;
+		super(server);
 	}
 
 	@Override
@@ -41,5 +37,30 @@ public class CmdRPS extends Command {
 		this.response = Utils.createMessage("`Challenge sent`");
 
 		return response;
+	}
+
+	@Override
+	public boolean isAdminRequired() {
+		return false;
+	}
+
+	@Override
+	public boolean isGlobalCommand() {
+		return true;
+	}
+
+	@Override
+	public String getName() {
+		return "RPS";
+	}
+
+	@Override
+	public String getDescription() {
+		return "Starts a Rock-Paper-Scissors game with another user";
+	}
+
+	@Override
+	public String getHelp() {
+		return getBaseCommand() + " <username>";
 	}
 }

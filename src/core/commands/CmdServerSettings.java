@@ -2,7 +2,6 @@ package core.commands;
 
 import java.util.Arrays;
 
-import core.Constants;
 import core.entities.Server;
 import core.entities.settings.ISetting;
 import core.util.Utils;
@@ -12,11 +11,7 @@ import net.dv8tion.jda.core.entities.Message;
 public class CmdServerSettings extends Command {
 
 	public CmdServerSettings(Server server) {
-		this.name = Constants.SERVERSETTINGS_NAME;
-		this.helpMsg = Constants.SERVERSETTINGS_HELP;
-		this.description = Constants.SERVERSETTINGS_DESC;
-		this.adminRequired = true;
-		this.server = server;
+		super(server);
 	}
 
 	@Override
@@ -38,6 +33,33 @@ public class CmdServerSettings extends Command {
 		}
 
 		return response;
+	}
+
+	@Override
+	public boolean isAdminRequired() {
+		return true;
+	}
+
+	@Override
+	public boolean isGlobalCommand() {
+		return true;
+	}
+
+	@Override
+	public String getName() {
+		return "ServerSettings";
+	}
+
+	@Override
+	public String getDescription() {
+		return "Gets or sets this bot's server settings";
+	}
+
+	@Override
+	public String getHelp() {
+		return  getBaseCommand() + " - Lists all server settings\n" +
+				getBaseCommand() + "<setting> - Lists a setting and its description\n" +
+				getBaseCommand() + "<setting> <args> - Updates a setting";
 	}
 
 }

@@ -1,6 +1,5 @@
 package core.commands;
 
-import core.Constants;
 import core.entities.Queue;
 import core.entities.QueueManager;
 import core.entities.Server;
@@ -12,11 +11,7 @@ import net.dv8tion.jda.core.entities.Message;
 public class CmdDel extends Command {
 
 	public CmdDel(Server server) {
-		this.helpMsg = Constants.DEL_HELP;
-		this.description = Constants.DEL_DESC;
-		this.name = Constants.DEL_NAME;
-		this.pugChannelOnlyCommand = true;
-		this.server = server;
+		super(server);
 	}
 
 	@Override
@@ -53,5 +48,32 @@ public class CmdDel extends Command {
 		qm.updateTopic();
 
 		return response;
+	}
+
+	@Override
+	public boolean isAdminRequired() {
+		return false;
+	}
+
+	@Override
+	public boolean isGlobalCommand() {
+		return false;
+	}
+
+	@Override
+	public String getName() {
+		return "Del";
+	}
+
+	@Override
+	public String getDescription() {
+		return "Leaves a game queue";
+	}
+
+	@Override
+	public String getHelp() {
+		return  getBaseCommand() + " - Removes yourself from all queues\n" +
+				getBaseCommand() + " <queue name>... - Removes yourself from all queues named\n" +
+				getBaseCommand() + " <index>... - Removes yourself from all queues at the specified indices";
 	}
 }

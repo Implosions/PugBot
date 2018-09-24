@@ -1,6 +1,5 @@
 package core.commands;
 
-import core.Constants;
 import core.entities.Game;
 import core.entities.Game.GameStatus;
 import core.entities.QueueManager;
@@ -14,11 +13,7 @@ import net.dv8tion.jda.core.entities.Message;
 public class CmdSubCaptain extends Command {
 
 	public CmdSubCaptain(Server server) {
-		this.name = Constants.SUBCAPTAIN_NAME;
-		this.description = Constants.SUBCAPTAIN_DESC;
-		this.helpMsg = Constants.SUBCAPTAIN_HELP;
-		this.pugChannelOnlyCommand = true;
-		this.server = server;
+		super(server);
 	}
 
 	@Override
@@ -54,5 +49,30 @@ public class CmdSubCaptain extends Command {
 				target.getEffectiveName()));
 
 		return response;
+	}
+
+	@Override
+	public boolean isAdminRequired() {
+		return false;
+	}
+
+	@Override
+	public boolean isGlobalCommand() {
+		return false;
+	}
+
+	@Override
+	public String getName() {
+		return "SubCaptain";
+	}
+
+	@Override
+	public String getDescription() {
+		return "Substitute a captain in an ongoing game";
+	}
+
+	@Override
+	public String getHelp() {
+		return getBaseCommand() + " <captain username>";
 	}
 }

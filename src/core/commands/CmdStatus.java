@@ -2,7 +2,6 @@ package core.commands;
 
 import java.util.List;
 
-import core.Constants;
 import core.entities.Game;
 import core.entities.Queue;
 import core.entities.QueueManager;
@@ -13,13 +12,9 @@ import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.Message;
 
 public class CmdStatus extends Command {
-	
+
 	public CmdStatus(Server server) {
-		this.helpMsg = Constants.STATUS_HELP;
-		this.description = Constants.STATUS_DESC;
-		this.name = Constants.STATUS_NAME;
-		this.pugChannelOnlyCommand = true;
-		this.server = server;
+		super(server);
 	}
 
 	@Override
@@ -34,11 +29,6 @@ public class CmdStatus extends Command {
 		}
 		
 		this.response = Utils.createMessage(null, statusMsg, true);
-		
-		// Delete last status message
-		if (lastResponseId != null) {
-			qm.getServer().getPugChannel().deleteMessageById(lastResponseId).complete();
-		}
 		
 		return response;
 	}
@@ -79,5 +69,31 @@ public class CmdStatus extends Command {
 		}
 		
 		return statusMsg;
+	}
+
+	@Override
+	public boolean isAdminRequired() {
+		return false;
+	}
+
+	@Override
+	public boolean isGlobalCommand() {
+		return false;
+	}
+
+	@Override
+	public String getName() {
+		return "Status";
+	}
+
+	@Override
+	public String getDescription() {
+		return "Lists all players in queue and all active games";
+	}
+
+	@Override
+	public String getHelp() {
+		return  getBaseCommand() + " - Lists information for all queues\n" + 
+				getBaseCommand() + " <queue name|queue index> - Lists information for a specific queue";
 	}
 }

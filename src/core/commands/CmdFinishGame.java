@@ -2,7 +2,6 @@ package core.commands;
 
 import java.util.concurrent.TimeUnit;
 
-import core.Constants;
 import core.entities.Game;
 import core.entities.Game.GameStatus;
 import core.entities.QueueManager;
@@ -14,15 +13,11 @@ import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.Message;
 
 public class CmdFinishGame extends Command {
-
-	public CmdFinishGame(Server server) {
-		this.helpMsg = Constants.FINISHGAME_HELP;
-		this.description = Constants.FINISHGAME_DESC;
-		this.name = Constants.FINISHGAME_NAME;
-		this.pugChannelOnlyCommand = true;
-		this.server = server;
-	}
 	
+	public CmdFinishGame(Server server) {
+		super(server);
+	}
+
 	@Override
 	public Message execCommand(Member caller, String[] args) {
 		QueueManager qm = server.getQueueManager();
@@ -43,13 +38,13 @@ public class CmdFinishGame extends Command {
 		
 		String title = String.format("Game '%s' finished", game.getQueueName());
 		
-		if(game.getStatus() == GameStatus.PICKING){
-			qm.finishGame(game, null);
-			
-			return Utils.createMessage("`" + title + "`");
-		}
-		
 		if(args.length == 0){
+			if(game.getStatus() == GameStatus.PICKING || server.isAdmin(caller)){
+				qm.finishGame(game, null);
+				
+				return Utils.createMessage("`" + title + "`");
+			}
+			
 			throw new BadArgumentsException();
 		}
 		
@@ -80,6 +75,32 @@ public class CmdFinishGame extends Command {
 		}
 		
 		return response;
+	}
+
+	@Override
+	public boolean isAdminRequired() {
+		return false;
+	}
+
+	@Override
+	public boolean isGlobalCommand() {
+		return false;
+	}
+
+	@Override
+	public String getName() {
+		return "FinishGame";
+	}
+
+	@Override
+	public String getDescription() {
+		return "Finishes a game so that users can requeue (usable only by captains and admins)";
+	}
+
+	@Override
+	public String getHelp() {
+		return  getBaseCommand() + " - Finishes an unstarted game\n" +
+				getBaseCommand() + " win/loss/tie - Finishes a game and records the result";
 	}
 
 }

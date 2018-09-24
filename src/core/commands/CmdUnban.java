@@ -1,6 +1,5 @@
 package core.commands;
 
-import core.Constants;
 import core.entities.Server;
 import core.exceptions.BadArgumentsException;
 import core.util.Utils;
@@ -10,11 +9,7 @@ import net.dv8tion.jda.core.entities.Message;
 public class CmdUnban extends Command {
 
 	public CmdUnban(Server server) {
-		this.name = Constants.UNBAN_NAME;
-		this.description = Constants.UNBAN_DESC;
-		this.helpMsg = Constants.UNBAN_HELP;
-		this.adminRequired = true;
-		this.server = server;
+		super(server);
 	}
 
 	@Override
@@ -37,5 +32,30 @@ public class CmdUnban extends Command {
 		this.response = Utils.createMessage(String.format("`%s has been unbanned`", pName));
 
 		return response;
+	}
+
+	@Override
+	public boolean isAdminRequired() {
+		return true;
+	}
+
+	@Override
+	public boolean isGlobalCommand() {
+		return true;
+	}
+
+	@Override
+	public String getName() {
+		return "Unban";
+	}
+
+	@Override
+	public String getDescription() {
+		return "Unbans a user";
+	}
+
+	@Override
+	public String getHelp() {
+		return getBaseCommand() + " <username>";
 	}
 }

@@ -2,7 +2,6 @@ package core.commands;
 
 import java.util.Arrays;
 
-import core.Constants;
 import core.entities.Queue;
 import core.entities.QueueManager;
 import core.entities.Server;
@@ -15,12 +14,7 @@ import net.dv8tion.jda.core.entities.Message;
 public class CmdRemove extends Command {
 
 	public CmdRemove(Server server) {
-		this.helpMsg = Constants.REMOVE_HELP;
-		this.description = Constants.REMOVE_DESC;
-		this.name = Constants.REMOVE_NAME;
-		this.adminRequired = true;
-		this.pugChannelOnlyCommand = true;
-		this.server = server;
+		super(server);
 	}
 
 	@Override
@@ -58,6 +52,32 @@ public class CmdRemove extends Command {
 		qm.updateTopic();
 
 		return response;
+	}
+
+	@Override
+	public boolean isAdminRequired() {
+		return true;
+	}
+
+	@Override
+	public boolean isGlobalCommand() {
+		return false;
+	}
+
+	@Override
+	public String getName() {
+		return "Remove";
+	}
+
+	@Override
+	public String getDescription() {
+		return "Removes a player from a queue";
+	}
+
+	@Override
+	public String getHelp() {
+		return  getBaseCommand() + " <username> - Removes a player from all queues\n" +
+				getBaseCommand() + " <username> <queue name|queue index> - Removes a player from a specific queue";
 	}
 
 }

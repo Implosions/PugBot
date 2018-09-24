@@ -1,6 +1,5 @@
 package core.commands;
 
-import core.Constants;
 import core.Database;
 import core.entities.Queue;
 import core.entities.QueueManager;
@@ -14,12 +13,7 @@ import net.dv8tion.jda.core.entities.Message;
 public class CmdRemoveQueue extends Command {
 
 	public CmdRemoveQueue(Server server) {
-		this.helpMsg = Constants.REMOVEQUEUE_HELP;
-		this.description = Constants.REMOVEQUEUE_DESC;
-		this.name = Constants.REMOVEQUEUE_NAME;
-		this.adminRequired = true;
-		this.pugChannelOnlyCommand = true;
-		this.server = server;
+		super(server);
 	}
 
 	@Override
@@ -46,5 +40,31 @@ public class CmdRemoveQueue extends Command {
 		this.response = Utils.createMessage(String.format("`Queue: %s removed`", queueNames));
 		
 		return response;
+	}
+
+	@Override
+	public boolean isAdminRequired() {
+		return true;
+	}
+
+	@Override
+	public boolean isGlobalCommand() {
+		return false;
+	}
+
+	@Override
+	public String getName() {
+		return "RemoveQueue";
+	}
+
+	@Override
+	public String getDescription() {
+		return "Removes a queue from the queue list";
+	}
+
+	@Override
+	public String getHelp() {
+		return  getBaseCommand() + " <queue name>\n" + 
+				getBaseCommand() + " <queue index>";
 	}
 }

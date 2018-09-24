@@ -1,6 +1,5 @@
 package core.commands;
 
-import core.Constants;
 import core.entities.Server;
 import core.exceptions.BadArgumentsException;
 import core.util.Utils;
@@ -10,11 +9,7 @@ import net.dv8tion.jda.core.entities.Message;
 public class CmdCreateGroup extends Command {
 
 	public CmdCreateGroup(Server server) {
-		this.name = Constants.ADDGROUP_NAME;
-		this.description = Constants.ADDGROUP_DESC;
-		this.helpMsg = Constants.ADDGROUP_HELP;
-		this.adminRequired = true;
-		this.server = server;
+		super(server);
 	}
 
 	@Override
@@ -29,5 +24,30 @@ public class CmdCreateGroup extends Command {
 		response = Utils.createMessage(String.format("`Group '%s' created`", groupName));
 
 		return response;
+	}
+
+	@Override
+	public boolean isAdminRequired() {
+		return true;
+	}
+
+	@Override
+	public boolean isGlobalCommand() {
+		return false;
+	}
+
+	@Override
+	public String getName() {
+		return "CreateGroup";
+	}
+
+	@Override
+	public String getDescription() {
+		return "Creates a pingable role that users can join and leave from";
+	}
+
+	@Override
+	public String getHelp() {
+		return getBaseCommand() + " <group name>";
 	}
 }

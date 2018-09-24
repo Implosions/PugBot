@@ -1,61 +1,103 @@
 package core.commands;
 
-import core.Constants;
+import java.awt.Color;
+import java.util.List;
+
 import core.entities.Server;
+import core.exceptions.InvalidUseException;
 import core.util.Utils;
+import net.dv8tion.jda.core.EmbedBuilder;
+import net.dv8tion.jda.core.MessageBuilder;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.Message;
+import net.dv8tion.jda.core.entities.MessageEmbed.Field;
 
 public class CmdHelp extends Command {
 
 	public CmdHelp(Server server) {
-		this.helpMsg = Constants.HELP_HELP;
-		this.description = Constants.HELP_DESC;
-		this.name = Constants.HELP_NAME;
-		this.dm = true;
-		this.server = server;
+		super(server);
 	}
 
 	@Override
 	public Message execCommand(Member caller, String[] args) {
-		String message = "";
-
+		String prefix = "!";
+		EmbedBuilder embedBuilder = new EmbedBuilder();
+		
+		embedBuilder.setColor(Color.green);
+		
 		if (args.length == 0) {
-			message += "Commands:\n\n";
-			Command cmdObj;
-
-			// List commands
-			for (String cmdName : server.cmds.getCmds()) {
-				cmdObj = server.cmds.getCommandObj(cmdName);
-				if (!cmdName.equals(Constants.TERMINATE_NAME)) {
-					message += String.format("!%s - %s%n", cmdObj.getName(), cmdObj.getDescription());
-				}
-			}
-
-			// List custom commands
-			for (String cmd : server.cmds.getCustomCmds()) {
-				cmdObj = server.cmds.getCommandObj(cmd);
-				message += String.format("!%s%n", cmdObj.getName());
-			}
-
-			// List admin commands
-			if (server.isAdmin(caller)) {
-				message += "\nAdmin commands:\n\n";
-				for (String cmd : server.cmds.getAdminCmds()) {
-					cmdObj = server.cmds.getCommandObj(cmd);
-					message += String.format("!%s - %s%n", cmdObj.getName(), cmdObj.getDescription());
+			List<ICommand> cmdList = server.getCommandManager().getCommandList();
+			
+			cmdList.sort((ICommand c1, ICommand c2) -> c1.getName().compareTo(c2.getName()));
+			
+			String regCmds = "";
+			String adminCmds = "";
+			String customCmds = "";
+			
+			for(ICommand cmd : cmdList){
+				String helpLine = String.format("%s%s - %s%n", prefix, cmd.getName(), cmd.getDescription());
+				
+				if(cmd.getClass() == CustomCommand.class){
+					customCmds += helpLine;
+				}else if(cmd.isAdminRequired()){
+					adminCmds += helpLine;
+				}else{
+					regCmds += helpLine;
 				}
 			}
 			
-		} else {
-			for (String cmdName : args) {
-				if (server.cmds.validateCommand(cmdName)) {
-					Command cmd = server.cmds.getCommandObj(cmdName);
-					message += String.format("!%s - %s. Usage: %s%n", cmd.getName(), cmd.getDescription(), cmd.help());
-				}
+			regCmds += customCmds;
+			
+			embedBuilder.addField(new Field("Commands:", regCmds,false));
+			
+			if(server.isAdmin(caller)){
+				embedBuilder.addField(new Field("Admin Commands:", adminCmds, false));
 			}
+			
+			caller.getUser().openPrivateChannel().complete().sendMessage(embedBuilder.build()).queue();
+			
+			return Utils.createMessage("`Help sent`");
+			
+		} else {
+			String cmdName = args[0];
+			
+			if(!server.getCommandManager().doesCommandExist(cmdName)){
+				throw new InvalidUseException("Command does not exist");
+			}
+			
+			ICommand cmd = server.getCommandManager().getCommand(cmdName);
+			
+			
+			String help = String.format("%s%n%n%s", cmd.getDescription(), cmd.getHelp());
+			embedBuilder.addField(new Field(cmd.getName(), help, false));
+			
+			return new MessageBuilder().setEmbed(embedBuilder.build()).build();
 		}
+	}
 
-		return Utils.createMessage(String.format("```%s```", message));
+	@Override
+	public boolean isAdminRequired() {
+		return false;
+	}
+
+	@Override
+	public boolean isGlobalCommand() {
+		return true;
+	}
+
+	@Override
+	public String getName() {
+		return "Help";
+	}
+
+	@Override
+	public String getDescription() {
+		return "Gives information about this bot's commands and functions";
+	}
+
+	@Override
+	public String getHelp() {
+		return  getBaseCommand() + " - Lists all available commands\n" +
+				getBaseCommand() + " <command name> - Lists information about a specific command";
 	}
 }

@@ -3,7 +3,7 @@ package core;
 import java.util.Arrays;
 import java.util.HashSet;
 
-import core.commands.Command;
+import core.commands.ICommand;
 import core.entities.MenuRouter;
 import core.entities.Server;
 import core.entities.ServerManager;
@@ -14,7 +14,7 @@ import net.dv8tion.jda.core.OnlineStatus;
 import net.dv8tion.jda.core.entities.Emote;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.Message;
-import net.dv8tion.jda.core.entities.MessageChannel;
+import net.dv8tion.jda.core.entities.TextChannel;
 import net.dv8tion.jda.core.entities.User;
 import net.dv8tion.jda.core.events.guild.GuildJoinEvent;
 import net.dv8tion.jda.core.events.guild.GuildLeaveEvent;
@@ -23,7 +23,6 @@ import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.core.events.message.guild.react.GenericGuildMessageReactionEvent;
 import net.dv8tion.jda.core.events.message.priv.react.PrivateMessageReactionAddEvent;
 import net.dv8tion.jda.core.events.user.UserOnlineStatusUpdateEvent;
-import net.dv8tion.jda.core.exceptions.InsufficientPermissionException;
 import net.dv8tion.jda.core.hooks.ListenerAdapter;
 
 // EventHandler class
@@ -34,10 +33,6 @@ public class EventHandler extends ListenerAdapter {
 		new ServerManager(jda);
 	}
 
-	/**
-	 * Gets message sent from guild, checks if the message is a command,
-	 * tokenizes the arguments, and executes the command.
-	 */
 	@Override
 	public void onGuildMessageReceived(GuildMessageReceivedEvent event) {
 		Server server = ServerManager.getServer(event.getGuild().getIdLong());
@@ -48,8 +43,6 @@ public class EventHandler extends ListenerAdapter {
 			if (server.isBanned(event.getMember()) || server.isSpam(event.getMessage())) {
 				return;
 			}
-
-			MessageChannel channel = event.getChannel();
 
 			// Workaround for users with spaces in their name
 			// Replaces name with user id
@@ -76,58 +69,54 @@ public class EventHandler extends ListenerAdapter {
 			// Log input
 			System.out.println("Command input: " + event.getAuthor().toString() + " " + Arrays.toString(tokens));
 
-			String cmd = tokens[0].toLowerCase();
+			String cmdName = tokens[0].toLowerCase();
 			String[] args = Arrays.copyOfRange(tokens, 1, tokens.length);
 
-			if (server.cmds.validateCommand(cmd)) {
-				Command cmdObj = server.cmds.getCommandObj(cmd);
-
-				// Pug channel only commands in other channels will be ignored
-				if (!(channel != server.getPugChannel() && cmdObj.isPugChannelOnlyCommand())) {
-
-					// Determine which channel to send response
-					if (cmdObj.getDM()) {
-						channel = event.getAuthor().openPrivateChannel().complete();
-					}
-
-					if (cmdObj.getAdminRequired() && !server.isAdmin(event.getMember())) {
-						channel.sendMessage(Utils.createMessage("Error!", "Admin required", false)).queue();
-					} else {
-						// Executes command and sends response to proper channel
-						Message response;
-						try {
-							response = cmdObj.execCommand(event.getMember(), args);
-						} catch (InvalidUseException | InsufficientPermissionException ex) {
-							response = Utils.createMessage("Error!", ex.getMessage(), false);
-						} catch (BadArgumentsException ex) {
-							response = Utils.createMessage("Error!",
-									String.format("%s%nUsage: %s", ex.getMessage(), cmdObj.help()), false);
-						} catch (Exception ex) {
-							response = Utils.createMessage("Error!", "Something went wrong", false);
-							ex.printStackTrace();
-						}
-
-						try {
-							if(response != null){
-								Message sentMsg = channel.sendMessage(response).complete();
-
-								cmdObj.setLastResponseId(sentMsg.getId());
-							}
-						} catch (Exception ex) {
-							System.out.println("Error sending message.\n" + ex.getMessage());
-						}
-					}
-				}
-			} else {
-				// Will only respond to invalid commands in the pug channel
-				if (channel.equals(server.getPugChannel())) {
-					channel.sendMessage(Utils.createMessage("Error!",
-							"Invalid command\nUse !help to see all available commands", false)).queue();
-				}
-			}
+			processCommand(server, event.getChannel(), event.getMember(), cmdName, args);
 		}
 		// Updates Server.activityList
 		server.updateActivityList(event.getMember());
+	}
+	
+	private void processCommand(Server server, TextChannel channel, Member caller, String cmdName, String[] args){
+		Message response = null;
+		ICommand cmd = null;
+
+		try{
+			// Check if command is valid
+			if(!server.getCommandManager().doesCommandExist(cmdName)){
+				throw new InvalidUseException("Command does not exist.\n"
+											+ "Use the **Help** command to see all available commands");
+			}
+			
+			cmd = server.getCommandManager().getCommand(cmdName);
+			
+			// Check if command is in the correct channel
+			if(!cmd.isGlobalCommand() && channel != server.getPugChannel()){
+				return;
+			}
+			
+			// Check if admin is required
+			if (cmd.isAdminRequired() && !server.isAdmin(caller)){
+				throw new InvalidUseException("Admin is required for this command");
+			}
+			
+			// Execute command
+			response = cmd.execCommand(caller, args);
+			
+		} catch(InvalidUseException ex) {
+			response = Utils.createMessage("Error!", ex.getMessage(), false);
+		} catch (BadArgumentsException ex) {
+			response = Utils.createMessage("Error!",
+					String.format("%s%nUsage: %s", ex.getMessage(), cmd.getHelp()), false);
+		} catch (Exception ex) {
+			response = Utils.createMessage("Error!", "Something went wrong", false);
+			ex.printStackTrace();
+		}
+		
+		if(response != null) {
+			channel.sendMessage(response).queue();
+		}
 	}
 
 	public void onUserOnlineStatusUpdate(UserOnlineStatusUpdateEvent event) {
