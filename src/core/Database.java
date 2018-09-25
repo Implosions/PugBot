@@ -1189,4 +1189,24 @@ public class Database {
 		
 		return result;
 	}
+	
+	public static void swapPlayers(long timestamp, long p1, long p2){
+		try{
+			PreparedStatement pStatement = conn.prepareStatement(
+					  "UPDATE PlayerGame SET team = "
+					+ "(SELECT SUM(team) FROM PlayerGame WHERE timestamp = ? AND (playerId = ? OR playerId = ?)) - team "
+					+ "WHERE timestamp = ? AND (playerId = ? or playerId = ?)");
+			
+			pStatement.setLong(1, timestamp);
+			pStatement.setLong(2, p1);
+			pStatement.setLong(3, p2);
+			pStatement.setLong(4, timestamp);
+			pStatement.setLong(5, p1);
+			pStatement.setLong(6, p2);
+			
+			pStatement.executeUpdate();
+		}catch(SQLException ex){
+			ex.printStackTrace();
+		}
+	}
 }

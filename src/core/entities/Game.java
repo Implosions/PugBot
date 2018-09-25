@@ -328,4 +328,11 @@ public class Game {
 		
 		pugChannel.sendMessage(message).queueAfter(2, TimeUnit.SECONDS);
 	}
+	
+	public boolean isCaptain(Member player){
+		if(captain1 == player || captain2 == player){
+			return true;
+		}
+		return false;
+	}
 }
