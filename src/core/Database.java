@@ -277,7 +277,7 @@ public class Database {
 	public static void insertPlayerGame(long playerId, long timestamp, long serverId, int pickOrder, int team){
 		try{
 			PreparedStatement pStatement = conn.prepareStatement(
-					  "INSERT OR IGNORE INTO PlayerGame "
+					  "INSERT OR REPLACE INTO PlayerGame "
 					+ "(playerId, timestamp, serverId, pickOrder, team) "
 					+ "VALUES(?, ?, ?, ?, ?)");
 			
@@ -382,7 +382,7 @@ public class Database {
 					+ "FROM (select pickOrder, timestamp from playergame where playerid = ? AND serverId = ? AND captain = 0) AS p1 "
 					+ "JOIN (select pickOrder, timestamp from playergame where playerid = ? AND serverId = ? AND captain = 0) AS p2 "
 					+ "ON p1.timestamp = p2.timestamp "
-					+ "ORDER BY timestamp DESC "
+					+ "ORDER BY p1.timestamp DESC "
 					+ "LIMIT 10");
 			
 			pStatement.setLong(1, p1);

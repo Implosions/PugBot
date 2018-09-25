@@ -46,6 +46,8 @@ public class CommandManager {
 		addCommand(new CmdLeaveGroup(server));
 		addCommand(new CmdFinishGame(server));
 		addCommand(new CmdStats(server));
+		addCommand(new CmdSwapPlayers(server));
+		addCommand(new CmdRepick(server));
 	}
 		
 	public boolean doesCommandExist(String cmdName){

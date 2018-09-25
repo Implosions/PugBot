@@ -205,7 +205,7 @@ public class Game {
 	}
 	
 	private void createVoiceChannels() {
-		if(ServerManager.getServer(serverId).getSettingsManager().getCreateTeamVoiceChannels()){
+		if(teamVoiceChannels == null && ServerManager.getServer(serverId).getSettingsManager().getCreateTeamVoiceChannels()){
 			teamVoiceChannels = new ArrayList<Channel>();
 		
 			createVoiceChannel(captain1);
@@ -334,5 +334,11 @@ public class Game {
 			return true;
 		}
 		return false;
+	}
+	
+	public void repick(){
+		if(status == GameStatus.PLAYING){
+			startPUGPicking();
+		}
 	}
 }

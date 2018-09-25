@@ -77,7 +77,11 @@ public abstract class EmbedMenu implements IMenu {
 
 	protected void update() {
 		Message updatedMessage;
-		int menuSize = manager.getNumberOfPagesInMenu();
+		int menuSize = 0;
+		
+		if(manager != null){
+			menuSize = manager.getNumberOfPagesInMenu();
+		}
 
 		embedBuilder.clearFields();
 
@@ -123,7 +127,7 @@ public abstract class EmbedMenu implements IMenu {
 			}
 		}
 
-		if (manager.getNumberOfPagesInMenu() > 0) {
+		if (manager != null && manager.getNumberOfPagesInMenu() > 0) {
 			buttons.add(fieldButtons.size(), Constants.Emoji.FORWARD_BUTTON);
 			buttons.add(0, Constants.Emoji.BACK_BUTTON);
 		}
