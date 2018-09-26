@@ -9,6 +9,7 @@ import core.Database;
 import core.entities.settings.QueueSettingsManager;
 import net.dv8tion.jda.core.OnlineStatus;
 import net.dv8tion.jda.core.entities.Member;
+import net.dv8tion.jda.core.entities.Role;
 
 public class Queue {
 	private Integer maxPlayers;
@@ -306,5 +307,21 @@ public class Queue {
 	
 	public QueueSettingsManager getSettingsManager(){
 		return settingsManager;
+	}
+	
+	public boolean isPlayerEligible(Member m){
+		List<Role> restrictionList = settingsManager.getRoleRestrictions();
+		
+		if(restrictionList.isEmpty()){
+			return true;
+		}
+		
+		for(Role role : m.getRoles()){
+			if(restrictionList.contains(role)){
+				return true;
+			}
+		}
+		
+		return false;
 	}
 }

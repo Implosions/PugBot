@@ -1,0 +1,88 @@
+package core.entities.settings.queuesettings;
+
+import java.util.Arrays;
+import java.util.List;
+
+import core.entities.settings.Setting;
+import core.exceptions.BadArgumentsException;
+import core.exceptions.InvalidUseException;
+import net.dv8tion.jda.core.entities.Role;
+
+public class SettingRoleRestrictions extends Setting<List<Role>>{
+
+	public SettingRoleRestrictions(List<Role> value) {
+		super(value);
+	}
+
+	@Override
+	public String getName() {
+		return "RoleRestrictions";
+	}
+
+	@Override
+	public String getDescription() {
+		return "Restricts this queue to the listed roles\n" +
+				"add <role> - Adds a role to the list\n" +
+				"delete <role> - Deletes a role from the list";
+	}
+
+	@Override
+	public String getValueString() {	
+		StringBuilder sb = new StringBuilder();
+		
+		for(Role role : getValue()){
+			sb.append(role.getName() + ", "); 
+		}
+		
+		if(sb.length() == 0){
+			return "N/A";
+		}
+		
+		sb.delete(sb.length() - 2, sb.length());
+		
+		return sb.toString();
+	}
+
+	@Override
+	public String getSaveString() {
+		return null;
+	}
+
+	@Override
+	public void set(String[] args) {
+		if(args.length < 2){
+			throw new BadArgumentsException();
+		}
+		
+		String cmd = args[0].toLowerCase();
+		String roleName = String.join(", ", Arrays.copyOfRange(args, 1, args.length));
+		
+		switch(cmd){
+		case "add": add(roleName); break;
+		case "delete": delete(roleName); break;
+		default: throw new BadArgumentsException("Missing **add** or **delete** operator");
+		}
+	}
+
+	private void add(String roleName){
+		Role role = findRole(roleName);
+		
+		if(!getValue().contains(role)){
+			getValue().add(role);
+		}
+	}
+	
+	private void delete(String roleName){
+		getValue().remove(findRole(roleName));
+	}
+	
+	private Role findRole(String roleName){
+		List<Role> roles = manager.getServer().getGuild().getRolesByName(roleName, true);
+		
+		if(roles.size() == 0){
+			throw new InvalidUseException(String.format("role '%s' does not exist", roleName));
+		}
+		
+		return roles.get(0);
+	}
+}

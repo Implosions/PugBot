@@ -44,6 +44,10 @@ public class CmdAdd extends Command {
 		StringBuilder stringBuilder = new StringBuilder(caller.getEffectiveName() + " added to: ");
 		
 		for(Queue queue : queueList){
+			if(!queue.isPlayerEligible(caller)){
+				continue;
+			}
+			
 			stringBuilder.append(queue.getName() + ", ");
 			
 			if(justFinished){

@@ -17,6 +17,7 @@ import core.entities.settings.QueueSettingsManager;
 import core.entities.settings.ServerSettingsManager;
 import core.entities.settings.queuesettings.SettingMinGamesPlayedToCaptain;
 import core.entities.settings.queuesettings.SettingPickPattern;
+import core.entities.settings.queuesettings.SettingRoleRestrictions;
 import core.entities.settings.queuesettings.SettingVoiceChannelCategory;
 import core.entities.settings.serversettings.SettingAFKTimeout;
 import core.entities.settings.serversettings.SettingCreateTeamVoiceChannels;
@@ -164,6 +165,16 @@ public class Database {
 					+ "result INTEGER, "
 					+ "PRIMARY KEY (timestamp, playerId), "
 					+ "FOREIGN KEY (playerId) REFERENCES Player(id)"
+					+ ")");
+			
+			statement.executeUpdate("CREATE TABLE IF NOT EXISTS "
+					+ "QueueRole("
+					+ "serverId INTEGER NOT NULL, "
+					+ "queueId INTEGER NOT NULL, "
+					+ "roleId INTEGER NOT NULL, "
+					+ "PRIMARY KEY (serverId, queueId, roleId), "
+					+ "FOREIGN KEY (queueId) REFERENCES Queue(id), "
+					+ "FOREIGN KEY (serverId) REFERENCES DiscordServer(id)"
 					+ ")");
 			
 		}catch(Exception ex){
@@ -616,6 +627,9 @@ public class Database {
 	 * @return A list of settings for the specified queue
 	 */
 	public static void loadQueueSettings(QueueSettingsManager manager){
+		Guild guild = manager.getServer().getGuild();
+		long queueId = manager.getParentQueue().getId();
+		
 		try{
 			PreparedStatement pStatement = conn.prepareStatement("SELECT "
 					+ "setting_MinGamesPlayedToCaptain, "
@@ -623,20 +637,47 @@ public class Database {
 					+ "setting_VoiceChannelCategory "
 					+ "FROM Queue WHERE serverId = ? AND id = ?");
 			
-			pStatement.setLong(1, manager.getServer().getId());
-			pStatement.setLong(2, manager.getParentQueue().getId());
+			pStatement.setLong(1, guild.getIdLong());
+			pStatement.setLong(2, queueId);
 			
 			ResultSet rs = pStatement.executeQuery();
-			Category category = manager.getServer().getGuild().getCategoryById(rs.getLong(3));
+			Category category = guild.getCategoryById(rs.getLong(3));
 			
 			manager.addSetting(new SettingMinGamesPlayedToCaptain(rs.getInt(1)));
 			manager.addSetting(new SettingPickPattern(rs.getString(2)));
 			manager.addSetting(new SettingVoiceChannelCategory(category));
+			rs.close();
+			manager.addSetting(new SettingRoleRestrictions(getQueueRoles(guild, queueId)));
+		}catch(SQLException ex){
+			ex.printStackTrace();
+		}
+	}
+	
+	private static List<Role> getQueueRoles(Guild guild, long queueId){
+		List<Role> roles = new ArrayList<>();
+		
+		try{
+			PreparedStatement pStatement = conn.prepareStatement("SELECT roleId FROM QueueRole WHERE serverId = ? AND queueId = ?");
+			
+			pStatement.setLong(1, guild.getIdLong());
+			pStatement.setLong(2, queueId);
+			
+			ResultSet rs = pStatement.executeQuery();
+			
+			while(rs.next()){
+				Role role = guild.getRoleById(rs.getLong(1));
+				
+				if(role != null){
+					roles.add(role);
+				}
+			}
 			
 			rs.close();
 		}catch(SQLException ex){
 			ex.printStackTrace();
 		}
+		
+		return roles;
 	}
 	
 	/**
@@ -674,6 +715,43 @@ public class Database {
 			pStatement.setString(1, value);
 			pStatement.setLong(2, serverId);
 			pStatement.setLong(3, queueId);
+			
+			pStatement.executeUpdate();
+		}catch(SQLException ex){
+			ex.printStackTrace();
+		}
+	}
+	
+	public static void updateQueueRoleRestrictions(long serverId, long queueId, List<Role> roles){
+		deleteQueueRoles(serverId, queueId);
+		
+		for(Role role : roles){
+			addQueueRole(serverId, queueId, role.getIdLong());
+		}
+	}
+	
+	private static void deleteQueueRoles(long serverId, long queueId){
+		try{
+			PreparedStatement pStatement = conn.prepareStatement(
+							"DELETE FROM QueueRole WHERE serverId = ? AND QueueId = ?");
+
+			pStatement.setLong(1, serverId);
+			pStatement.setLong(2, queueId);
+			
+			pStatement.executeUpdate();
+		}catch(SQLException ex){
+			ex.printStackTrace();
+		}
+	}
+	
+	private static void addQueueRole(long serverId, long queueId, long roleId){
+		try{
+			PreparedStatement pStatement = conn.prepareStatement(
+							"INSERT INTO QueueRole VALUES(?, ?, ?)");
+
+			pStatement.setLong(1, serverId);
+			pStatement.setLong(2, queueId);
+			pStatement.setLong(3, roleId);
 			
 			pStatement.executeUpdate();
 		}catch(SQLException ex){
