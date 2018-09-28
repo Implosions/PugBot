@@ -30,30 +30,29 @@ public class CmdHelp extends Command {
 			
 			cmdList.sort((ICommand c1, ICommand c2) -> c1.getName().compareTo(c2.getName()));
 			
-			String regCmds = "";
-			String adminCmds = "";
-			String customCmds = "";
+			String currentLetter = "";
+			String cmds = "";
+			boolean admin = server.isAdmin(caller);
 			
 			for(ICommand cmd : cmdList){
-				String helpLine = String.format("%s%s - %s%n", prefix, cmd.getName(), cmd.getDescription());
+				String helpLine = String.format("%s**%s** - %s%n", prefix, cmd.getName(), cmd.getDescription());
+				String letter = String.valueOf(cmd.getName().charAt(0)).toUpperCase();
 				
-				if(cmd.getClass() == CustomCommand.class){
-					customCmds += helpLine;
-				}else if(cmd.isAdminRequired()){
-					adminCmds += helpLine;
-				}else{
-					regCmds += helpLine;
+				
+				if(cmd.isAdminRequired() && !admin){
+					continue;
 				}
+				
+				if(!currentLetter.equals(letter)){
+					embedBuilder.addField(new Field(currentLetter, cmds, false));
+					cmds = "";
+					currentLetter = letter;
+				}
+				
+				cmds += helpLine;
 			}
 			
-			regCmds += customCmds;
-			
-			embedBuilder.addField(new Field("Commands:", regCmds,false));
-			
-			if(server.isAdmin(caller)){
-				embedBuilder.addField(new Field("Admin Commands:", adminCmds, false));
-			}
-			
+			embedBuilder.setTitle("Commands");
 			caller.getUser().openPrivateChannel().complete().sendMessage(embedBuilder.build()).queue();
 			
 			return Utils.createMessage("`Help sent`");
