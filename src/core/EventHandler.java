@@ -108,6 +108,7 @@ public class EventHandler extends ListenerAdapter {
 			
 			// Execute command
 			response = cmd.execCommand(caller, args);
+			System.out.println(String.format("Command %s executed", cmd.getName()));
 			
 		} catch(InvalidUseException ex) {
 			response = Utils.createMessage("Error!", ex.getMessage(), false);
