@@ -56,8 +56,8 @@ public class EventHandler extends ListenerAdapter {
 			// Replaces standard emote string
 			// Allows bot to use server specific emotes
 			if (event.getMessage().getEmotes().size() > 0) {
-				// Uses a set to remove duplicates
 				HashSet<Emote> emotes = new HashSet<Emote>(event.getMessage().getEmotes());
+				
 				for (Emote emote : emotes) {
 					message = message.replace(":" + emote.getName() + ":",
 							String.format("<:%s:%s>", emote.getName(), emote.getId()));
@@ -74,7 +74,7 @@ public class EventHandler extends ListenerAdapter {
 
 			processCommand(server, event.getChannel(), event.getMember(), cmdName, args);
 		}
-		// Updates Server.activityList
+		
 		server.updateActivityList(event.getMember());
 	}
 	
@@ -85,8 +85,13 @@ public class EventHandler extends ListenerAdapter {
 		try{
 			// Check if command is valid
 			if(!server.getCommandManager().doesCommandExist(cmdName)){
-				throw new InvalidUseException("Command does not exist.\n"
+				// Ignore invalid commands outside of the designated pug channel
+				if(channel == server.getPugChannel()){
+					throw new InvalidUseException("Command does not exist.\n"
 											+ "Use the **Help** command to see all available commands");
+				}
+				
+				return;
 			}
 			
 			cmd = server.getCommandManager().getCommand(cmdName);
