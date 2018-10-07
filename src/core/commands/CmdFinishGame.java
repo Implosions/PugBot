@@ -32,22 +32,17 @@ public class CmdFinishGame extends Command {
 			throw new InvalidUseException("You are not currently in-game");
 		}
 		
-		if(!(caller.equals(game.getCaptain1()) || caller.equals(game.getCaptain2()))){
+		if(!game.isCaptain(caller)){
 			throw new InvalidUseException("You must be a captain to finish your game");
 		}
 		
-		String title = String.format("Game '%s' finished", game.getQueueName());
-		
-		if(args.length == 0){
-			if(game.getStatus() == GameStatus.PICKING || server.isAdmin(caller)){
-				qm.finishGame(game, null);
-				
-				return Utils.createMessage("`" + title + "`");
-			}
+		if(game.getStatus() == GameStatus.PICKING || args.length == 0){
+			qm.finishGame(game, null);
 			
-			throw new BadArgumentsException();
+			return Utils.createMessage("`Game cancelled`");
 		}
 		
+		String title = String.format("Game '%s' finished", game.getQueueName());
 		String result = args[0].toLowerCase();
 		int team = caller.equals(game.getCaptain1()) ? 1 : 2;
 		int winningTeam;
@@ -56,7 +51,7 @@ public class CmdFinishGame extends Command {
 		case "tie": winningTeam = 0; break;
 		case "win": winningTeam = team; break;
 		case "loss": winningTeam = (team == 1) ? 2 : 1; break;
-		default: throw new BadArgumentsException("Result must either be `win`, `loss`, or `tie`");
+		default: throw new BadArgumentsException("Result must either be **win**, **loss**, or **tie**");
 		}
 		
 		qm.finishGame(game, winningTeam);
@@ -94,7 +89,7 @@ public class CmdFinishGame extends Command {
 
 	@Override
 	public String getDescription() {
-		return "Finishes a game so that users can requeue (usable only by captains and admins)";
+		return "Finishes a game so that users can requeue";
 	}
 
 	@Override
