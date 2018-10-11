@@ -22,6 +22,7 @@ import net.dv8tion.jda.core.events.guild.member.GuildMemberJoinEvent;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.core.events.message.guild.react.GenericGuildMessageReactionEvent;
 import net.dv8tion.jda.core.events.message.priv.react.PrivateMessageReactionAddEvent;
+import net.dv8tion.jda.core.events.message.priv.react.PrivateMessageReactionRemoveEvent;
 import net.dv8tion.jda.core.events.user.UserOnlineStatusUpdateEvent;
 import net.dv8tion.jda.core.hooks.ListenerAdapter;
 
@@ -145,17 +146,27 @@ public class EventHandler extends ListenerAdapter {
 		System.out.println(String.format("Removed from server: %s", event.getGuild().getName()));
 	}
 
+	@Override
 	public void onGenericGuildMessageReaction(GenericGuildMessageReactionEvent event) {
 		// Updates activity list with the user
 		ServerManager.getServer(event.getGuild().getIdLong()).updateActivityList(event.getMember());
 	}
 
+	@Override
 	public void onGuildMemberJoin(GuildMemberJoinEvent event) {
 		// Inserts new player into database
 		Database.insertPlayer(event.getUser().getIdLong(), event.getMember().getEffectiveName());
 	}
 	
+	@Override
 	public void onPrivateMessageReactionAdd(PrivateMessageReactionAddEvent event){
+		if(!event.getUser().isBot()){
+			MenuRouter.newReactionEvent(event.getMessageIdLong(), event.getReactionEmote().getName());
+		}
+	}
+
+	@Override
+	public void onPrivateMessageReactionRemove(PrivateMessageReactionRemoveEvent event){
 		if(!event.getUser().isBot()){
 			MenuRouter.newReactionEvent(event.getMessageIdLong(), event.getReactionEmote().getName());
 		}
