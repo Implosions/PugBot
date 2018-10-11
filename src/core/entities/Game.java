@@ -339,6 +339,7 @@ public class Game {
 	public void repick(){
 		if(status == GameStatus.PLAYING){
 			startPUGPicking();
+			status = GameStatus.PICKING;
 		}
 	}
 }

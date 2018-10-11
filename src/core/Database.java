@@ -289,8 +289,8 @@ public class Database {
 		try{
 			PreparedStatement pStatement = conn.prepareStatement(
 					  "INSERT OR REPLACE INTO PlayerGame "
-					+ "(playerId, timestamp, serverId, pickOrder, team) "
-					+ "VALUES(?, ?, ?, ?, ?)");
+					+ "(playerId, timestamp, serverId, pickOrder, team, captain) "
+					+ "VALUES(?, ?, ?, ?, ?, 0)");
 			
 			pStatement.setLong(1, playerId);
 			pStatement.setLong(2, timestamp);
@@ -307,9 +307,9 @@ public class Database {
 	public static void insertPlayerGameCaptain(long playerId, long timestamp, long serverId, int team){
 		try{
 			PreparedStatement pStatement = conn.prepareStatement(
-					  "INSERT OR IGNORE INTO PlayerGame "
-					+ "(playerId, timestamp, serverId, captain, team) "
-					+ "VALUES(?, ?, ?, 1, ?)");
+					  "INSERT OR REPLACE INTO PlayerGame "
+					+ "(playerId, timestamp, serverId, captain, team, pickOrder) "
+					+ "VALUES(?, ?, ?, 1, ?, 0)");
 			
 			pStatement.setLong(1, playerId);
 			pStatement.setLong(2, timestamp);
