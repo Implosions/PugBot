@@ -25,7 +25,7 @@ public class CmdSwapPlayers extends Command{
 		
 		QueueManager qm = server.getQueueManager();
 		Member p1 = server.getMember(args[0]);
-		Member p2 = server.getMember(args[0]);
+		Member p2 = server.getMember(args[1]);
 		Game game = qm.getPlayersGame(caller);
 		
 		if(game == null){
