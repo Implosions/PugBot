@@ -81,14 +81,12 @@ public class Game {
 		players.remove(target);
 		players.add(substitute);
 		
-		if(status == GameStatus.PICKING){
-			if(target == captain1 || target == captain2){
-				subCaptain(substitute, target);
-			}else{
-				if(pickController != null){
-					pickController.cancel();
-					startPUGPicking();
-				}
+		if(target == captain1 || target == captain2){
+			subCaptain(substitute, target);
+		}else{
+			if(status == GameStatus.PICKING && pickController != null){
+				pickController.cancel();
+				startPUGPicking();
 			}
 		}		
 	}
