@@ -2,6 +2,7 @@ package core;
 
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -1166,7 +1167,7 @@ public class Database {
 		return result;
 	}
 	
-	public static int queryGetPlayerTotalCompletedGames(long serverId, long playerId){
+	public static int queryGetPlayerTotalCompletedGames(long serverId, long playerId, long queueId){
 		int result = 0;
 		
 		try{
@@ -1175,10 +1176,12 @@ public class Database {
 					+ "FROM PlayerGame JOIN Game ON PlayerGame.timestamp = Game.timestamp "
 					+ "WHERE Game.serverId = ? "
 					+ "AND playerId = ? "
+					+ "AND queueId = ? "
 					+ "AND completion_timestamp > 0");
 			
 			pStatement.setLong(1, serverId);
 			pStatement.setLong(2, playerId);
+			pStatement.setLong(3, queueId);
 			
 			ResultSet rs = pStatement.executeQuery();
 			result = rs.getInt(1);
@@ -1191,7 +1194,7 @@ public class Database {
 		return result;
 	}
 	
-	public static int queryGetPlayerTotalWins(long serverId, long playerId){
+	public static int queryGetPlayerTotalWins(long serverId, long playerId, long queueId){
 		int result = 0;
 		
 		try{
@@ -1200,11 +1203,13 @@ public class Database {
 					+ "FROM PlayerGame JOIN Game ON PlayerGame.timestamp = Game.timestamp "
 					+ "WHERE Game.serverId = ? "
 					+ "AND playerId = ? "
+					+ "AND queueId = ? "
 					+ "AND completion_timestamp > 0 "
 					+ "AND winning_team = team");
 			
 			pStatement.setLong(1, serverId);
 			pStatement.setLong(2, playerId);
+			pStatement.setLong(3, queueId);
 			
 			ResultSet rs = pStatement.executeQuery();
 			result = rs.getInt(1);
@@ -1217,7 +1222,7 @@ public class Database {
 		return result;
 	}
 	
-	public static int queryGetPlayerTotalLosses(long serverId, long playerId){
+	public static int queryGetPlayerTotalLosses(long serverId, long playerId, long queueId){
 		int result = 0;
 		
 		try{
@@ -1226,12 +1231,14 @@ public class Database {
 					+ "FROM PlayerGame JOIN Game ON PlayerGame.timestamp = Game.timestamp "
 					+ "WHERE Game.serverId = ? "
 					+ "AND playerId = ? "
+					+ "AND queueId = ? "
 					+ "AND completion_timestamp > 0 "
 					+ "AND NOT winning_team = team "
 					+ "AND NOT winning_team = 0");
 			
 			pStatement.setLong(1, serverId);
 			pStatement.setLong(2, playerId);
+			pStatement.setLong(3, queueId);
 			
 			ResultSet rs = pStatement.executeQuery();
 			result = rs.getInt(1);
@@ -1244,18 +1251,21 @@ public class Database {
 		return result;
 	}
 	
-	public static int queryGetPlayerAvgPickPosition(long serverId, long playerId){
+	public static int queryGetPlayerAvgPickPosition(long serverId, long playerId, long queueId){
 		int result = 0;
 		
 		try{
 			PreparedStatement pStatement = conn.prepareStatement(
 					  "SELECT (sum(pickOrder) / count(pickOrder)) "
-					+ "FROM PlayerGame "
-					+ "WHERE serverId = ? "
-					+ "AND playerId = ?");
+					+ "FROM PlayerGame JOIN Game ON PlayerGame.timestamp = Game.timestamp "
+					+ "WHERE Game.serverId = ? "
+					+ "AND playerId = ? "
+					+ "AND queueId = ? "
+					+ "AND NOT captain = 1");
 			
 			pStatement.setLong(1, serverId);
 			pStatement.setLong(2, playerId);
+			pStatement.setLong(3, queueId);
 			
 			ResultSet rs = pStatement.executeQuery();
 			result = rs.getInt(1);
@@ -1266,6 +1276,69 @@ public class Database {
 		}
 		
 		return result;
+	}
+	
+	public static int queryGetPlayerCaptainWinPercent(long serverId, long playerId, long queueId){
+		int result = 0;
+		
+		try{
+			PreparedStatement pStatement = conn.prepareStatement(
+					  "SELECT ((count(playerId) * 100) / "
+					  + "(SELECT count(playerId) "
+					  + "FROM PlayerGame JOIN Game ON PlayerGame.timestamp = Game.timestamp "
+					  + "WHERE Game.serverId = ? AND playerId = ? AND queueId = ? AND completion_timestamp > 0)) "
+					+ "FROM PlayerGame JOIN Game ON PlayerGame.timestamp = Game.timestamp "
+					+ "WHERE Game.serverId = ? "
+					+ "AND playerId = ? "
+					+ "AND queueId = ? "
+					+ "AND captain = 1 "
+					+ "AND winning_team = team "
+					+ "AND completion_timestamp > 0");
+			
+			pStatement.setLong(1, serverId);
+			pStatement.setLong(2, playerId);
+			pStatement.setLong(3, queueId);
+			pStatement.setLong(4, serverId);
+			pStatement.setLong(5, playerId);
+			pStatement.setLong(6, queueId);
+			
+			ResultSet rs = pStatement.executeQuery();
+			result = rs.getInt(1);
+			
+			rs.close();
+		}catch(SQLException ex){
+			ex.printStackTrace();
+		}
+		
+		return result;
+	}
+	
+	public static Date queryGetPlayerLastPlayedDate(long serverId, long playerId, long queueId){
+		long timestamp = 0;
+		
+		try{
+			PreparedStatement pStatement = conn.prepareStatement(
+					  "SELECT Game.timestamp "
+					+ "FROM PlayerGame JOIN Game ON PlayerGame.timestamp = Game.timestamp "
+					+ "WHERE Game.serverId = ? "
+					+ "AND playerId = ? "
+					+ "AND queueId = ? "
+					+ "ORDER BY Game.timestamp DESC "
+					+ "LIMIT 1");
+			
+			pStatement.setLong(1, serverId);
+			pStatement.setLong(2, playerId);
+			pStatement.setLong(3, queueId);
+			
+			ResultSet rs = pStatement.executeQuery();
+			timestamp = rs.getLong(1);
+			
+			rs.close();
+		}catch(SQLException ex){
+			ex.printStackTrace();
+		}
+		
+		return new Date(timestamp);
 	}
 	
 	public static void swapPlayers(long timestamp, long p1, long p2){
