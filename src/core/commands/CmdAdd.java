@@ -64,12 +64,14 @@ public class CmdAdd extends Command {
 			String s = String.format("Your game has just finished, you will be randomized into the queue in %d seconds",
 					qm.getWaitTimeRemaining(caller));
 			
-			this.response = Utils.createMessage(stringBuilder.toString(), s, true);
-		} else {
-			this.response = Utils.createMessage(stringBuilder.toString(), qm.getHeader(), true);
+			return Utils.createMessage(stringBuilder.toString(), s, true);
+		} 
+		else if (qm.isPlayerIngame(caller)){
+			return null;
 		}
-
-		return response;
+		else {
+			return Utils.createMessage(stringBuilder.toString(), qm.getHeader(), true);
+		}
 	}
 
 	@Override
