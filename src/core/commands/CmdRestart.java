@@ -18,9 +18,7 @@ public class CmdRestart extends Command {
 		ServerManager.removeServer(server.getId());
 		ServerManager.addNewServer(server.getGuild());
 
-		this.response = Utils.createMessage("`Server instance restarted`");
-
-		return response;
+		return Utils.createMessage("`Server instance restarted`");
 	}
 
 	@Override

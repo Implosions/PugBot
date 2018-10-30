@@ -21,9 +21,7 @@ public class CmdCreateGroup extends Command {
 		String groupName = String.join(" ", args);
 		server.addGroup(groupName);
 
-		response = Utils.createMessage(String.format("`Group '%s' created`", groupName));
-
-		return response;
+		return Utils.createMessage(String.format("`Group '%s' created`", groupName));
 	}
 
 	@Override

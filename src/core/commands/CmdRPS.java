@@ -34,9 +34,7 @@ public class CmdRPS extends Command {
 		}).start();
 		
 
-		this.response = Utils.createMessage("`Challenge sent`");
-
-		return response;
+		return Utils.createMessage("`Challenge sent`");
 	}
 
 	@Override

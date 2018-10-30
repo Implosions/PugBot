@@ -37,9 +37,8 @@ public class CmdRemoveQueue extends Command {
 		
 		queueNames = queueNames.substring(0, queueNames.length() - 2);
 		qm.updateTopic();
-		this.response = Utils.createMessage(String.format("`Queue: %s removed`", queueNames));
 		
-		return response;
+		return Utils.createMessage(String.format("`Queue: %s removed`", queueNames));
 	}
 
 	@Override

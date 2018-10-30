@@ -35,23 +35,23 @@ public class CmdQueueSettings extends Command {
 		String title = queue.getName() + " settings";
 		
 		if(args.length == 1){
-			response = Utils.createMessage(title, settingsManager.toString(), true);
-		}else if(args.length == 2){
+			return Utils.createMessage(title, settingsManager.toString(), true);
+		}
+		else if(args.length == 2){
 			ISetting setting = settingsManager.getSetting(args[1]);
 			
-			response = Utils.createMessage(title, 
+			return Utils.createMessage(title, 
 					String.format("%s: %s%n%s", setting.getName(), setting.getValueString(), setting.getDescription()), true);
 			
-		}else if(args.length > 2){
+		}
+		else{
 			String[] settingArgs = Arrays.copyOfRange(args, 2, args.length);
 			String settingName = args[1];
 			
 			settingsManager.setSetting(args[1], settingArgs);
 			
-			response = Utils.createMessage(title, settingName + " updated", true);
+			return Utils.createMessage(title, settingName + " updated", true);
 		}
-		
-		return response;
 	}
 
 	@Override

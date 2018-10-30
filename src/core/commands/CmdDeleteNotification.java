@@ -28,7 +28,7 @@ public class CmdDeleteNotification extends Command {
 				queue.removeNotification(caller);
 			}
 
-			this.response = Utils.createMessage("All notifications removed", "", true);
+			return Utils.createMessage("All notifications removed", "", true);
 
 		} else {
 			Queue queue;
@@ -45,11 +45,9 @@ public class CmdDeleteNotification extends Command {
 			
 			queue.removeNotification(caller);
 
-			this.response = Utils.createMessage(String.format("Notification in queue '%s' removed", queue.getName()),
+			return Utils.createMessage(String.format("Notification in queue '%s' removed", queue.getName()),
 					"", true);
 		}
-
-		return response;
 	}
 
 	@Override

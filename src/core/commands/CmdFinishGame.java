@@ -63,13 +63,12 @@ public class CmdFinishGame extends Command {
 			Member winner = (winningTeam == 1) ? game.getCaptain1() : game.getCaptain2();
 			String teamName = "Team " + winner.getEffectiveName();
 			
-			response = Utils.createMessage(title, String.format("**Winner:** %s%n**Duration:** %d Minutes",
+			return Utils.createMessage(title, String.format("**Winner:** %s%n**Duration:** %d Minutes",
 					teamName, duration), true);
-		}else{
-			response = Utils.createMessage(title, String.format("**Tie game**%n**Duration:** %d Minutes", duration), true);
 		}
-		
-		return response;
+		else{
+			return Utils.createMessage(title, String.format("**Tie game**%n**Duration:** %d Minutes", duration), true);
+		}
 	}
 
 	@Override

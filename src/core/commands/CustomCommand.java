@@ -7,16 +7,19 @@ import net.dv8tion.jda.core.entities.Message;
 
 public class CustomCommand extends Command {
 
-	String name;
+	private String name;
+	private Message output;
+	
+	
 	public CustomCommand(Server server, String name, String output){
 		super(server);
 		this.name = name;		
-		this.response = Utils.createMessage(output);
+		this.output = Utils.createMessage(output);
 	}
 	
 	@Override
 	public Message execCommand(Member caller, String[] args) {
-		return response;
+		return output;
 	}
 
 	@Override

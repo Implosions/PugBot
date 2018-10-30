@@ -21,9 +21,7 @@ public class CmdDeleteGroup extends Command{
 		String groupName = String.join(" ", args);
 		server.deleteGroup(groupName);
 		
-		response = Utils.createMessage(String.format("`Group '%s' deleted`", groupName));
-		
-		return response;
+		return Utils.createMessage(String.format("`Group '%s' deleted`", groupName));
 	}
 
 	@Override

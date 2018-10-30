@@ -24,9 +24,7 @@ public class CmdJoinGroup extends Command{
 		
 		server.getGuild().getController().addSingleRoleToMember(caller, role).queue();
 		
-		response = Utils.createMessage(String.format("`%s joined the group: %s`", caller.getEffectiveName(), groupName));
-		
-		return response;
+		return Utils.createMessage(String.format("`%s joined the group: %s`", caller.getEffectiveName(), groupName));
 	}
 
 	@Override

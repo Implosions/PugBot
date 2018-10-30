@@ -29,9 +29,7 @@ public class CmdUnban extends Command {
 			server.unbanUser(m.getUser().getIdLong());
 		}
 
-		this.response = Utils.createMessage(String.format("`%s has been unbanned`", pName));
-
-		return response;
+		return Utils.createMessage(String.format("`%s has been unbanned`", pName));
 	}
 
 	@Override

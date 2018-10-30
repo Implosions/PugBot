@@ -47,10 +47,8 @@ public class CmdNotify extends Command {
 		}
 
 		queue.addNotification(caller, playerCount);
-		this.response = Utils.createMessage(
+		return Utils.createMessage(
 				String.format("`Notification added to queue '%s' at %d players`", queue.getName(), playerCount));
-
-		return response;
 	}
 
 	@Override

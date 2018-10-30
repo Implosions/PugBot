@@ -45,10 +45,8 @@ public class CmdSubCaptain extends Command {
 
 		game.subCaptain(caller, target);
 
-		this.response = Utils.createMessage(String.format("`%s has replaced %s as captain`", caller.getEffectiveName(),
+		return Utils.createMessage(String.format("`%s has replaced %s as captain`", caller.getEffectiveName(),
 				target.getEffectiveName()));
-
-		return response;
 	}
 
 	@Override

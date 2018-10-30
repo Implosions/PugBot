@@ -48,13 +48,10 @@ public class CmdSub extends Command {
 
 		game.sub(target, substitute);
 		qm.purgeQueue(substitute);
-
-		this.response = Utils.createMessage(String.format("`%s has been substituted with %s`",
-				target.getEffectiveName(), substitute.getEffectiveName()));
-
 		qm.updateTopic();
 
-		return response;
+		return Utils.createMessage(String.format("`%s has been substituted with %s`",
+				target.getEffectiveName(), substitute.getEffectiveName()));
 	}
 
 	@Override

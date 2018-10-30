@@ -19,9 +19,7 @@ public class CmdGroups extends Command{
 			formattedNames = " ";
 		}
 		
-		response = Utils.createMessage("Available groups:", formattedNames, true);
-		
-		return response;
+		return Utils.createMessage("Available groups:", formattedNames, true);
 	}
 
 	@Override

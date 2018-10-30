@@ -48,15 +48,13 @@ public class CmdEditQueue extends Command {
 			throw new InvalidUseException("New player count must be greater than the amount of current players");
 		}
 
-		this.response = Utils.createMessage(String.format("`Queue %s edited`", queue.getName()));
-
 		queue.setName(newName);
 		queue.setMaxPlayers(playerCount);
 
 		Database.updateQueue(server.getId(), queue.getId(), queue.getName(), queue.getMaxPlayers());
 		qm.updateTopic();
 
-		return response;
+		return Utils.createMessage(String.format("`Queue %s edited`", queue.getName()));
 	}
 
 	@Override

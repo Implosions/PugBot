@@ -17,22 +17,22 @@ public class CmdServerSettings extends Command {
 	@Override
 	public Message execCommand(Member caller, String[] args) {				
 		if (args.length == 0) {
-			response = Utils.createMessage("Server settings", server.getSettingsManager().toString(), true);
-		} else if(args.length == 1){
+			return Utils.createMessage("Server settings", server.getSettingsManager().toString(), true);
+		}
+		else if(args.length == 1){
 			ISetting setting = server.getSettingsManager().getSetting(args[0]);
 			
-			response = Utils.createMessage("Server Settings",
+			return Utils.createMessage("Server Settings",
 					String.format("%s: %s%n%s", setting.getName(), setting.getValueString(), setting.getDescription()), true);
-		} else {
+		}
+		else {
 			String settingName = args[0];
 			String[] settingArgs = Arrays.copyOfRange(args, 1, args.length);
 			
 			server.getSettingsManager().setSetting(settingName, settingArgs);
 			
-			response = Utils.createMessage("Server Settings", settingName + " updated", true);
+			return Utils.createMessage("Server Settings", settingName + " updated", true);
 		}
-
-		return response;
 	}
 
 	@Override

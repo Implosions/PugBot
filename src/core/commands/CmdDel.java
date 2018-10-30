@@ -27,7 +27,7 @@ public class CmdDel extends Command {
 				queue.delete(caller);
 			}
 
-			this.response = Utils.createMessage(String.format("%s deleted from all queues", caller.getEffectiveName()),
+			return Utils.createMessage(String.format("%s deleted from all queues", caller.getEffectiveName()),
 					qm.getHeader(), true);
 		} else {
 			String queueNames = "";
@@ -39,15 +39,13 @@ public class CmdDel extends Command {
 			if (queueNames.isEmpty()) {
 				throw new InvalidUseException("No valid queues named");
 			}
-
+			
+			qm.updateTopic();
 			queueNames = queueNames.substring(0, queueNames.length() - 2);
-			this.response = Utils.createMessage(
+			
+			return Utils.createMessage(
 					String.format("%s deleted from %s", caller.getEffectiveName(), queueNames), qm.getHeader(), true);
 		}
-
-		qm.updateTopic();
-
-		return response;
 	}
 
 	@Override

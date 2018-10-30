@@ -24,13 +24,12 @@ public class CmdStatus extends Command {
 		
 		if (args.length == 0) {
 			statusMsg = statusBuilder(qm.getQueueList());
-		} else {
+		}
+		else {
 			statusMsg = statusBuilder(qm.getListOfQueuesFromStringArgs(args));
 		}
 		
-		this.response = Utils.createMessage(null, statusMsg, true);
-		
-		return response;
+		return Utils.createMessage(null, statusMsg, true);
 	}
 
 	private String statusBuilder(List<Queue> queueList) {

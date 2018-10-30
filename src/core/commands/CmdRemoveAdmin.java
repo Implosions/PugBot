@@ -27,9 +27,7 @@ public class CmdRemoveAdmin extends Command {
 			throw new InvalidUseException(m.getEffectiveName() + " is not an admin");
 		}
 
-		this.response = Utils.createMessage(String.format("`%s's admin removed`", m.getEffectiveName()));
-
-		return response;
+		return Utils.createMessage(String.format("`%s's admin removed`", m.getEffectiveName()));
 	}
 
 	@Override

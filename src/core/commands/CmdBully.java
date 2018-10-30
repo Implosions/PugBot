@@ -31,9 +31,7 @@ public class CmdBully extends Command {
 		Member m = server.getMember(args[0]);
 		String action = actionList.get(random.nextInt(actionList.size()));
 
-		response = Utils.createMessage(String.format(action, m.getUser().getId()));
-
-		return response;
+		return Utils.createMessage(String.format(action, m.getUser().getId()));
 	}
 
 	private List<String> getActionList() {
