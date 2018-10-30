@@ -4,7 +4,6 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.util.concurrent.TimeUnit;
 
 import core.Database;
 import core.entities.menus.PUGPickMenuController;
@@ -37,10 +36,18 @@ public class Game {
 		this.timestamp = System.currentTimeMillis();
 		this.players = new ArrayList<Member>(players);
 		
-		// Insert game into database
 		Database.insertGame(timestamp, queue.getId(), serverId);
 		
-		randomizeCaptains();
+		if(players.size() == 2){
+			captain1 = players.get(0);
+			captain2 = players.get(1);
+			status = GameStatus.PLAYING;
+			insertCaptains();
+		}
+		else{
+			randomizeCaptains();
+		}
+		
 		sendGameStartMessages();
 	}
 	
@@ -308,17 +315,19 @@ public class Game {
 									 captain2.getUser().getId()));
 		
 		for(Member m : players){
-			if(m != captain1 && m != captain2){
-				try{
-					PrivateChannel pc = m.getUser().openPrivateChannel().complete();
-					
-					pc.sendMessage(dm).queue();
-				}catch(Exception ex){
-					System.out.println("Error sending private message.\n" + ex.getMessage());
-				}
+			try{
+				PrivateChannel pc = m.getUser().openPrivateChannel().complete();
 				
-				builder.append(m.getEffectiveName() + ", ");
+				pc.sendMessage(dm).queue();
+			}catch(Exception ex){
+				System.out.println("Error sending private message.\n" + ex.getMessage());
 			}
+			
+			if(m == captain1 || m == captain2){
+				continue;
+			}
+			
+			builder.append(m.getEffectiveName() + ", ");
 		}
 		
 		builder.delete(builder.length() - 2, builder.length());
@@ -326,7 +335,7 @@ public class Game {
 		Message message = Utils.createMessage(String.format("Game '%s' has begun", getQueueName()),
 											  builder.toString(), Color.blue);
 		
-		pugChannel.sendMessage(message).queueAfter(2, TimeUnit.SECONDS);
+		pugChannel.sendMessage(message).queue();
 	}
 	
 	public boolean isCaptain(Member player){
