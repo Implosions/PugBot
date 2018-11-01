@@ -26,7 +26,9 @@ public class CmdDel extends Command {
 			for (Queue queue : qm.getQueueList()) {
 				queue.delete(caller);
 			}
-
+			
+			qm.updateTopic();
+			
 			return Utils.createMessage(String.format("%s deleted from all queues", caller.getEffectiveName()),
 					qm.getHeader(), true);
 		} else {
