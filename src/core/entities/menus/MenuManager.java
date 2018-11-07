@@ -18,10 +18,12 @@ public abstract class MenuManager<Controller extends MenuController<?>, Menu ext
 
 	public void complete() {
 		menu.complete();
+		menu = null;
 	}
 
 	public void cancel() {
 		menu.delete();
+		menu = null;
 	}
 
 	public Member getOwner() {

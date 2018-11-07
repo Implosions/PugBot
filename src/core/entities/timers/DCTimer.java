@@ -9,6 +9,7 @@ public class DCTimer extends Timer {
 
 	private Server server;
 	private Member member;
+	private boolean cancelled = false;
 	
 	public DCTimer(Server server, Member member) {
 		super(server.getSettingsManager().getDCTimeout(), TimeUnit.MINUTES);
@@ -18,9 +19,16 @@ public class DCTimer extends Timer {
 
 	@Override
 	protected void cycleCompleted() {
-		server.dcTimerEnd(member);
+		if(!cancelled){
+			server.dcTimerEnd(member);
+		}
 
 		condition = false;
 	}
 
+	public synchronized void cancel(){
+		cancelled = true;
+		
+		notifyAll();
+	}
 }

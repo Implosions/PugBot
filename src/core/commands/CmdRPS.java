@@ -33,7 +33,6 @@ public class CmdRPS extends Command {
 			}
 		}).start();
 		
-
 		return Utils.createMessage("`Challenge sent`");
 	}
 

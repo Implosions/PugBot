@@ -1,7 +1,6 @@
 package core.entities;
 
 import java.util.ArrayList;
-import java.util.Enumeration;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -11,8 +10,8 @@ import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.exceptions.PermissionException;
 
 public class QueueManager {
-	private List<Queue> queueList = new ArrayList<Queue>();
-	private ConcurrentHashMap<Game, QueueFinishTimer> finishedGameMap = new ConcurrentHashMap<Game, QueueFinishTimer>();
+	private List<Queue> queueList = new ArrayList<>();
+	private ConcurrentHashMap<QueueFinishTimer, Game> finishedGameMap = new ConcurrentHashMap<>();
 	private Server server;
 
 	public QueueManager(Server server) {
@@ -158,31 +157,28 @@ public class QueueManager {
 	}
 
 	private void addToJustFinished(Game game) {
-		QueueFinishTimer timer = new QueueFinishTimer(this, game);
+		QueueFinishTimer timer = new QueueFinishTimer(this);
 		
-		finishedGameMap.put(game, timer);
+		finishedGameMap.put(timer, game);
 		timer.start();
 	}
 	
-	public void queueFinishTimerEnd(Game game) {
-		finishedGameMap.remove(game);
+	public void queueFinishTimerEnd(QueueFinishTimer timer) {
+		Game g = finishedGameMap.get(timer);
 		
 		for (Queue q : queueList) {
-			q.addPlayersWaiting(game.getPlayers());
+			q.addPlayersWaiting(g.getPlayers());
 		}
 
+		finishedGameMap.remove(timer);
 		updateTopic();
 	}
 	
 	public int getWaitTimeRemaining(Member player){
-		Enumeration<Game> e = finishedGameMap.keys();
-		
-		while(e.hasMoreElements()){
-			Game game = e.nextElement();
+		for(QueueFinishTimer timer : finishedGameMap.keySet()){
+			Game g = finishedGameMap.get(timer);
 			
-			if(game.containsPlayer(player)){
-				QueueFinishTimer timer = finishedGameMap.get(game);
-				
+			if(g.containsPlayer(player)){
 				return timer.getTimeRemaining();
 			}
 		}
@@ -206,12 +202,10 @@ public class QueueManager {
 	}
 
 	public boolean hasPlayerJustFinished(Member player) {
-		Enumeration<Game> e = finishedGameMap.keys();
-		
-		while(e.hasMoreElements()){
-			Game game = e.nextElement();
+		for(QueueFinishTimer timer : finishedGameMap.keySet()){
+			Game g = finishedGameMap.get(timer);
 			
-			if(game.containsPlayer(player)){
+			if(g.containsPlayer(player)){
 				return true;
 			}
 		}
@@ -329,6 +323,8 @@ public class QueueManager {
 		game.finish();
 		
 		if(winningTeam == null){
+			game = null;
+			updateTopic();
 			return;
 		}
 		

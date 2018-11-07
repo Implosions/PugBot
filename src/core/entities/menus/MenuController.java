@@ -12,6 +12,7 @@ public abstract class MenuController<Manager extends MenuManager<?, ?>> {
 	protected List<String> fieldButtons;
 	protected List<String> utilityButtons;
 	protected int pageSize = 0;
+	private boolean cancelled = false;
 
 	public synchronized void start() {
 		manager1.createMenu();
@@ -23,6 +24,10 @@ public abstract class MenuController<Manager extends MenuManager<?, ?>> {
 		while (condition) {
 			try {
 				wait();
+				
+				if(cancelled){
+					return;
+				}
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
@@ -61,9 +66,15 @@ public abstract class MenuController<Manager extends MenuManager<?, ?>> {
 		}
 	}
 	
-	public void cancel(){
+	public synchronized void cancel(){
+		cancelled = true;
+		
 		manager1.cancel();
 		manager2.cancel();
+		notifyAll();
+		
+		manager1 = null;
+		manager2 = null;
 	}
 
 	protected abstract void managerActionTaken(Manager manager);

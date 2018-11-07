@@ -28,7 +28,7 @@ public class Server {
 	private ServerSettingsManager settingsManager;
 	private QueueManager queueManager;
 	private ConcurrentHashMap<Member, Long> activityList = new ConcurrentHashMap<Member, Long>();
-	private ConcurrentHashMap<Member, DCTimer> disconnectList = new ConcurrentHashMap<Member, DCTimer>();
+	private ConcurrentHashMap<Member, DCTimer> disconnectList = new ConcurrentHashMap<>();
 	private java.util.Queue<Message> messageCache = new LinkedList<Message>();
 	private Set<Long> banList;
 	private Set<Long> adminList;
