@@ -319,10 +319,13 @@ public class Game {
 	 */
 	private List<Member> getCaptainPool() {
 		List<Member> captainPool = new ArrayList<Member>();
-		Integer minGames = parentQueue.getSettingsManager().getMinGamesPlayedToCaptain();
+		int minGames = parentQueue.getSettingsManager().getMinGamesPlayedToCaptain();
 		
 		for(Member m : players){
-			if(Database.queryGetTotalGamesPlayed(m.getUser().getIdLong()) >= minGames){
+			int gamesPlayed = Database.queryGetPlayerTotalCompletedGames(
+					serverId, m.getUser().getIdLong(), parentQueue.getId());
+			
+			if(gamesPlayed >= minGames){
 				captainPool.add(m);
 			}
 		}
