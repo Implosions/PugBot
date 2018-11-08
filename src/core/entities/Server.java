@@ -118,8 +118,9 @@ public class Server {
 					member.getEffectiveName(), settingsManager.getDCTimeout());
 
 			getPugChannel().sendMessage(Utils.createMessage("", msg, false)).queue();
-			disconnectList.remove(member);
 		}
+		
+		disconnectList.remove(member);
 	}
 
 	public void updateActivityList(Member m) {
