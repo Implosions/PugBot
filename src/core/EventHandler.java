@@ -19,6 +19,7 @@ import net.dv8tion.jda.core.entities.User;
 import net.dv8tion.jda.core.events.guild.GuildJoinEvent;
 import net.dv8tion.jda.core.events.guild.GuildLeaveEvent;
 import net.dv8tion.jda.core.events.guild.member.GuildMemberJoinEvent;
+import net.dv8tion.jda.core.events.guild.member.GuildMemberLeaveEvent;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.core.events.message.guild.react.GenericGuildMessageReactionEvent;
 import net.dv8tion.jda.core.events.message.priv.react.PrivateMessageReactionAddEvent;
@@ -156,6 +157,13 @@ public class EventHandler extends ListenerAdapter {
 	public void onGuildMemberJoin(GuildMemberJoinEvent event) {
 		// Inserts new player into database
 		Database.insertPlayer(event.getUser().getIdLong(), event.getMember().getEffectiveName());
+	}
+	
+	@Override
+	public void onGuildMemberLeave(GuildMemberLeaveEvent event) {
+		Server server = ServerManager.getServer(event.getGuild().getIdLong());
+		
+		server.getQueueManager().purgeQueue(event.getMember());
 	}
 	
 	@Override
