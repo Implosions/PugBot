@@ -55,6 +55,10 @@ public class CmdAdd extends Command {
 			}else{
 				queue.addToQueue(caller);
 			}
+			
+			if(qm.isPlayerIngame(caller)){
+				break;
+			}
 		}
 		
 		stringBuilder.delete(stringBuilder.length() - 2, stringBuilder.length());

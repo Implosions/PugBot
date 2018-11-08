@@ -163,7 +163,11 @@ public class PUGPickMenuController extends MenuController<PUGTeam>{
 		generatePages();
 	}
 	
-	public int getTeam(Member player){
-		return manager1.getPlayers().contains(player) ? 1 : 2;
+	public List<Member> getTeam1(){
+		return manager1.getPlayers();
+	}
+	
+	public List<Member> getTeam2(){
+		return manager2.getPlayers();
 	}
 }

@@ -3,6 +3,7 @@ package core.commands;
 import java.util.List;
 
 import core.entities.Game;
+import core.entities.Game.GameStatus;
 import core.entities.Queue;
 import core.entities.QueueManager;
 import core.entities.Server;
@@ -33,41 +34,57 @@ public class CmdStatus extends Command {
 	}
 
 	private String statusBuilder(List<Queue> queueList) {
-		String statusMsg = "";
+		if(queueList.size() == 0){
+			throw new InvalidUseException("No valid queues");
+		}
+		
+		StringBuilder status = new StringBuilder();
 
 		for (Queue q : queueList) {
 			// Get basic queue information
-			statusMsg += String.format("**%s** [%s/%s]%n", q.getName(), q.getCurrentPlayersCount(), q.getMaxPlayers());
+			status.append(String.format("**%s** [%s/%s]%n", q.getName(), q.getCurrentPlayersCount(), q.getMaxPlayers()));
 			
 			// Get players in queue
 			if (q.getCurrentPlayersCount() > 0) {
-				String names = ""; 
+				status.append("**IN QUEUE**: ");
+				
 				for (Member m : q.getPlayersInQueue()) {
-					names += m.getEffectiveName() + ", ";
+					status.append(m.getEffectiveName() + ", ");
 				}
-				names = names.substring(0, names.lastIndexOf(","));
-				statusMsg += String.format("**IN QUEUE**: %s%n", names);
+				
+				status.delete(status.length() - 2, status.length());
+				status.append("\n");
 			}
 			
 			// Get players in game
 			if (q.getNumberOfGames() > 0) {
 				for (Game g : q.getGames()) {
-					String names = "";
-					for (Member m : g.getPlayers()) {
-						names += m.getEffectiveName() + ", ";
+					status.append("**IN GAME**:");
+					
+					if(g.getStatus() == GameStatus.PICKING){
+						for (Member m : g.getPlayers()) {
+							status.append(m.getEffectiveName() + ", ");
+						}
+						
+						status.delete(status.length() - 2, status.length());
 					}
-					names = names.substring(0, names.lastIndexOf(","));
-					statusMsg += String.format("**IN GAME**: %s @ %d minutes ago%n", names, (System.currentTimeMillis() - g.getTimestamp()) / 60000);
+					else{
+						status.append("\n");
+						status.append(g.getTeamsString());
+					}
+					
+					status.append("\n");
+					
+					long time = (System.currentTimeMillis() - g.getTimestamp()) / 60000;
+					status.append(String.format("**@ %d minutes ago**", time));
+					status.append("\n");
 				}
 			}
-			statusMsg += System.lineSeparator();
+			
+			status.append("\n");
 		}
 		
-		if (statusMsg.isEmpty()) {
-			throw new InvalidUseException("Queue does not exist");
-		}
-		
-		return statusMsg;
+		return status.toString();
 	}
 
 	@Override

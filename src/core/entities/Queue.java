@@ -16,10 +16,10 @@ public class Queue {
 	private String name;
 	private QueueManager manager;
 	private long id;
-	private List<Member> playersInQueue = new ArrayList<Member>();;
-	private List<Game> games = new ArrayList<Game>();;
-	private List<Member> waitlist = new ArrayList<Member>();
-	private HashMap<Integer, List<Member>> notifications = new HashMap<Integer, List<Member>>();
+	private List<Member> playersInQueue = new ArrayList<>();
+	private List<Game> games = new ArrayList<>();
+	private List<Member> waitlist = new ArrayList<>();
+	private HashMap<Integer, List<Member>> notifications = new HashMap<>();
 	private QueueSettingsManager settingsManager;
 	
 	public Queue(String name, int maxPlayers, long id, QueueManager manager) {
@@ -43,7 +43,7 @@ public class Queue {
 			Database.insertPlayerInQueue(manager.getServerId(), id, player.getUser().getIdLong());
 			checkNotifications();
 				
-			if (playersInQueue.size() == maxPlayers) {
+			if (playersInQueue.size() >= maxPlayers) {
 				popQueue();
 			}
 		}
@@ -136,7 +136,7 @@ public class Queue {
 		// Create Game and add to the list of active games
 		games.add(new Game(this, manager.getServerId(), players));
 
-		manager.getServer().getQueueManager().purgeQueue(players);
+		manager.purgeQueue(players);
 		Database.deletePlayersInQueueFromQueue(manager.getServerId(), id);
 	}
 	

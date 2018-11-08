@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 import core.Database;
+import core.entities.Game.GameStatus;
 import core.entities.timers.QueueFinishTimer;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.exceptions.PermissionException;
@@ -170,6 +171,7 @@ public class QueueManager {
 			q.addPlayersWaiting(g.getPlayers());
 		}
 
+		g.finish();
 		finishedGameMap.remove(timer);
 		updateTopic();
 	}
@@ -319,10 +321,11 @@ public class QueueManager {
 	public void finishGame(Game game, Integer winningTeam){
 		Queue queue = game.getParentQueue();
 		
+		game.setStatus(GameStatus.FINISHED);
 		queue.removeGame(game);
-		game.finish();
 		
 		if(winningTeam == null){
+			game.finish();
 			game = null;
 			updateTopic();
 			return;

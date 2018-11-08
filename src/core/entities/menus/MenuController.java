@@ -72,9 +72,10 @@ public abstract class MenuController<Manager extends MenuManager<?, ?>> {
 		manager1.cancel();
 		manager2.cancel();
 		notifyAll();
-		
-		manager1 = null;
-		manager2 = null;
+	}
+	
+	public boolean isCancelled(){
+		return cancelled;
 	}
 
 	protected abstract void managerActionTaken(Manager manager);

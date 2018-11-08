@@ -1,6 +1,5 @@
 package core.commands;
 
-import core.Database;
 import core.entities.Game;
 import core.entities.Game.GameStatus;
 import core.entities.QueueManager;
@@ -26,25 +25,21 @@ public class CmdSwapPlayers extends Command{
 		QueueManager qm = server.getQueueManager();
 		Member p1 = server.getMember(args[0]);
 		Member p2 = server.getMember(args[1]);
-		Game game = qm.getPlayersGame(caller);
+		Game game = qm.getPlayersGame(p1);
 		
 		if(game == null){
-			throw new InvalidUseException("You are not in-game");
+			throw new InvalidUseException(String.format("%s is not in-game", p1.getEffectiveName()));
 		}
 		
-		if(!game.isCaptain(caller)){
-			throw new InvalidUseException("You must be a captain to use this command");
+		if(!(game.isCaptain(caller) || server.isAdmin(caller))){
+			throw new InvalidUseException("You must be a captain or admin to use this command");
 		}
 		
 		if(game.getStatus() != GameStatus.PLAYING){
 			throw new InvalidUseException("Game must not be currently picking or finished");
 		}
 		
-		if(!qm.isPlayerIngame(p1) || !qm.isPlayerIngame(p2)){
-			throw new InvalidUseException("Both players must be in-game");
-		}
-		
-		if(!game.containsPlayer(p1) || !game.containsPlayer(p2)){
+		if(!game.containsPlayer(p2)){
 			throw new InvalidUseException("Players are not in the same game");
 		}
 		
@@ -52,7 +47,11 @@ public class CmdSwapPlayers extends Command{
 			throw new InvalidUseException("Captains cannot be swapped");
 		}
 		
-		Database.swapPlayers(game.getTimestamp(), p1.getUser().getIdLong(), p2.getUser().getIdLong());
+		if(game.getTeam(p1) == game.getTeam(p2)){
+			throw new InvalidUseException("Players must be on different teaams");
+		}
+		
+		game.swapPlayers(p1, p2);
 		
 		return Utils.createMessage(
 				String.format("`%s has been swapped with %s`", p1.getEffectiveName(), p2.getEffectiveName()));

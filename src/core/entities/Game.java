@@ -20,12 +20,17 @@ import net.dv8tion.jda.core.entities.TextChannel;
 
 public class Game {
 	private Queue parentQueue;
+	
 	private long serverId;
 	private long timestamp;
+	
 	private List<Member> players;
 	private Member captain1;
 	private Member captain2;
 	private List<Channel> teamVoiceChannels;
+	private List<Member> team1;
+	private List<Member> team2;
+	
 	private GameStatus status = GameStatus.PICKING;
 	private PUGPickMenuController pickController;
 	private RPSMenuController rpsController;
@@ -83,7 +88,24 @@ public class Game {
 		
 		if(target == captain1 || target == captain2){
 			subCaptain(substitute, target);
-		}		
+		}
+		else{
+			if(status == GameStatus.PLAYING){
+				if(team1.contains(target)){
+					team1.remove(target);
+					team1.add(substitute);
+				}
+				else{
+					team2.remove(target);
+					team2.add(substitute);
+				}
+			}
+			
+			if(status == GameStatus.PICKING){
+				cancelMenus();
+				startPUGPicking();
+			}
+		}
 	}
 	
 	public boolean containsPlayer(Member player){
@@ -129,13 +151,18 @@ public class Game {
 		return status;
 	}
 	
-	public void startRPSGame(){
+	private void startRPSGame(){
 		new Thread(new Runnable(){
 			public void run(){
-				rpsController = new RPSMenuController(captain1, captain2);
-				rpsController.start();
+				RPSMenuController localRpsController = new RPSMenuController(captain1, captain2);
+				rpsController = localRpsController;
+				localRpsController.start();
 				
-				Member winner = rpsController.getWinner();
+				if(localRpsController.isCancelled()){
+					return;
+				}
+				
+				Member winner = localRpsController.getWinner();
 				
 				if(captain2 == winner){
 					captain2 = captain1;
@@ -148,7 +175,7 @@ public class Game {
 		}).start();
 	}
 	
-	public void startPUGPicking(){
+	private void startPUGPicking(){
 		new Thread(new Runnable(){
 			public void run(){
 				List<Member> playerPool = new ArrayList<Member>(players);
@@ -157,8 +184,14 @@ public class Game {
 				playerPool.remove(captain1);
 				playerPool.remove(captain2);
 				
-				pickController = new PUGPickMenuController(captain1, captain2, playerPool, pickingPattern);
-				pickController.start();
+				PUGPickMenuController localPickController = 
+						new PUGPickMenuController(captain1, captain2, playerPool, pickingPattern);
+				pickController = localPickController;
+				localPickController.start();
+				
+				if(localPickController.isCancelled()){
+					return;
+				}
 				
 				pickingComplete();
 			}
@@ -169,14 +202,14 @@ public class Game {
 	 * Inserts information into the database
 	 */
 	private void pickingComplete(){
-		status = GameStatus.PLAYING;		
+		status = GameStatus.PLAYING;
+		team1 = pickController.getTeam1();
+		team2 = pickController.getTeam2();
 		
 		insertCaptains();
 		insertPlayersInGame();
 		createVoiceChannels();
 		postTeamsToPUGChannel();
-		
-		pickController = null;
 	}
 	
 	private void insertPlayersInGame(){
@@ -184,7 +217,7 @@ public class Game {
 		
 		for(int i = 0;i < pickedPlayers.size();i++){
 			Member player = pickedPlayers.get(i);
-			int team = pickController.getTeam(player);
+			int team = (getTeam(player) == team1) ? 1 : 2;
 			
 			Database.insertPlayerGame(player.getUser().getIdLong(), timestamp, serverId, i+1, team);
 		}
@@ -312,6 +345,10 @@ public class Game {
 									 captain2.getUser().getId()));
 		
 		for(Member m : players){
+			if(players.size() > 2 && (m == captain1 || m == captain2)){
+				continue;
+			}
+			
 			try{
 				PrivateChannel pc = m.getUser().openPrivateChannel().complete();
 				
@@ -320,9 +357,7 @@ public class Game {
 				System.out.println("Error sending private message.\n" + ex.getMessage());
 			}
 			
-			if(m == captain1 || m == captain2){
-				continue;
-			}
+			
 			
 			builder.append(m.getEffectiveName() + ", ");
 		}
@@ -344,8 +379,61 @@ public class Game {
 	
 	public void repick(){
 		if(status == GameStatus.PLAYING){
+			cancelMenus();
 			startPUGPicking();
 			status = GameStatus.PICKING;
 		}
+	}
+	
+	public void setStatus(GameStatus newStatus){
+		status = newStatus;
+	}
+	
+	public String getTeamsString(){
+		String t1 = getTeamString(captain1, team1);
+		String t2 = getTeamString(captain2, team2);
+		
+		return t1 + '\n' + t2;
+	}
+	
+	public List<Member> getTeam(Member player){
+		if(player == captain1 || team1.contains(player)){
+			return team1;
+		}
+		
+		return team2;
+	}
+	
+	public void swapPlayers(Member p1, Member p2){
+		if(getTeam(p1) == team1){
+			team1.remove(p1);
+			team1.add(p2);
+			team2.remove(p2);
+			team2.add(p1);
+		}
+		else{
+			team2.remove(p1);
+			team2.add(p2);
+			team1.remove(p2);
+			team1.add(p1);
+		}
+		
+		Database.swapPlayers(timestamp, p1.getUser().getIdLong(), p2.getUser().getIdLong());
+	}
+	
+	private String getTeamString(Member captain, List<Member> players){
+		StringBuilder builder = new StringBuilder();
+		
+		builder.append(captain.getEffectiveName() + ": ");
+		
+		if(players.size() > 0){
+			for(Member player : players){
+				builder.append(player.getEffectiveName() + ", ");
+			}
+			
+			builder.delete(builder.length() - 2, builder.length());
+		}
+		
+		return builder.toString();
 	}
 }
