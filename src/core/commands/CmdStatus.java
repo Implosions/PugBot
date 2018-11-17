@@ -70,7 +70,9 @@ public class CmdStatus extends Command {
 					}
 					else{
 						status.append("\n");
-						status.append(g.getTeamsString());
+						status.append(g.getTeam1().toString());
+						status.append("\n");
+						status.append(g.getTeam2().toString());
 					}
 					
 					status.append("\n");

@@ -44,7 +44,7 @@ public class CmdFinishGame extends Command {
 		
 		String title = String.format("Game '%s' finished", game.getQueueName());
 		String result = args[0].toLowerCase();
-		int team = caller.equals(game.getCaptain1()) ? 1 : 2;
+		int team = caller.equals(game.getTeam1().getCaptain()) ? 1 : 2;
 		int winningTeam;
 		
 		switch(result){
@@ -60,7 +60,7 @@ public class CmdFinishGame extends Command {
 		long duration = TimeUnit.MINUTES.convert(msDiff, TimeUnit.MILLISECONDS);
 		
 		if(winningTeam != 0){
-			Member winner = (winningTeam == 1) ? game.getCaptain1() : game.getCaptain2();
+			Member winner = (winningTeam == 1) ? game.getTeam1().getCaptain() : game.getTeam2().getCaptain();
 			String teamName = "Team " + winner.getEffectiveName();
 			
 			return Utils.createMessage(title, String.format("**Winner:** %s%n**Duration:** %d Minutes",

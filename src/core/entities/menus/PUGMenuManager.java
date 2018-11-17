@@ -1,20 +1,20 @@
 package core.entities.menus;
 
-import java.util.ArrayList;
 import java.util.List;
 
+import core.entities.PUGTeam;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.MessageChannel;
 
-public class PUGTeam extends MenuManager<PUGPickMenuController, PUGPickMenu> {
+public class PUGMenuManager extends MenuManager<PUGPickMenuController, PUGPickMenu> {
 
-	private List<Member> players;
+	private PUGTeam team;
 	private boolean picking;
 	
-	public PUGTeam(Member owner, PUGPickMenuController controller) {
+	public PUGMenuManager(Member owner, PUGPickMenuController controller) {
 		super(owner, controller);
 		
-		players = new ArrayList<Member>();
+		team = new PUGTeam(owner);
 	}
 
 	@Override
@@ -40,7 +40,7 @@ public class PUGTeam extends MenuManager<PUGPickMenuController, PUGPickMenu> {
 		Member pick = playerPool.get(index);
 		
 		if(!controller.getPickedPlayers().contains(pick)){
-			players.add(pick);
+			team.addPlayer(pick);
 			controller.managerActionTaken(this);
 		}
 	}
@@ -53,37 +53,22 @@ public class PUGTeam extends MenuManager<PUGPickMenuController, PUGPickMenu> {
 		picking = !picking;
 	}
 	
-	public List<Member> getPlayers(){
-		return players;
+	public PUGTeam getPUGTeam(){
+		return team;
 	}
 	
 	public int getTeamSize(){
-		return players.size();
+		return team.getPlayers().size();
 	}
 	
 	public Member getLastPick(){
+		List<Member> players = team.getPlayers();
+		
 		return players.get(players.size() - 1);
 	}
 	
 	protected void addPlayer(Member player){
-		players.add(player);
-	}
-	
-	@Override
-	public String toString(){
-		StringBuilder builder = new StringBuilder();
-		
-		builder.append(owner.getEffectiveName() + ": ");
-		
-		if(players.size() > 0){
-			for(Member player : players){
-				builder.append(player.getEffectiveName() + ", ");
-			}
-			
-			builder.delete(builder.length() - 2, builder.length());
-		}
-		
-		return builder.toString();
+		team.addPlayer(player);
 	}
 	
 	@Override

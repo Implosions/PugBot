@@ -25,11 +25,9 @@ public class Game {
 	private long timestamp;
 	
 	private List<Member> players;
-	private Member captain1;
-	private Member captain2;
 	private List<Channel> teamVoiceChannels;
-	private List<Member> team1;
-	private List<Member> team2;
+	private PUGTeam team1 = new PUGTeam();
+	private PUGTeam team2 = new PUGTeam();
 	
 	private GameStatus status = GameStatus.PICKING;
 	private PUGPickMenuController pickController;
@@ -44,8 +42,9 @@ public class Game {
 		Database.insertGame(timestamp, queue.getId(), serverId);
 		
 		if(players.size() == 2){
-			captain1 = players.get(0);
-			captain2 = players.get(1);
+			team1.setCaptain(players.get(0));
+			team2.setCaptain(players.get(1));
+			
 			status = GameStatus.PLAYING;
 			insertCaptains();
 		}
@@ -86,18 +85,18 @@ public class Game {
 		players.remove(target);
 		players.add(substitute);
 		
-		if(target == captain1 || target == captain2){
+		if(target == team1.getCaptain() || target == team2.getCaptain()){
 			subCaptain(substitute, target);
 		}
 		else{
 			if(status == GameStatus.PLAYING){
-				if(team1.contains(target)){
-					team1.remove(target);
-					team1.add(substitute);
+				if(team1.getPlayers().contains(target)){
+					team1.removePlayer(target);
+					team1.addPlayer(substitute);
 				}
 				else{
-					team2.remove(target);
-					team2.add(substitute);
+					team2.removePlayer(target);
+					team2.addPlayer(substitute);
 				}
 			}
 			
@@ -118,19 +117,24 @@ public class Game {
 	private void randomizeCaptains() {
 		Random random = new Random();
 		List<Member> captainPool = getCaptainPool();
-		captain1 = captainPool.get(random.nextInt(captainPool.size()));
+		Member captain1 = captainPool.get(random.nextInt(captainPool.size()));
+		
 		captainPool.remove(captain1);
-		captain2 = MatchMaker.getMatch(captain1, captainPool);
+		
+		Member captain2 = MatchMaker.getMatch(captain1, captainPool);
+		
+		team1.setCaptain(captain1);
+		team2.setCaptain(captain2);
 		
 		startRPSGame();
 	}
 	
-	public Member getCaptain1(){
-		return captain1;
+	public PUGTeam getTeam1(){
+		return team1;
 	}
 	
-	public Member getCaptain2(){
-		return captain2;
+	public PUGTeam getTeam2(){
+		return team2;
 	}
 
 	/**
@@ -154,7 +158,7 @@ public class Game {
 	private void startRPSGame(){
 		new Thread(new Runnable(){
 			public void run(){
-				RPSMenuController localRpsController = new RPSMenuController(captain1, captain2);
+				RPSMenuController localRpsController = new RPSMenuController(team1.getCaptain(), team2.getCaptain());
 				rpsController = localRpsController;
 				localRpsController.start();
 				
@@ -164,9 +168,9 @@ public class Game {
 				
 				Member winner = localRpsController.getWinner();
 				
-				if(captain2 == winner){
-					captain2 = captain1;
-					captain1 = winner;
+				if(team2.getCaptain() == winner){
+					team2.setCaptain(team1.getCaptain());
+					team1.setCaptain(winner);
 				}
 				
 				rpsController = null;
@@ -181,11 +185,11 @@ public class Game {
 				List<Member> playerPool = new ArrayList<Member>(players);
 				String pickingPattern = parentQueue.getSettingsManager().getPickPattern();
 				
-				playerPool.remove(captain1);
-				playerPool.remove(captain2);
+				playerPool.remove(team1.getCaptain());
+				playerPool.remove(team2.getCaptain());
 				
 				PUGPickMenuController localPickController = 
-						new PUGPickMenuController(captain1, captain2, playerPool, pickingPattern);
+						new PUGPickMenuController(team1.getCaptain(), team2.getCaptain(), playerPool, pickingPattern);
 				pickController = localPickController;
 				localPickController.start();
 				
@@ -224,8 +228,11 @@ public class Game {
 	}
 	
 	private void insertCaptains(){
-		Database.insertPlayerGameCaptain(captain1.getUser().getIdLong(), timestamp, serverId, 1);
-		Database.insertPlayerGameCaptain(captain2.getUser().getIdLong(), timestamp, serverId, 2);
+		long c1 = team1.getCaptain().getUser().getIdLong();
+		long c2 = team2.getCaptain().getUser().getIdLong();
+		
+		Database.insertPlayerGameCaptain(c1, timestamp, serverId, 1);
+		Database.insertPlayerGameCaptain(c2, timestamp, serverId, 2);
 	}
 	
 	private void postTeamsToPUGChannel(){
@@ -241,8 +248,8 @@ public class Game {
 		if(teamVoiceChannels == null && ServerManager.getServer(serverId).getSettingsManager().getCreateTeamVoiceChannels()){
 			teamVoiceChannels = new ArrayList<Channel>();
 		
-			createVoiceChannel(captain1);
-			createVoiceChannel(captain2);
+			createVoiceChannel(team1.getCaptain());
+			createVoiceChannel(team2.getCaptain());
 		}
 	}
 	
@@ -301,10 +308,10 @@ public class Game {
 	 * @param target the captain to be replaced
 	 */
 	public void subCaptain(Member sub, Member target){
-		if(captain1 == target){
-			captain1 = sub;
+		if(team1.getCaptain() == target){
+			team1.setCaptain(sub);
 		}else{
-			captain2 = sub;
+			team2.setCaptain(sub);
 		}
 		
 		if(status == GameStatus.PICKING){
@@ -343,12 +350,13 @@ public class Game {
 		TextChannel pugChannel = ServerManager.getServer(serverId).getPugChannel();
 		StringBuilder builder = new StringBuilder();
 		
-		builder.append(String.format("**Captains: <@%s> & <@%s>**%n",
-									 captain1.getUser().getId(),
-									 captain2.getUser().getId()));
+		long c1 = team1.getCaptain().getUser().getIdLong();
+		long c2 = team2.getCaptain().getUser().getIdLong();
+		
+		builder.append(String.format("**Captains: <@%d> & <@%d>**%n", c1, c2));
 		
 		for(Member m : players){
-			if(players.size() > 2 && (m == captain1 || m == captain2)){
+			if(players.size() > 2 && isCaptain(m)){
 				continue;
 			}
 			
@@ -374,10 +382,7 @@ public class Game {
 	}
 	
 	public boolean isCaptain(Member player){
-		if(captain1 == player || captain2 == player){
-			return true;
-		}
-		return false;
+		return team1.getCaptain() == player || team2.getCaptain() == player;
 	}
 	
 	public void repick(){
@@ -392,15 +397,8 @@ public class Game {
 		status = newStatus;
 	}
 	
-	public String getTeamsString(){
-		String t1 = getTeamString(captain1, team1);
-		String t2 = getTeamString(captain2, team2);
-		
-		return t1 + '\n' + t2;
-	}
-	
-	public List<Member> getTeam(Member player){
-		if(player == captain1 || team1.contains(player)){
+	public PUGTeam getTeam(Member player){
+		if(player == team1.getCaptain() || team1.getPlayers().contains(player)){
 			return team1;
 		}
 		
@@ -408,35 +406,14 @@ public class Game {
 	}
 	
 	public void swapPlayers(Member p1, Member p2){
-		if(getTeam(p1) == team1){
-			team1.remove(p1);
-			team1.add(p2);
-			team2.remove(p2);
-			team2.add(p1);
-		}
-		else{
-			team2.remove(p1);
-			team2.add(p2);
-			team1.remove(p2);
-			team1.add(p1);
-		}
+		PUGTeam p1Team = getTeam(p1);
+		PUGTeam p2Team = getTeam(p2);
+		
+		p1Team.removePlayer(p1);
+		p1Team.addPlayer(p2);
+		p2Team.removePlayer(p2);
+		p2Team.addPlayer(p1);
 		
 		Database.swapPlayers(timestamp, p1.getUser().getIdLong(), p2.getUser().getIdLong());
-	}
-	
-	private String getTeamString(Member captain, List<Member> players){
-		StringBuilder builder = new StringBuilder();
-		
-		builder.append(captain.getEffectiveName() + ": ");
-		
-		if(players.size() > 0){
-			for(Member player : players){
-				builder.append(player.getEffectiveName() + ", ");
-			}
-			
-			builder.delete(builder.length() - 2, builder.length());
-		}
-		
-		return builder.toString();
 	}
 }

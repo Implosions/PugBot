@@ -4,10 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
 
+import core.entities.PUGTeam;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.MessageEmbed.Field;
 
-public class PUGPickMenuController extends MenuController<PUGTeam>{
+public class PUGPickMenuController extends MenuController<PUGMenuManager>{
 	
 	private List<Member> playerPool;
 	private List<Member> pickedPlayers = new ArrayList<Member>();
@@ -16,8 +17,8 @@ public class PUGPickMenuController extends MenuController<PUGTeam>{
 	
 	public PUGPickMenuController(Member captain1, Member captain2, List<Member> playerPool, String pickPattern) {
 		pageSize = 5;
-		manager1 = new PUGTeam(captain1, this);
-		manager2 = new PUGTeam(captain2, this);
+		manager1 = new PUGMenuManager(captain1, this);
+		manager2 = new PUGMenuManager(captain2, this);
 		this.playerPool = new ArrayList<Member>(playerPool);
 		generatePages();
 		parsePickPattern(pickPattern);
@@ -26,7 +27,7 @@ public class PUGPickMenuController extends MenuController<PUGTeam>{
 	}
 	
 	@Override
-	protected synchronized void managerActionTaken(PUGTeam manager) {
+	protected synchronized void managerActionTaken(PUGMenuManager manager) {
 		Member player = manager.getLastPick();
 		int index = playerPool.indexOf(player);
 		
@@ -154,7 +155,7 @@ public class PUGPickMenuController extends MenuController<PUGTeam>{
 	}
 	
 	private void autoassignLastPick(){
-		PUGTeam team = manager1.isPicking() ? manager1 : manager2;
+		PUGMenuManager team = manager1.isPicking() ? manager1 : manager2;
 		Member lastPlayer = playerPool.get(0);
 		
 		team.addPlayer(lastPlayer);
@@ -163,11 +164,11 @@ public class PUGPickMenuController extends MenuController<PUGTeam>{
 		generatePages();
 	}
 	
-	public List<Member> getTeam1(){
-		return manager1.getPlayers();
+	public PUGTeam getTeam1(){
+		return manager1.getPUGTeam();
 	}
 	
-	public List<Member> getTeam2(){
-		return manager2.getPlayers();
+	public PUGTeam getTeam2(){
+		return manager2.getPUGTeam();
 	}
 }

@@ -10,7 +10,7 @@ import net.dv8tion.jda.core.entities.MessageChannel;
 
 public class PUGPickMenu extends EmbedMenu {
 
-	public PUGPickMenu(MessageChannel channel, PUGTeam manager, List<Member> playerPool) {
+	public PUGPickMenu(MessageChannel channel, PUGMenuManager manager, List<Member> playerPool) {
 		super(channel, manager);
 		
 		fieldButtons = Arrays.asList(Constants.Emoji.NUMBER_1,

@@ -35,11 +35,11 @@ public class CmdSubCaptain extends Command {
 			throw new InvalidUseException("Picking has already finished");
 		}
 
-		if (!(game.getCaptain1() == target || game.getCaptain2() == target)) {
+		if (!game.isCaptain(target)) {
 			throw new InvalidUseException(target.getEffectiveName() + " is not a captain in your game");
 		}
 
-		if (game.getCaptain1() == caller || game.getCaptain2() == caller) {
+		if (game.isCaptain(caller)) {
 			throw new InvalidUseException("You are already a captain");
 		}
 

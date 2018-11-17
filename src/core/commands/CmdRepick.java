@@ -41,8 +41,15 @@ public class CmdRepick extends Command {
 			
 			new Thread(new Runnable(){
 				public void run(){
-					Member captain = (game.getCaptain1() == caller) ? game.getCaptain2() : game.getCaptain1();
-					RepickConfirmationMenu menu = new RepickConfirmationMenu(captain);
+					Member captain2;
+					
+					if(game.getTeam1().getCaptain() == caller) {
+						captain2 = game.getTeam2().getCaptain();
+					} else {
+						captain2 = game.getTeam1().getCaptain();
+					}
+					
+					RepickConfirmationMenu menu = new RepickConfirmationMenu(captain2);
 					
 					if(menu.getResult()){
 						game.repick();
