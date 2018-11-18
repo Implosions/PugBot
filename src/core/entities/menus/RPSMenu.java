@@ -1,7 +1,6 @@
 package core.entities.menus;
 
 import java.awt.Color;
-import java.util.Arrays;
 
 import core.Constants;
 import core.entities.menus.RPSMenuController.RPSMove;
@@ -19,12 +18,6 @@ public class RPSMenu extends EmbedMenu{
 							Constants.Emoji.RAISED_HAND,
 							Constants.Emoji.V,
 							manager.getOpponentOwner().getEffectiveName()));
-		
-		utilityButtons = Arrays.asList(Constants.Emoji.PUNCH,
-									   Constants.Emoji.RAISED_HAND,
-									   Constants.Emoji.V,
-									   Constants.Emoji.STOP_SIGN);
-		
 		
 		register();
 	}
@@ -47,7 +40,7 @@ public class RPSMenu extends EmbedMenu{
 		case Constants.Emoji.STOP_SIGN: move = RPSMove.FORFEIT; break;
 		}
 		
-		manager.menuAction(move);
+		manager.menuAction(0, move);
 	}
 	
 	public void updateWaiting() {

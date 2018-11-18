@@ -8,13 +8,13 @@ import net.dv8tion.jda.core.entities.MessageChannel;
 
 public class PUGMenuManager extends MenuManager<PUGPickMenuController, PUGPickMenu> {
 
-	private PUGTeam team;
+	private PUGTeam team = new PUGTeam();
 	private boolean picking;
 	
 	public PUGMenuManager(Member owner, PUGPickMenuController controller) {
 		super(owner, controller);
 		
-		team = new PUGTeam(owner);
+		team.setCaptain(owner);
 	}
 
 	@Override
@@ -25,21 +25,24 @@ public class PUGMenuManager extends MenuManager<PUGPickMenuController, PUGPickMe
 	}
 
 	@Override
-	protected <T> void menuAction(T action) {
+	protected <T> void menuAction(int pageIndex, T action) {
 		if(!picking){
 			return;
 		}
 		
-		int index = (int)action;
+		int fieldIndex = (int)action;
+		int playerIndex = (pageIndex * getOptions().getPageMaxSize()) + fieldIndex;
+		
 		List<Member> playerPool = controller.getPlayerPool();
 		
-		if(index >= playerPool.size()){
+		if(playerIndex >= playerPool.size()){
 			return;
 		}
 		
-		Member pick = playerPool.get(index);
+		Member pick = playerPool.get(playerIndex);
 		
 		if(!controller.getPickedPlayers().contains(pick)){
+			getOptions().removeOption(pageIndex, fieldIndex);
 			team.addPlayer(pick);
 			controller.managerActionTaken(this);
 		}

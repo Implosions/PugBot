@@ -1,7 +1,6 @@
 package core.entities.menus;
 
 import java.awt.Color;
-import java.util.Arrays;
 
 import core.Constants;
 import net.dv8tion.jda.core.entities.Member;
@@ -11,7 +10,7 @@ public class RepickConfirmationMenu extends EmbedMenu {
 	private boolean result = false;
 	
 	public RepickConfirmationMenu(Member user) {
-		super(user.getUser().openPrivateChannel().complete(), null);
+		super(user.getUser().openPrivateChannel().complete());
 		
 		embedBuilder.setTitle("Your opponent has requested to repick the teams")
 					.setColor(Color.yellow)
@@ -19,7 +18,9 @@ public class RepickConfirmationMenu extends EmbedMenu {
 											Constants.Emoji.CHECKMARK,
 											Constants.Emoji.X));
 		
-		utilityButtons = Arrays.asList(Constants.Emoji.CHECKMARK, Constants.Emoji.X);
+		options = new MenuOptions(0);
+		options.addUtilityButton(Constants.Emoji.CHECKMARK);
+		options.addUtilityButton(Constants.Emoji.X);
 		
 		register();
 		start();

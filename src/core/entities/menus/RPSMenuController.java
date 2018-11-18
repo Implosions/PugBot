@@ -1,7 +1,5 @@
 package core.entities.menus;
 
-import java.util.Arrays;
-
 import core.Constants;
 import core.Database;
 import net.dv8tion.jda.core.entities.Member;
@@ -18,9 +16,6 @@ public class RPSMenuController extends MenuController<RPSTeam> {
 	}
 
 	public RPSMenuController(Member p1, Member p2) {
-		utilityButtons = Arrays.asList(Constants.Emoji.PUNCH, Constants.Emoji.RAISED_HAND, Constants.Emoji.V,
-				Constants.Emoji.STOP_SIGN);
-
 		manager1 = new RPSTeam(p1, this);
 		manager2 = new RPSTeam(p2, this);
 	}
@@ -106,8 +101,13 @@ public class RPSMenuController extends MenuController<RPSTeam> {
 	}
 
 	@Override
-	protected void generatePages() {
-		pages = null;
+	protected void buildMenuOptions() {
+		options = new MenuOptions(0);
+		
+		options.addUtilityButton(Constants.Emoji.PUNCH);
+		options.addUtilityButton(Constants.Emoji.RAISED_HAND);
+		options.addUtilityButton(Constants.Emoji.V);
+		options.addUtilityButton(Constants.Emoji.STOP_SIGN);
 	}
 	
 	@Override

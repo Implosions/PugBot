@@ -20,7 +20,7 @@ public class RPSTeam extends MenuManager<RPSMenuController, RPSMenu> {
 	}
 
 	@Override
-	protected void menuAction(Object action) {
+	protected void menuAction(int pageIndex, Object action) {
 		RPSMove move = (RPSMove) action;
 
 		this.move = move;

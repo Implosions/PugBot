@@ -1,20 +1,14 @@
 package core.entities.menus;
 
-import java.util.List;
-
-import net.dv8tion.jda.core.entities.MessageEmbed.Field;
-
 public abstract class MenuController<Manager extends MenuManager<?, ?>> {
 
 	protected Manager manager1;
 	protected Manager manager2;
-	protected List<List<Field>> pages;
-	protected List<String> fieldButtons;
-	protected List<String> utilityButtons;
-	protected int pageSize = 0;
+	protected MenuOptions options;
 	private boolean cancelled = false;
 
 	public synchronized void start() {
+		buildMenuOptions();
 		manager1.createMenu();
 		manager2.createMenu();
 		onMenuCreation();
@@ -42,28 +36,8 @@ public abstract class MenuController<Manager extends MenuManager<?, ?>> {
 		return (manager == manager1) ? manager2 : manager1;
 	}
 
-	public List<Field> getPage(int pageIndex) {
-		return pages.get(pageIndex);
-	}
-
-	public int getNumberOfPages() {
-		if (pages == null) {
-			return 0;
-		}
-
-		return pages.size();
-	}
-
-	protected void removeField(int index) {
-		int pageIndex = index / pageSize;
-		int fieldIndex = index % pageSize;
-		List<Field> page = pages.get(pageIndex);
-
-		page.remove(fieldIndex);
-
-		if (page.size() == 0) {
-			pages.remove(page);
-		}
+	public MenuOptions getOptions() {
+		return options;
 	}
 	
 	public synchronized void cancel(){
@@ -84,7 +58,7 @@ public abstract class MenuController<Manager extends MenuManager<?, ?>> {
 
 	protected abstract void complete();
 
-	protected abstract void generatePages();
+	protected abstract void buildMenuOptions();
 	
 	protected abstract void onMenuCreation();
 }

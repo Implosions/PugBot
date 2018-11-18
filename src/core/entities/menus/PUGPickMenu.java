@@ -1,10 +1,8 @@
 package core.entities.menus;
 
 import java.awt.Color;
-import java.util.Arrays;
 import java.util.List;
 
-import core.Constants;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.MessageChannel;
 
@@ -12,20 +10,14 @@ public class PUGPickMenu extends EmbedMenu {
 
 	public PUGPickMenu(MessageChannel channel, PUGMenuManager manager, List<Member> playerPool) {
 		super(channel, manager);
-		
-		fieldButtons = Arrays.asList(Constants.Emoji.NUMBER_1,
-									 Constants.Emoji.NUMBER_2,
-									 Constants.Emoji.NUMBER_3,
-									 Constants.Emoji.NUMBER_4,
-									 Constants.Emoji.NUMBER_5);
 		embedBuilder.setTitle(String.format("Captaining vs. %s", manager.getOpponentOwner().getEffectiveName()));
 		
 		register();
 	}
 
 	@Override
-	public void fieldButtonClick(int index) {
-		manager.menuAction((pageIndex * fieldButtons.size()) + index);
+	public void fieldButtonClick(int fieldIndex) {
+		manager.menuAction(pageIndex, fieldIndex);
 	}
 
 	@Override

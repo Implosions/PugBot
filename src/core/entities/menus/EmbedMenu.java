@@ -17,13 +17,17 @@ public abstract class EmbedMenu implements IMenu {
 	protected MessageChannel channel;
 	protected MenuManager<?, ?> manager;
 	protected EmbedBuilder embedBuilder = new EmbedBuilder();
-	protected List<String> fieldButtons;
-	protected List<String> utilityButtons;
 	protected int pageIndex = 0;
+	protected MenuOptions options;
+	
+	public EmbedMenu(MessageChannel channel) {
+		this.channel = channel;
+	}
 
 	public EmbedMenu(MessageChannel channel, MenuManager<?, ?> manager) {
 		this.channel = channel;
 		this.manager = manager;
+		this.options = manager.getOptions();
 	}
 
 	protected void register() {
@@ -53,7 +57,11 @@ public abstract class EmbedMenu implements IMenu {
 
 	@Override
 	public void buttonClick(String emoteName) {
-		if (emoteName.equals(Constants.Emoji.FORWARD_BUTTON) && pageIndex < manager.getNumberOfPagesInMenu() - 1) {
+		int pages = options.getPageCount();
+		List<String> fieldButtons = options.getFieldButtons();
+		List<String> utilityButtons = options.getUtilityButtons();
+		
+		if (emoteName.equals(Constants.Emoji.FORWARD_BUTTON) && pageIndex < pages - 1) {
 			pageIndex++;
 		} else if (emoteName.equals(Constants.Emoji.BACK_BUTTON) && pageIndex > 0) {
 			pageIndex--;
@@ -61,7 +69,7 @@ public abstract class EmbedMenu implements IMenu {
 			int index = fieldButtons.indexOf(emoteName);
 			fieldButtonClick(index);
 			return;
-		} else if (utilityButtons != null && utilityButtons.contains(emoteName)) {
+		} else if (utilityButtons.contains(emoteName)) {
 			utilityButtonClick(emoteName);
 			return;
 		} else {
@@ -77,22 +85,19 @@ public abstract class EmbedMenu implements IMenu {
 
 	protected void update() {
 		Message updatedMessage;
-		int menuSize = 0;
-		
-		if(manager != null){
-			menuSize = manager.getNumberOfPagesInMenu();
-		}
 
 		embedBuilder.clearFields();
 
-		if (menuSize > 0) {
-			if (pageIndex == menuSize) {
+		int pageCount = options.getPageCount();
+		
+		if (pageCount > 0) {
+			if (pageIndex == pageCount) {
 				pageIndex--;
 			}
 
-			embedBuilder.setFooter(String.format("Page %d/%d", pageIndex + 1, menuSize), null);
+			embedBuilder.setFooter(String.format("Page %d/%d", pageIndex + 1, pageCount), null);
 
-			for (Field field : manager.getPage(pageIndex)) {
+			for (Field field : options.getPage(pageIndex)) {
 				embedBuilder.addField(field);
 			}
 		} else {
@@ -115,20 +120,16 @@ public abstract class EmbedMenu implements IMenu {
 	private List<String> getButtonList() {
 		List<String> buttons = new ArrayList<String>();
 
-		if (fieldButtons != null) {
-			for (String button : fieldButtons) {
-				buttons.add(button);
-			}
+		for (String button : options.getFieldButtons()) {
+			buttons.add(button);
 		}
 
-		if (utilityButtons != null) {
-			for (String button : utilityButtons) {
-				buttons.add(button);
-			}
+		for (String button : options.getUtilityButtons()) {
+			buttons.add(button);
 		}
 
-		if (manager != null && manager.getNumberOfPagesInMenu() > 0) {
-			buttons.add(fieldButtons.size(), Constants.Emoji.FORWARD_BUTTON);
+		if (options.getPageCount() > 1) {
+			buttons.add(buttons.size(), Constants.Emoji.FORWARD_BUTTON);
 			buttons.add(0, Constants.Emoji.BACK_BUTTON);
 		}
 

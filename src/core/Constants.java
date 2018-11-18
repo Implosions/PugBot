@@ -17,6 +17,10 @@ public class Constants {
 		public final static String NUMBER_3 = "\u0033\u20E3";
 		public final static String NUMBER_4 = "\u0034\u20E3";
 		public final static String NUMBER_5 = "\u0035\u20E3";
+		public final static String NUMBER_6 = "\u0036\u20E3";
+		public final static String NUMBER_7 = "\u0037\u20E3";
+		public final static String NUMBER_8 = "\u0038\u20E3";
+		public final static String NUMBER_9 = "\u0039\u20E3";
 		public final static String X = "\u274C";
 	}
 }

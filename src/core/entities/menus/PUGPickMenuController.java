@@ -6,7 +6,6 @@ import java.util.ListIterator;
 
 import core.entities.PUGTeam;
 import net.dv8tion.jda.core.entities.Member;
-import net.dv8tion.jda.core.entities.MessageEmbed.Field;
 
 public class PUGPickMenuController extends MenuController<PUGMenuManager>{
 	
@@ -16,11 +15,9 @@ public class PUGPickMenuController extends MenuController<PUGMenuManager>{
 	private ListIterator<Integer> pickIterator;
 	
 	public PUGPickMenuController(Member captain1, Member captain2, List<Member> playerPool, String pickPattern) {
-		pageSize = 5;
 		manager1 = new PUGMenuManager(captain1, this);
 		manager2 = new PUGMenuManager(captain2, this);
 		this.playerPool = new ArrayList<Member>(playerPool);
-		generatePages();
 		parsePickPattern(pickPattern);
 		
 		manager1.nextTurn();
@@ -29,12 +26,9 @@ public class PUGPickMenuController extends MenuController<PUGMenuManager>{
 	@Override
 	protected synchronized void managerActionTaken(PUGMenuManager manager) {
 		Member player = manager.getLastPick();
-		int index = playerPool.indexOf(player);
 		
 		pickedPlayers.add(player);
 		playerPool.remove(player);
-		removeField(index);
-		generatePages();
 		
 		picksRemaining--;
 		
@@ -69,28 +63,11 @@ public class PUGPickMenuController extends MenuController<PUGMenuManager>{
 	}
 	
 	@Override
-	protected void generatePages(){
-		pages = new ArrayList<List<Field>>();
-		List<Field> fields;
+	protected void buildMenuOptions(){
+		options = new MenuOptions(5);
 		
-		for(int i = 0;i < (playerPool.size() / pageSize) + 1;i++){
-			fields = new ArrayList<Field>();
-			
-			for(int j = 0;j < pageSize;j++){		
-				int index = j + (i * pageSize);
-				
-				if(index == playerPool.size()){
-					break;
-				}
-				
-				String playerName = playerPool.get(index).getEffectiveName();
-				
-				fields.add(new Field(String.format("%d) %s", j + 1, playerName), "\u200b", false));
-			}
-			
-			if(fields.size() > 0){
-				pages.add(fields);
-			}
+		for(Member m : playerPool) {
+			options.addOption(m.getEffectiveName());
 		}
 	}
 	
@@ -108,7 +85,7 @@ public class PUGPickMenuController extends MenuController<PUGMenuManager>{
 	}
 	
 	public String getTeamsString(){
-		return manager1.toString() + System.lineSeparator() + manager2.toString();
+		return manager1.getPUGTeam().toString() + System.lineSeparator() + manager2.getPUGTeam().toString();
 	}
 	
 	private void updateMenus(){
@@ -161,7 +138,7 @@ public class PUGPickMenuController extends MenuController<PUGMenuManager>{
 		team.addPlayer(lastPlayer);
 		pickedPlayers.add(lastPlayer);
 		playerPool.clear();
-		generatePages();
+		options.clearOptions();
 	}
 	
 	public PUGTeam getTeam1(){

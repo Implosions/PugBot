@@ -1,9 +1,6 @@
 package core.entities.menus;
 
-import java.util.List;
-
 import net.dv8tion.jda.core.entities.Member;
-import net.dv8tion.jda.core.entities.MessageEmbed.Field;
 
 public abstract class MenuManager<Controller extends MenuController<?>, Menu extends EmbedMenu> {
 
@@ -36,16 +33,12 @@ public abstract class MenuManager<Controller extends MenuController<?>, Menu ext
 		return menu;
 	}
 
-	public int getNumberOfPagesInMenu() {
-		return controller.getNumberOfPages();
-	}
-
-	public List<Field> getPage(int index) {
-		return controller.getPage(index);
+	public MenuOptions getOptions() {
+		return controller.getOptions();
 	}
 
 	protected abstract void createMenu();
 
-	protected abstract <T> void menuAction(T action);
+	protected abstract <T> void menuAction(int pageIndex, T action);
 
 }
