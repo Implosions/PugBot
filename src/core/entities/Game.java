@@ -11,8 +11,6 @@ import core.entities.menus.RPSMenuController;
 import core.util.MatchMaker;
 import core.util.Utils;
 import net.dv8tion.jda.core.entities.Category;
-import net.dv8tion.jda.core.entities.Channel;
-import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.Message;
 import net.dv8tion.jda.core.entities.PrivateChannel;
@@ -25,7 +23,6 @@ public class Game {
 	private long timestamp;
 	
 	private List<Member> players;
-	private List<Channel> teamVoiceChannels;
 	private PUGTeam team1 = new PUGTeam();
 	private PUGTeam team2 = new PUGTeam();
 	
@@ -245,38 +242,19 @@ public class Game {
 	}
 	
 	private void createVoiceChannels() {
-		if(teamVoiceChannels == null && ServerManager.getServer(serverId).getSettingsManager().getCreateTeamVoiceChannels()){
-			teamVoiceChannels = new ArrayList<Channel>();
+		boolean createChannels = ServerManager.getServer(serverId).getSettingsManager().getCreateTeamVoiceChannels();
 		
-			createVoiceChannel(team1.getCaptain());
-			createVoiceChannel(team2.getCaptain());
-		}
-	}
-	
-	private void createVoiceChannel(Member member){
-		try{
-			Guild guild = ServerManager.getGuild(serverId);
+		if(createChannels){
 			Category category = parentQueue.getSettingsManager().getVoiceChannelCategory();
-			Channel channel = guild.getController().createVoiceChannel("Team " + member.getEffectiveName()).complete();
-				
-			channel.getManager().setParent(category).queue();
-			teamVoiceChannels.add(channel);
-		}catch(Exception ex){
-			//System.out.println(ex.getMessage());
-			ex.printStackTrace();
+			
+			team1.createVoiceChannel(category);
+			team2.createVoiceChannel(category);
 		}
 	}
 	
 	private void deleteVoiceChannels(){
-		if(teamVoiceChannels != null){
-			try{
-				for(Channel channel : teamVoiceChannels){
-					channel.delete().queue();
-				}
-			}catch(Exception ex){
-				System.out.println(ex.getMessage());
-			}
-		}
+		team1.deleteVoiceChannel();
+		team2.deleteVoiceChannel();
 	}
 	
 	protected void finish(){
@@ -310,8 +288,10 @@ public class Game {
 	public void subCaptain(Member sub, Member target){
 		if(team1.getCaptain() == target){
 			team1.setCaptain(sub);
+			team1.updateVoiceChannel();
 		}else{
 			team2.setCaptain(sub);
+			team2.updateVoiceChannel();
 		}
 		
 		if(status == GameStatus.PICKING){
