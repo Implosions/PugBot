@@ -234,9 +234,19 @@ public class Game {
 	
 	private void postTeamsToPUGChannel(){
 		TextChannel pugChannel = ServerManager.getServer(serverId).getPugChannel();
-		Message message = Utils.createMessage(String.format("Game '%s' starting", getQueueName()),
+		Message message = Utils.createMessage(String.format("Game '%s' teams picked", getQueueName()),
 											  String.format("Teams:%n%s", pickController.getTeamsString()),
 											  true);
+		
+		for(Member m : players) {
+			if(!isCaptain(m)) {
+				try {
+					m.getUser().openPrivateChannel().complete().sendMessage(message).queue();
+				} catch(Exception ex) {
+					ex.printStackTrace();
+				}
+			}
+		}
 		
 		pugChannel.sendMessage(message).queue();
 	}
