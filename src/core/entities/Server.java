@@ -2,7 +2,7 @@ package core.entities;
 
 import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.Set;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
@@ -30,8 +30,8 @@ public class Server {
 	private ConcurrentHashMap<Member, Long> activityList = new ConcurrentHashMap<Member, Long>();
 	private ConcurrentHashMap<Member, DCTimer> disconnectList = new ConcurrentHashMap<>();
 	private java.util.Queue<Message> messageCache = new LinkedList<Message>();
-	private Set<Long> banList;
-	private Set<Long> adminList;
+	private List<Long> banList;
+	private List<Long> adminList;
 	private HashMap<String, Role> groupDict = new HashMap<String, Role>();
 	private CommandManager commandManager;
 

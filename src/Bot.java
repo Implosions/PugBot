@@ -14,9 +14,17 @@ public class Bot{
 	
 	public static void main(String[] args) {
 		try{
-			new Database();
-			OkHttpClient.Builder httpBuilder = new OkHttpClient.Builder().readTimeout(60, TimeUnit.SECONDS).connectTimeout(60, TimeUnit.SECONDS).writeTimeout(60, TimeUnit.SECONDS);
-			JDA jda = new JDABuilder(AccountType.BOT).setToken(Tokens.TOKEN).setHttpClientBuilder(httpBuilder).buildBlocking();
+			Database.createConnection();
+			OkHttpClient.Builder httpBuilder = new OkHttpClient.Builder()
+					.readTimeout(60, TimeUnit.SECONDS)
+					.connectTimeout(60, TimeUnit.SECONDS)
+					.writeTimeout(60, TimeUnit.SECONDS);
+			
+			JDA jda = new JDABuilder(AccountType.BOT)
+					.setToken(Tokens.TOKEN)
+					.setHttpClientBuilder(httpBuilder)
+					.buildBlocking();
+			
 			jda.setAutoReconnect(true);
 			jda.addEventListener(new EventHandler(jda));
 		}catch(Exception ex){
