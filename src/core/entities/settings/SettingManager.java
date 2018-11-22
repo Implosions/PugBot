@@ -1,6 +1,8 @@
 package core.entities.settings;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import core.entities.Server;
 import core.exceptions.InvalidUseException;
@@ -32,7 +34,7 @@ public abstract class SettingManager {
 		Setting<?> setting = settingMap.get(settingName);
 		
 		setting.set(args);
-		save(setting);		
+		setting.save();
 	}
 	
 	public Server getServer(){
@@ -42,13 +44,15 @@ public abstract class SettingManager {
 	@Override
 	public String toString(){
 		StringBuilder builder = new StringBuilder();
+		List<ISetting> settings = new ArrayList<>();
 		
-		for(ISetting setting : settingMap.values()){
+		settings.addAll(settingMap.values());
+		settings.sort((ISetting s1, ISetting s2) -> s1.getName().compareTo(s2.getName()));
+		
+		for(ISetting setting : settings){
 			builder.append(setting.getName() + ": " + setting.getValueString() + System.lineSeparator());
 		}
 		
 		return builder.toString();
 	}
-	
-	protected abstract void save(Setting<?> setting);
 }

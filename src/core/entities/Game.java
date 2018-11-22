@@ -6,8 +6,10 @@ import java.util.List;
 import java.util.Random;
 
 import core.Database;
+import core.entities.menus.MapPickMenuController;
 import core.entities.menus.PUGPickMenuController;
 import core.entities.menus.RPSMenuController;
+import core.entities.settings.QueueSettingsManager;
 import core.util.MatchMaker;
 import core.util.Utils;
 import net.dv8tion.jda.core.entities.Category;
@@ -29,6 +31,7 @@ public class Game {
 	private GameStatus status = GameStatus.PICKING;
 	private PUGPickMenuController pickController;
 	private RPSMenuController rpsController;
+	private MapPickMenuController mapPickController;
 
 	public Game(Queue queue, long serverId, List<Member> players) {
 		this.parentQueue = queue;
@@ -194,6 +197,35 @@ public class Game {
 					return;
 				}
 				
+				startMapPicking();
+			}
+		}).start();
+	}
+	
+	private void startMapPicking() {
+		QueueSettingsManager settings = getParentQueue().getSettingsManager();
+		int mapCount = settings.getMapCount();
+		int poolSize = settings.getMapPool().size();
+		
+		if(mapCount == 0 || poolSize < 2 || (mapCount >= poolSize)) {
+			pickingComplete();
+			return;
+		}
+		
+		new Thread(new Runnable(){
+			public void run(){
+				List<String> mapPool = new ArrayList<>(settings.getMapPool());
+				
+				MapPickMenuController localMapPickController = 
+						new MapPickMenuController(team1.getCaptain(), team2.getCaptain(), 
+								mapCount, mapPool, settings.getPickStyle());
+				mapPickController = localMapPickController;
+				localMapPickController.start();
+				
+				if(localMapPickController.isCancelled()){
+					return;
+				}
+				
 				pickingComplete();
 			}
 		}).start();
@@ -207,8 +239,6 @@ public class Game {
 		team1 = pickController.getTeam1();
 		team2 = pickController.getTeam2();
 		
-		insertCaptains();
-		insertPlayersInGame();
 		createVoiceChannels();
 		postTeamsToPUGChannel();
 	}
@@ -233,10 +263,18 @@ public class Game {
 	}
 	
 	private void postTeamsToPUGChannel(){
+		String output = String.format("**Teams:**%n%s", pickController.getTeamsString());
+		
+		if(mapPickController != null) {
+			String maps = String.join(", ", mapPickController.getPickedMaps());
+			
+			output += String.format("%n%n**Maps:** %s", maps);
+		}
+				
+				
 		TextChannel pugChannel = ServerManager.getServer(serverId).getPugChannel();
 		Message message = Utils.createMessage(String.format("Game '%s' teams picked", getQueueName()),
-											  String.format("Teams:%n%s", pickController.getTeamsString()),
-											  true);
+											  output, true);
 		
 		for(Member m : players) {
 			if(!isCaptain(m)) {
@@ -268,10 +306,16 @@ public class Game {
 	}
 	
 	protected void finish(){
-		cancelMenus();
-		deleteVoiceChannels();
+		insertCaptains();
+		insertPlayersInGame();
+		insertMaps();
 		
 		status = GameStatus.FINISHED;
+	}
+	
+	protected void cleanup() {
+		cancelMenus();
+		deleteVoiceChannels();
 	}
 
 	/**
@@ -286,6 +330,11 @@ public class Game {
 		if(rpsController != null){
 			rpsController.cancel();
 			rpsController = null;
+		}
+		
+		if(mapPickController != null) {
+			mapPickController.cancel();
+			mapPickController = null;
 		}
 	}
 	
@@ -405,5 +454,13 @@ public class Game {
 		p2Team.addPlayer(p1);
 		
 		Database.swapPlayers(timestamp, p1.getUser().getIdLong(), p2.getUser().getIdLong());
+	}
+	
+	private void insertMaps() {
+		if(mapPickController != null) {
+			for(String map : mapPickController.getPickedMaps()) {
+				Database.insertGameMap(serverId, getParentQueue().getId(), timestamp, map);
+			}
+		}
 	}
 }

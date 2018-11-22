@@ -1,14 +1,12 @@
 package core.entities.menus;
 
 import java.awt.Color;
-import java.util.List;
 
-import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.MessageChannel;
 
 public class PUGPickMenu extends EmbedMenu {
 
-	public PUGPickMenu(MessageChannel channel, PUGMenuManager manager, List<Member> playerPool) {
+	public PUGPickMenu(MessageChannel channel, PUGMenuManager manager) {
 		super(channel, manager);
 		embedBuilder.setTitle(String.format("Captaining vs. %s", manager.getOpponentOwner().getEffectiveName()));
 		

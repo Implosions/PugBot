@@ -3,12 +3,12 @@ package core.entities.settings.queuesettings;
 import java.util.Arrays;
 import java.util.List;
 
-import core.entities.settings.Setting;
+import core.Database;
 import core.exceptions.BadArgumentsException;
 import core.exceptions.InvalidUseException;
 import net.dv8tion.jda.core.entities.Role;
 
-public class SettingRoleRestrictions extends Setting<List<Role>>{
+public class SettingRoleRestrictions extends QueueSetting<List<Role>>{
 
 	public SettingRoleRestrictions(List<Role> value) {
 		super(value);
@@ -55,7 +55,7 @@ public class SettingRoleRestrictions extends Setting<List<Role>>{
 		}
 		
 		String cmd = args[0].toLowerCase();
-		String roleName = String.join(", ", Arrays.copyOfRange(args, 1, args.length));
+		String roleName = String.join(" ", Arrays.copyOfRange(args, 1, args.length));
 		
 		switch(cmd){
 		case "add": add(roleName); break;
@@ -69,11 +69,15 @@ public class SettingRoleRestrictions extends Setting<List<Role>>{
 		
 		if(!getValue().contains(role)){
 			getValue().add(role);
+			Database.addQueueRole(getServerId(), getQueueId(), role.getIdLong());
 		}
 	}
 	
 	private void delete(String roleName){
-		getValue().remove(findRole(roleName));
+		Role role = findRole(roleName);
+		
+		getValue().remove(role);
+		Database.addQueueRole(getServerId(), getQueueId(), role.getIdLong());
 	}
 	
 	private Role findRole(String roleName){
@@ -84,5 +88,9 @@ public class SettingRoleRestrictions extends Setting<List<Role>>{
 		}
 		
 		return roles.get(0);
+	}
+	
+	@Override
+	public void save() {
 	}
 }

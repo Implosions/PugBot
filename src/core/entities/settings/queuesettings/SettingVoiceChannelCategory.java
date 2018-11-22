@@ -2,11 +2,10 @@ package core.entities.settings.queuesettings;
 
 import java.util.List;
 
-import core.entities.settings.Setting;
 import core.exceptions.InvalidUseException;
 import net.dv8tion.jda.core.entities.Category;
 
-public class SettingVoiceChannelCategory extends Setting<Category>{
+public class SettingVoiceChannelCategory extends QueueSetting<Category>{
 
 	public SettingVoiceChannelCategory(Category value) {
 		super(value);

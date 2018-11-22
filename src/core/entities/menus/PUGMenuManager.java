@@ -21,7 +21,7 @@ public class PUGMenuManager extends MenuManager<PUGPickMenuController, PUGPickMe
 	protected void createMenu() {
 		MessageChannel channel = owner.getUser().openPrivateChannel().complete();
 		
-		menu = new PUGPickMenu(channel, this, controller.getPlayerPool());
+		menu = new PUGPickMenu(channel, this);
 	}
 
 	@Override

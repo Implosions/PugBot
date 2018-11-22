@@ -30,9 +30,4 @@ public class ServerSettingsManager extends SettingManager {
 	public int getQueueFinishTimer(){
 		return (int)getSetting("QueueFinishTimer").getValue();
 	}
-
-	@Override
-	protected void save(Setting<?> setting) {
-		Database.updateServerSetting(getServer().getId(), setting.getName(), setting.getSaveString());
-	}
 }

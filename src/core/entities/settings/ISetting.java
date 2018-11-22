@@ -10,4 +10,6 @@ public interface ISetting {
 	String getSaveString();
 	
 	void set(String[] args);
+	
+	void save();
 }

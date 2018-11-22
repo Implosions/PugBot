@@ -1,9 +1,8 @@
 package core.entities.settings.queuesettings;
 
-import core.entities.settings.Setting;
 import core.exceptions.BadArgumentsException;
 
-public class SettingPickPattern extends Setting<String> {
+public class SettingPickPattern extends QueueSetting<String> {
 
 	public SettingPickPattern(String value) {
 		super(value);

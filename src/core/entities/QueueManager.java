@@ -160,6 +160,7 @@ public class QueueManager {
 	private void addToJustFinished(Game game) {
 		QueueFinishTimer timer = new QueueFinishTimer(this);
 		
+		game.finish();
 		finishedGameMap.put(timer, game);
 		timer.start();
 	}
@@ -171,7 +172,7 @@ public class QueueManager {
 			q.addPlayersWaiting(g.getPlayers());
 		}
 
-		g.finish();
+		g.cleanup();
 		finishedGameMap.remove(timer);
 		updateTopic();
 	}

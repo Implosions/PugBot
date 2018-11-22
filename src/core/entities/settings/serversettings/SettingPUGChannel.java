@@ -2,11 +2,10 @@ package core.entities.settings.serversettings;
 
 import java.util.List;
 
-import core.entities.settings.Setting;
 import core.exceptions.InvalidUseException;
 import net.dv8tion.jda.core.entities.TextChannel;
 
-public class SettingPUGChannel extends Setting<TextChannel> {
+public class SettingPUGChannel extends ServerSetting<TextChannel> {
 
 	public SettingPUGChannel(TextChannel value) {
 		super(value);

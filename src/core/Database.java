@@ -19,6 +19,9 @@ import core.entities.Server;
 import core.entities.ServerManager;
 import core.entities.settings.QueueSettingsManager;
 import core.entities.settings.ServerSettingsManager;
+import core.entities.settings.queuesettings.SettingMapCount;
+import core.entities.settings.queuesettings.SettingMapPickingStyle;
+import core.entities.settings.queuesettings.SettingMapPool;
 import core.entities.settings.queuesettings.SettingMinGamesPlayedToCaptain;
 import core.entities.settings.queuesettings.SettingPickPattern;
 import core.entities.settings.queuesettings.SettingRoleRestrictions;
@@ -80,6 +83,8 @@ public class Database {
 					+ "setting_MinGamesPlayedToCaptain INTEGER NOT NULL DEFAULT 15, "
 					+ "setting_PickPattern VARCHAR(15) NOT NULL DEFAULT '1', "
 					+ "setting_VoiceChannelCategory INTEGER NOT NULL DEFAULT 0, "
+					+ "setting_MapCount INTEGER NOT NULL DEFAULT 0, "
+					+ "setting_MapPickingStyle INTEGER NOT NULL DEFAULT 0, "
 					+ "PRIMARY KEY (id, serverId), "
 					+ "FOREIGN KEY (serverId) REFERENCES DiscordServer(id)"
 					+ ")");
@@ -178,6 +183,29 @@ public class Database {
 					+ "PRIMARY KEY (serverId, queueId, roleId), "
 					+ "FOREIGN KEY (queueId) REFERENCES Queue(id), "
 					+ "FOREIGN KEY (serverId) REFERENCES DiscordServer(id)"
+					+ ")");
+			
+			statement.executeUpdate("CREATE TABLE IF NOT EXISTS "
+					+ "QueueMap("
+					+ "serverId INTEGER NOT NULL, "
+					+ "queueId INTEGER NOT NULL, "
+					+ "name VARCHAR(20) NOT NULL, "
+					+ "PRIMARY KEY (serverId, queueId, name), "
+					+ "FOREIGN KEY (queueId) REFERENCES Queue(id), "
+					+ "FOREIGN KEY (serverId) REFERENCES DiscordServer(id)"
+					+ ")");
+			
+			statement.executeUpdate("CREATE TABLE IF NOT EXISTS "
+					+ "GameMap("
+					+ "serverId INTEGER NOT NULL, "
+					+ "queueId INTEGER NOT NULL, "
+					+ "timestamp INTEGER NOT NULL, "
+					+ "mapName VARCHAR(20) NOT NULL, "
+					+ "PRIMARY KEY (serverId, queueId, timestamp, mapName), "
+					+ "FOREIGN KEY (queueId) REFERENCES QueueMap(queueId), "
+					+ "FOREIGN KEY (serverId) REFERENCES QueueMap(serverId), "
+					+ "FOREIGN KEY (mapName) REFERENCES QueueMap(name), "
+					+ "FOREIGN KEY (timestamp) REFERENCES Game(timestamp)"
 					+ ")");
 			
 		}catch(Exception ex){
@@ -570,7 +598,9 @@ public class Database {
 		String sql = "SELECT "
 				+ "setting_MinGamesPlayedToCaptain, "
 				+ "setting_PickPattern, "
-				+ "setting_VoiceChannelCategory "
+				+ "setting_VoiceChannelCategory, "
+				+ "setting_MapCount, "
+				+ "setting_MapPickingStyle "
 				+ "FROM Queue WHERE serverId = ? AND id = ?";
 		
 		Guild guild = manager.getServer().getGuild();
@@ -586,12 +616,42 @@ public class Database {
 				manager.addSetting(new SettingMinGamesPlayedToCaptain(rs.getInt(1)));
 				manager.addSetting(new SettingPickPattern(rs.getString(2)));
 				manager.addSetting(new SettingVoiceChannelCategory(category));
-				manager.addSetting(new SettingRoleRestrictions(getQueueRoles(guild, queueId)));
+				manager.addSetting(new SettingMapCount(rs.getInt(4)));
+				manager.addSetting(new SettingMapPickingStyle(rs.getInt(5)));
 			}
 
 		}catch(SQLException ex){
 			ex.printStackTrace();
 		}
+		
+		List<Role> roles = getQueueRoles(guild, queueId);
+		List<String> maps = getQueueMaps(guild.getIdLong(), queueId);
+		
+		manager.addSetting(new SettingRoleRestrictions(roles));
+		manager.addSetting(new SettingMapPool(maps));
+	}
+	
+	private static List<String> getQueueMaps(long serverId, long queueId) {
+		String sql = "SELECT name FROM QueueMap WHERE serverId = ? AND queueId = ?";
+		List<String> maps = new ArrayList<>();
+		
+		try(PreparedStatement statement = _conn.prepareStatement(sql)){
+			statement.setLong(1, serverId);
+			statement.setLong(2, queueId);
+			
+			try(ResultSet rs = statement.executeQuery()){
+				while(rs.next()){
+					String map = rs.getString(1);
+					
+					maps.add(map);
+				}
+			}
+			
+		}catch(SQLException ex){
+			ex.printStackTrace();
+		}
+		
+		return maps;
 	}
 	
 	private static List<Role> getQueueRoles(Guild guild, long queueId){
@@ -661,29 +721,8 @@ public class Database {
 		}
 	}
 	
-	public static void updateQueueRoleRestrictions(long serverId, long queueId, List<Role> roles){
-		deleteQueueRoles(serverId, queueId);
-		
-		for(Role role : roles){
-			addQueueRole(serverId, queueId, role.getIdLong());
-		}
-	}
-	
-	private static void deleteQueueRoles(long serverId, long queueId){
-		String sql = "DELETE FROM QueueRole WHERE serverId = ? AND QueueId = ?";
-		
-		try(PreparedStatement statement = _conn.prepareStatement(sql)){
-			statement.setLong(1, serverId);
-			statement.setLong(2, queueId);
-			
-			statement.executeUpdate();
-		}catch(SQLException ex){
-			ex.printStackTrace();
-		}
-	}
-	
-	private static void addQueueRole(long serverId, long queueId, long roleId){
-		String sql = "INSERT INTO QueueRole VALUES(?, ?, ?)";
+	public static void deleteQueueRole(long serverId, long queueId, long roleId){
+		String sql = "DELETE FROM QueueRole WHERE serverId = ? AND QueueId = ? AND RoleId = ?";
 		
 		try(PreparedStatement statement = _conn.prepareStatement(sql)){
 			statement.setLong(1, serverId);
@@ -695,6 +734,22 @@ public class Database {
 			ex.printStackTrace();
 		}
 	}
+	
+	public static void addQueueRole(long serverId, long queueId, long roleId){
+		String sql = "INSERT OR IGNORE INTO QueueRole VALUES(?, ?, ?)";
+		
+		try(PreparedStatement statement = _conn.prepareStatement(sql)){
+			statement.setLong(1, serverId);
+			statement.setLong(2, queueId);
+			statement.setLong(3, roleId);
+			
+			statement.executeUpdate();
+		}catch(SQLException ex){
+			ex.printStackTrace();
+		}
+	}
+	
+	
 	
 	/**
 	 * @param serverId The id of the server
@@ -1289,6 +1344,56 @@ public class Database {
 			statement.setLong(4, timestamp);
 			statement.setLong(5, p1);
 			statement.setLong(6, p2);
+			
+			statement.executeUpdate();
+		}catch(SQLException ex){
+			ex.printStackTrace();
+		}
+	}
+	
+	public static void addQueueMap(long serverId, long queueId, String mapName){
+		String sql = "INSERT OR IGNORE INTO QueueMap VALUES(?, ?, ?)";
+		
+		try(PreparedStatement statement = _conn.prepareStatement(sql)){
+			statement.setLong(1, serverId);
+			statement.setLong(2, queueId);
+			statement.setString(3, mapName);
+			
+			statement.executeUpdate();
+		}catch(SQLException ex){
+			ex.printStackTrace();
+		}
+	}
+	
+	public static void deleteQueueMap(long serverId, long queueId, String mapName){
+		String sql = "DELETE FROM QueueMap WHERE "
+				+ "serverId = ? AND "
+				+ "queueId = ? AND "
+				+ "name = ?";
+		
+		try(PreparedStatement statement = _conn.prepareStatement(sql)){
+			statement.setLong(1, serverId);
+			statement.setLong(2, queueId);
+			statement.setString(3, mapName);
+			
+			statement.executeUpdate();
+		}catch(SQLException ex){
+			ex.printStackTrace();
+		}
+	}
+	
+	public static void insertGameMap(long serverId, long queueId, long timestamp, String mapName) {
+		String sql = "INSERT OR REPLACE INTO GameMap "
+				   + "(serverId, queueId, timestamp, mapName) "
+				   + "VALUES(?, ?, ?, ?)";
+		
+		try(PreparedStatement statement = _conn.prepareStatement(sql)) {
+			
+			
+			statement.setLong(1, serverId);
+			statement.setLong(2, queueId);
+			statement.setLong(3, timestamp);
+			statement.setString(4, mapName);
 			
 			statement.executeUpdate();
 		}catch(SQLException ex){

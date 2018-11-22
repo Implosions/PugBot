@@ -2,25 +2,30 @@ package core.entities.settings.queuesettings;
 
 import core.exceptions.BadArgumentsException;
 
-public class SettingMinGamesPlayedToCaptain extends QueueSetting<Integer>{
+public class SettingMapCount extends QueueSetting<Integer>{
 
-	public SettingMinGamesPlayedToCaptain(Integer value) {
+	public SettingMapCount(Integer value) {
 		super(value);
 	}
 
 	@Override
 	public String getName() {
-		return "MinGamesPlayedToCaptain";
+		return "MapCount";
 	}
 
 	@Override
 	public String getDescription() {
-		return "The minumum amount of games played to be eligible to captain";
+		return "The number of maps to be played";
 	}
 
 	@Override
 	public String getValueString() {
-		return getValue() + " Games";
+		return getSaveString() + " Maps";
+	}
+
+	@Override
+	public String getSaveString() {
+		return getValue().toString();
 	}
 
 	@Override
@@ -37,16 +42,7 @@ public class SettingMinGamesPlayedToCaptain extends QueueSetting<Integer>{
 			throw new BadArgumentsException("Value must be a valid integer");
 		}
 		
-		if(newValue < 1){
-			throw new BadArgumentsException("Value must be greater than 1");
-		}
-		
 		setValue(newValue);
 	}
-
-	@Override
-	public String getSaveString() {
-		return getValue().toString();
-	}
-
+	
 }

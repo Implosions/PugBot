@@ -1,9 +1,8 @@
 package core.entities.settings.serversettings;
 
-import core.entities.settings.Setting;
 import core.exceptions.BadArgumentsException;
 
-public class SettingDCTimeout extends Setting<Integer> {
+public class SettingDCTimeout extends ServerSetting<Integer> {
 	
 	public SettingDCTimeout(Integer value) {
 		super(value);

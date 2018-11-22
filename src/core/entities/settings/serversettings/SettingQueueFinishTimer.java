@@ -1,9 +1,8 @@
 package core.entities.settings.serversettings;
 
-import core.entities.settings.Setting;
 import core.exceptions.BadArgumentsException;
 
-public class SettingQueueFinishTimer extends Setting<Integer>{
+public class SettingQueueFinishTimer extends ServerSetting<Integer>{
 
 	public SettingQueueFinishTimer(Integer value) {
 		super(value);

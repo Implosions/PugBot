@@ -5,6 +5,10 @@ import java.util.List;
 import core.Database;
 import core.entities.Queue;
 import core.entities.Server;
+import core.entities.menus.MapPickMenuController.PickStyle;
+import core.entities.settings.queuesettings.SettingMapCount;
+import core.entities.settings.queuesettings.SettingMapPickingStyle;
+import core.entities.settings.queuesettings.SettingMapPool;
 import core.entities.settings.queuesettings.SettingRoleRestrictions;
 import net.dv8tion.jda.core.entities.Category;
 import net.dv8tion.jda.core.entities.Role;
@@ -38,13 +42,16 @@ public class QueueSettingsManager extends SettingManager {
 	public List<Role> getRoleRestrictions(){
 		return ((SettingRoleRestrictions)getSetting("RoleRestrictions")).getValue();
 	}
-
-	@Override
-	protected void save(Setting<?> setting) {
-		if(setting.getClass() == SettingRoleRestrictions.class){
-			Database.updateQueueRoleRestrictions(getServer().getId(), queue.getId(), ((SettingRoleRestrictions)setting).getValue());
-		}else{
-			Database.updateQueueSetting(getServer().getId(), queue.getId(), setting.getName(), setting.getSaveString());
-		}
+	
+	public List<String> getMapPool(){
+		return ((SettingMapPool)getSetting("MapPool")).getValue();
+	}
+	
+	public int getMapCount() {
+		return ((SettingMapCount)getSetting("MapCount")).getValue();
+	}
+	
+	public PickStyle getPickStyle() {
+		return ((SettingMapPickingStyle)getSetting("MapPickingStyle")).getValue();
 	}
 }

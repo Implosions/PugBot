@@ -1,9 +1,8 @@
 package core.entities.settings.serversettings;
 
-import core.entities.settings.Setting;
 import core.exceptions.BadArgumentsException;
 
-public class SettingAFKTimeout extends Setting<Integer> {
+public class SettingAFKTimeout extends ServerSetting<Integer> {
 	
 	public SettingAFKTimeout(int value) {
 		super(value);

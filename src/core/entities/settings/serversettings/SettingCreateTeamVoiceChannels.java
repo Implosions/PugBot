@@ -1,9 +1,8 @@
 package core.entities.settings.serversettings;
 
-import core.entities.settings.Setting;
 import core.exceptions.BadArgumentsException;
 
-public class SettingCreateTeamVoiceChannels extends Setting<Boolean> {
+public class SettingCreateTeamVoiceChannels extends ServerSetting<Boolean> {
 	
 	public SettingCreateTeamVoiceChannels(Boolean value) {
 		super(value);

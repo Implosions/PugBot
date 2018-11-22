@@ -20,4 +20,8 @@ public abstract class Setting<T> implements ISetting {
 	public void setManager(SettingManager manager){
 		this.manager = manager;
 	}
+	
+	public long getServerId() {
+		return manager.getServer().getId();
+	}
 }
