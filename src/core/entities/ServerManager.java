@@ -65,7 +65,12 @@ public class ServerManager {
 	
 	public void checkServerActivityLists(){
 		for(Server server : servers.values()){
-			server.checkActivityList();
+			try {
+				server.checkActivityList();
+			}catch(Exception ex) {
+				System.out.printf("Error on AFK check: {0}", ex.getMessage());
+			}
+			
 		}
 	}
 }
