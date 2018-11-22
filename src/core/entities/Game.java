@@ -231,9 +231,6 @@ public class Game {
 		}).start();
 	}
 	
-	/**
-	 * Inserts information into the database
-	 */
 	private void pickingComplete(){
 		status = GameStatus.PLAYING;
 		team1 = pickController.getTeam1();

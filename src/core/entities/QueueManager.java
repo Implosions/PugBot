@@ -314,7 +314,7 @@ public class QueueManager {
 	public void finishAllGames(){
 		for(Queue queue : queueList){
 			for(Game game : queue.getGames()){
-				game.finish();
+				game.cleanup();
 			}
 		}
 	}
@@ -326,7 +326,7 @@ public class QueueManager {
 		queue.removeGame(game);
 		
 		if(winningTeam == null){
-			game.finish();
+			game.cleanup();
 			game = null;
 			updateTopic();
 			return;
