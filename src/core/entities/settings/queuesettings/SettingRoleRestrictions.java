@@ -77,7 +77,7 @@ public class SettingRoleRestrictions extends QueueSetting<List<Role>>{
 		Role role = findRole(roleName);
 		
 		getValue().remove(role);
-		Database.addQueueRole(getServerId(), getQueueId(), role.getIdLong());
+		Database.deleteQueueRole(getServerId(), getQueueId(), role.getIdLong());
 	}
 	
 	private Role findRole(String roleName){
