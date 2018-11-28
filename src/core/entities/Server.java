@@ -259,13 +259,33 @@ public class Server {
 		return banList.contains(m.getUser().getIdLong());
 	}
 
-	public Member getMember(String member) {
-		for (Member m : guild.getMembers()) {
-			if (m.getEffectiveName().equalsIgnoreCase(member) || m.getUser().getId().equals(member)) {
-				return m;
-			}
+	public Member getMember(String memberString) {
+		Member member = null;
+		long id;
+		
+		try {
+			id = Long.valueOf(memberString);
+			
+			member = guild.getMemberById(id);
+		}catch(NumberFormatException ex) {
+			member = getMemberByName(memberString);
 		}
+		
+		if(member != null) {
+			return member;
+		}
+		
 		throw new InvalidUseException("Member does not exist");
+	}
+	
+	private Member getMemberByName(String name) {
+		List<Member> members = guild.getMembersByEffectiveName(name, true);
+		
+		if(members.size() > 0) {
+			return members.get(0);
+		}
+		
+		return null;
 	}
 
 	public void banUser(long userId) {
