@@ -208,6 +208,14 @@ public class Database {
 					+ "FOREIGN KEY (timestamp) REFERENCES Game(timestamp)"
 					+ ")");
 			
+			statement.executeUpdate("CREATE TABLE IF NOT EXISTS "
+					+ "ServerDisabledCommand("
+					+ "serverId INTEGER NOT NULL, "
+					+ "commandName VARCHAR(20) NOT NULL, "
+					+ "PRIMARY KEY (serverId, commandName), "
+					+ "FOREIGN KEY (serverId) REFERENCES Server(id)"
+					+ ")");
+			
 		}catch(Exception ex){
 			ex.printStackTrace();
 		}
@@ -1388,12 +1396,60 @@ public class Database {
 				   + "VALUES(?, ?, ?, ?)";
 		
 		try(PreparedStatement statement = _conn.prepareStatement(sql)) {
-			
-			
 			statement.setLong(1, serverId);
 			statement.setLong(2, queueId);
 			statement.setLong(3, timestamp);
 			statement.setString(4, mapName);
+			
+			statement.executeUpdate();
+		}catch(SQLException ex){
+			ex.printStackTrace();
+		}
+	}
+	
+	public static List<String> getDisabledCommands(long serverId) {
+		String sql = "SELECT commandName FROM ServerDisabledCommand WHERE serverId = ?";
+		List<String> commands = new ArrayList<>();
+		
+		try(PreparedStatement statement = _conn.prepareStatement(sql)){
+			statement.setLong(1, serverId);
+			
+			try(ResultSet rs = statement.executeQuery()){
+				while(rs.next()){
+					String cmd = rs.getString(1);
+					
+					commands.add(cmd);
+				}
+			}
+			
+		}catch(SQLException ex){
+			ex.printStackTrace();
+		}
+		
+		return commands;
+	}
+	
+	public static void insertDisabledCommand(long serverId, String cmdName) {
+		String sql = "INSERT OR IGNORE INTO ServerDisabledCommand "
+				   + "VALUES(?, ?)";
+		
+		try(PreparedStatement statement = _conn.prepareStatement(sql)) {
+			statement.setLong(1, serverId);
+			statement.setString(2, cmdName);
+			
+			statement.executeUpdate();
+		}catch(SQLException ex){
+			ex.printStackTrace();
+		}
+	}
+	
+	public static void deleteDisabledCommand(long serverId, String cmdName) {
+		String sql = "DELETE FROM ServerDisabledCommand "
+				+ "WHERE serverId = ? AND commandName = ?";
+		
+		try(PreparedStatement statement = _conn.prepareStatement(sql)) {
+			statement.setLong(1, serverId);
+			statement.setString(2, cmdName);
 			
 			statement.executeUpdate();
 		}catch(SQLException ex){

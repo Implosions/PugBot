@@ -3,7 +3,6 @@ package core.commands;
 import java.util.Arrays;
 
 import core.Database;
-import core.entities.Server;
 import core.exceptions.BadArgumentsException;
 import core.exceptions.InvalidUseException;
 import core.util.Utils;
@@ -11,10 +10,6 @@ import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.Message;
 
 public class CmdCreateCommand extends Command {
-
-	public CmdCreateCommand(Server server) {
-		super(server);
-	}
 
 	@Override
 	public Message execCommand(Member caller, String[] args) {

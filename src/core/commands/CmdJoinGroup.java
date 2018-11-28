@@ -1,17 +1,12 @@
 package core.commands;
 
-import core.entities.Server;
 import core.exceptions.BadArgumentsException;
 import core.util.Utils;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.Message;
 import net.dv8tion.jda.core.entities.Role;
 
-public class CmdJoinGroup extends Command{
-	
-	public CmdJoinGroup(Server server) {
-		super(server);
-	}
+public class CmdJoinGroup extends Command {
 
 	@Override
 	public Message execCommand(Member caller, String[] args) {

@@ -112,7 +112,7 @@ public class Server {
 
 		try{
 			// Check if command is valid
-			if(!commandManager.doesCommandExist(commandName)) {
+			if(!commandManager.doesCommandExist(commandName) || !commandManager.isCommandEnabled(commandName)) {
 				return;
 			}
 			

@@ -8,11 +8,11 @@ public abstract class Command implements ICommand {
 
 	protected Server server;
 	
-	public Command(Server server){
-		this.server = server;
-	}
-	
 	protected String getBaseCommand(){
 		return "!" + getName();
+	}
+	
+	public void setServer(Server server) {
+		this.server = server;
 	}
 }

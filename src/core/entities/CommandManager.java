@@ -10,44 +10,50 @@ import core.commands.*;
 public class CommandManager {
 	
 	private HashMap<String, ICommand> commandMap = new HashMap<>();
+	private List<String> disabledCommands;
+	private Server server;
 	
 	public CommandManager(Server server){
+		this.server = server;
 		Database.loadCustomCommands(this, server);
+		disabledCommands = Database.getDisabledCommands(server.getId());
 		
-		addCommand(new CmdCreateQueue(server));
-		addCommand(new CmdStatus(server));
-		addCommand(new CmdAdd(server));
-		addCommand(new CmdDel(server));
-		addCommand(new CmdRemoveQueue(server));
-		addCommand(new CmdEditQueue(server));
-		addCommand(new CmdSub(server));
-		addCommand(new CmdHelp(server));
-		addCommand(new CmdRemove(server));
-		addCommand(new CmdBully(server));
-		addCommand(new CmdNotify(server));
-		addCommand(new CmdDeleteNotification(server));
-		addCommand(new CmdTerminate(server));
-		addCommand(new CmdRPS(server));
-		addCommand(new CmdGithub(server));
-		addCommand(new CmdSubCaptain(server));
-		addCommand(new CmdRestart(server));
-		addCommand(new CmdBan(server));
-		addCommand(new CmdUnban(server));
-		addCommand(new CmdAddAdmin(server));
-		addCommand(new CmdRemoveAdmin(server));
-		addCommand(new CmdCreateCommand(server));
-		addCommand(new CmdDeleteCommand(server));
-		addCommand(new CmdServerSettings(server));
-		addCommand(new CmdQueueSettings(server));
-		addCommand(new CmdCreateGroup(server));
-		addCommand(new CmdDeleteGroup(server));
-		addCommand(new CmdGroups(server));
-		addCommand(new CmdJoinGroup(server));
-		addCommand(new CmdLeaveGroup(server));
-		addCommand(new CmdFinishGame(server));
-		addCommand(new CmdStats(server));
-		addCommand(new CmdSwapPlayers(server));
-		addCommand(new CmdRepick(server));
+		addCommand(new CmdCreateQueue());
+		addCommand(new CmdStatus());
+		addCommand(new CmdAdd());
+		addCommand(new CmdDel());
+		addCommand(new CmdRemoveQueue());
+		addCommand(new CmdEditQueue());
+		addCommand(new CmdSub());
+		addCommand(new CmdHelp());
+		addCommand(new CmdRemove());
+		addCommand(new CmdBully());
+		addCommand(new CmdNotify());
+		addCommand(new CmdDeleteNotification());
+		addCommand(new CmdTerminate());
+		addCommand(new CmdRPS());
+		addCommand(new CmdGithub());
+		addCommand(new CmdSubCaptain());
+		addCommand(new CmdRestart());
+		addCommand(new CmdBan());
+		addCommand(new CmdUnban());
+		addCommand(new CmdAddAdmin());
+		addCommand(new CmdRemoveAdmin());
+		addCommand(new CmdCreateCommand());
+		addCommand(new CmdDeleteCommand());
+		addCommand(new CmdServerSettings());
+		addCommand(new CmdQueueSettings());
+		addCommand(new CmdCreateGroup());
+		addCommand(new CmdDeleteGroup());
+		addCommand(new CmdGroups());
+		addCommand(new CmdJoinGroup());
+		addCommand(new CmdLeaveGroup());
+		addCommand(new CmdFinishGame());
+		addCommand(new CmdStats());
+		addCommand(new CmdSwapPlayers());
+		addCommand(new CmdRepick());
+		addCommand(new CmdDisableCommand());
+		addCommand(new CmdEnableCommand());
 	}
 		
 	public boolean doesCommandExist(String cmdName){
@@ -66,11 +72,34 @@ public class CommandManager {
 		return cmdList;
 	}
 	
-	public void addCommand(ICommand cmd){
+	public void addCommand(Command cmd){
+		cmd.setServer(server);
 		commandMap.put(cmd.getName().toLowerCase(), cmd);
 	}
 	
 	public void removeCommand(String cmdName){
 		commandMap.remove(cmdName);
+	}
+	
+	public void disableCommand(String cmdName) {
+		cmdName = cmdName.toLowerCase();
+		
+		if(!disabledCommands.contains(cmdName)) {
+			disabledCommands.add(cmdName);
+			Database.insertDisabledCommand(server.getId(), cmdName);
+		}
+	}
+	
+	public void enableCommand(String cmdName) {
+		cmdName = cmdName.toLowerCase();
+		
+		if(disabledCommands.contains(cmdName)) {
+			disabledCommands.remove(cmdName);
+			Database.deleteDisabledCommand(server.getId(), cmdName);
+		}
+	}
+	
+	public boolean isCommandEnabled(String cmdName) {
+		return !disabledCommands.contains(cmdName);
 	}
 }

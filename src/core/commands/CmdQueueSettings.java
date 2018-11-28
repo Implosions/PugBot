@@ -3,7 +3,6 @@ package core.commands;
 import java.util.Arrays;
 
 import core.entities.Queue;
-import core.entities.Server;
 import core.entities.settings.ISetting;
 import core.entities.settings.QueueSettingsManager;
 import core.exceptions.BadArgumentsException;
@@ -13,10 +12,6 @@ import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.Message;
 
 public class CmdQueueSettings extends Command {
-	
-	public CmdQueueSettings(Server server) {
-		super(server);
-	}
 
 	@Override
 	public Message execCommand(Member caller, String[] args) {

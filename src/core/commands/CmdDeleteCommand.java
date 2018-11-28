@@ -1,7 +1,6 @@
 package core.commands;
 
 import core.Database;
-import core.entities.Server;
 import core.exceptions.BadArgumentsException;
 import core.exceptions.InvalidUseException;
 import core.util.Utils;
@@ -9,10 +8,6 @@ import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.Message;
 
 public class CmdDeleteCommand extends Command {
-
-	public CmdDeleteCommand(Server server) {
-		super(server);
-	}
 
 	@Override
 	public Message execCommand(Member caller, String[] args) {

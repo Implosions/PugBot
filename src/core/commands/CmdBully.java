@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import core.entities.Server;
 import core.exceptions.BadArgumentsException;
 import core.util.Utils;
 import net.dv8tion.jda.core.entities.Member;
@@ -17,10 +16,6 @@ public class CmdBully extends Command {
 
 	private List<String> actionList = getActionList();
 	private Random random = new Random();
-	
-	public CmdBully(Server server) {
-		super(server);
-	}
 
 	@Override
 	public Message execCommand(Member caller, String[] args) {

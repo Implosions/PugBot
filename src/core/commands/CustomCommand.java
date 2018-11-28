@@ -12,7 +12,7 @@ public class CustomCommand extends Command {
 	
 	
 	public CustomCommand(Server server, String name, String output){
-		super(server);
+		setServer(server);
 		this.name = name;		
 		this.output = Utils.createMessage(output);
 	}

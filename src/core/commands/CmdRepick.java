@@ -6,7 +6,6 @@ import java.util.List;
 
 import core.entities.Game;
 import core.entities.Game.GameStatus;
-import core.entities.Server;
 import core.entities.menus.RepickConfirmationMenu;
 import core.exceptions.InvalidUseException;
 import net.dv8tion.jda.core.entities.Member;
@@ -16,10 +15,6 @@ public class CmdRepick extends Command {
 
 	private static List<Long> gameList = Collections.synchronizedList(new ArrayList<Long>());
 	
-	public CmdRepick(Server server) {
-		super(server);
-	}
-
 	@Override
 	public Message execCommand(Member caller, String[] args) {
 		Game game = server.getQueueManager().getPlayersGame(caller);

@@ -3,7 +3,6 @@ package core.commands;
 import java.awt.Color;
 import java.util.List;
 
-import core.entities.Server;
 import core.exceptions.InvalidUseException;
 import core.util.Utils;
 import net.dv8tion.jda.core.EmbedBuilder;
@@ -13,10 +12,6 @@ import net.dv8tion.jda.core.entities.Message;
 import net.dv8tion.jda.core.entities.MessageEmbed.Field;
 
 public class CmdHelp extends Command {
-
-	public CmdHelp(Server server) {
-		super(server);
-	}
 
 	@Override
 	public Message execCommand(Member caller, String[] args) {
