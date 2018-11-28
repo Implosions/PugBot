@@ -32,7 +32,7 @@ public class MapPickMenuManager extends MenuManager<MapPickMenuController, MapPi
 		}
 		
 		controller.chooseMap(mapIndex);
-		getOptions().removeOption(pageIndex, mapIndex);
+		getOptions().removeOption(pageIndex, fieldIndex);
 		controller.managerActionTaken(this);
 	}
 	
