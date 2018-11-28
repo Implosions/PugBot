@@ -1,6 +1,9 @@
 package core.entities;
 
+import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
@@ -9,16 +12,20 @@ import java.util.concurrent.TimeUnit;
 import core.util.Utils;
 import core.Constants;
 import core.Database;
+import core.commands.ICommand;
 import core.entities.settings.ServerSettingsManager;
 import core.entities.timers.DCTimer;
+import core.exceptions.BadArgumentsException;
 import core.exceptions.InvalidUseException;
 import net.dv8tion.jda.core.OnlineStatus;
 import net.dv8tion.jda.core.Permission;
+import net.dv8tion.jda.core.entities.Emote;
 import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.Message;
 import net.dv8tion.jda.core.entities.Role;
 import net.dv8tion.jda.core.entities.TextChannel;
+import net.dv8tion.jda.core.entities.User;
 import net.dv8tion.jda.core.managers.RoleManager;
 
 // Server class; Controls bot actions for each server
@@ -54,6 +61,98 @@ public class Server {
 		groupDict = Database.retrieveGroups(guild.getIdLong());
 		
 		queueManager.getQueueList().forEach((q) -> q.getPlayersInQueue().forEach((u) -> updateActivityList(u)));
+	}
+	
+	public void processMessage(Message message) {
+		String content = message.getContent();
+		Member caller = guild.getMember(message.getAuthor());
+		
+		if (!content.startsWith("!") || caller.getUser().isBot()) {
+			return;
+		}
+		
+		if(isBanned(caller) || isSpam(message)) {
+			return;
+		}
+		
+		// Workaround for users with spaces in their name
+		// Replaces name with user id
+		if (message.getMentionedUsers().size() > 0) {
+			for (User u : message.getMentionedUsers()) {
+				content = content.replace("@" + guild.getMember(u).getEffectiveName(), u.getId());
+			}
+		}
+
+		// Replaces standard emote string
+		// Allows bot to use server specific emotes
+		if (message.getEmotes().size() > 0) {
+			HashSet<Emote> emotes = new HashSet<Emote>(message.getEmotes());
+			
+			for (Emote emote : emotes) {
+				content = content.replace(":" + emote.getName() + ":",
+						String.format("<:%s:%s>", emote.getName(), emote.getId()));
+			}
+		}
+
+		// Remove command prefix and extra spaces
+		content = content.substring(1);
+		content = content.trim().replaceAll(" +", " ");
+		
+		String[] args = content.split(" ");
+		
+		processCommand(caller, message.getTextChannel(), args);
+		updateActivityList(caller);
+	}
+	
+	private void processCommand(Member caller, TextChannel channel, String[] args) {
+		String commandName = args[0];
+		String[] commandArgs = Arrays.copyOfRange(args, 1,args.length);
+		Message response = null;
+		ICommand cmd = null;
+
+		try{
+			// Check if command is valid
+			if(!commandManager.doesCommandExist(commandName)) {
+				return;
+			}
+			
+			cmd = commandManager.getCommand(commandName);
+			
+			// Check if command is in the correct channel
+			if(!cmd.isGlobalCommand() && channel != getPugChannel()){
+				return;
+			}
+			
+			// Check if admin is required
+			if (cmd.isAdminRequired() && !isAdmin(caller)){
+				throw new InvalidUseException("Admin is required for this command");
+			}
+			
+			// Log input
+			Date date = new Date(System.currentTimeMillis());
+			String logString = String.format("%tc [%s][%s][%s]%s", 
+					date, guild.getName(), channel.getName(),
+					caller.getUser().toString(), Arrays.toString(args));
+			
+			System.out.println(logString);
+			
+			// Execute command
+			response = cmd.execCommand(caller, commandArgs);
+			System.out.println(String.format("Command %s executed", cmd.getName()));
+			
+		} catch(InvalidUseException ex) {
+			response = Utils.createMessage("Error!", ex.getMessage(), false);
+		} catch (BadArgumentsException ex) {
+			response = Utils.createMessage("Error!",
+					String.format("%s%nUsage:%n%s", ex.getMessage(), cmd.getHelp()), false);
+		} catch (Exception ex) {
+			response = Utils.createMessage("Error!", "Something went wrong", false);
+			ex.printStackTrace();
+		}
+		
+		if(response != null) {
+			channel.sendMessage(response).queue();
+		}
 	}
 
 	public long getId() {
