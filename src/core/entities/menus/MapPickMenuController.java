@@ -48,9 +48,9 @@ public class MapPickMenuController extends MenuController<MapPickMenuManager> {
 	protected void complete() {
 		if(pickStyle == PickStyle.BAN) {
 			pickedMaps.addAll(mapPool);
-			options.clearOptions();
 		}
 		
+		options.clearOptions();
 		manager1.getMenu().updateFinished(pickedMaps);
 		manager2.getMenu().updateFinished(pickedMaps);
 		manager1.complete();
