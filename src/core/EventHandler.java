@@ -30,6 +30,7 @@ public class EventHandler extends ListenerAdapter {
 		Server server = ServerManager.getServer(event.getGuild().getIdLong());
 		
 		server.processMessage(event.getMessage());
+		server.updateActivityList(event.getMember());
 	}
 
 	public void onUserOnlineStatusUpdate(UserOnlineStatusUpdateEvent event) {

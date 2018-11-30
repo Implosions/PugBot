@@ -101,7 +101,6 @@ public class Server {
 		String[] args = content.split(" ");
 		
 		processCommand(caller, message.getTextChannel(), args);
-		updateActivityList(caller);
 	}
 	
 	private void processCommand(Member caller, TextChannel channel, String[] args) {
