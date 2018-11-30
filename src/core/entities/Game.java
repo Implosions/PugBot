@@ -100,7 +100,7 @@ public class Game {
 				}
 			}
 			
-			if(status == GameStatus.PICKING){
+			if(status == GameStatus.PICKING && pickController != null){
 				cancelMenus();
 				startPUGPicking();
 			}
@@ -173,7 +173,6 @@ public class Game {
 					team1.setCaptain(winner);
 				}
 				
-				rpsController = null;
 				startPUGPicking();
 			}
 		}).start();
@@ -308,6 +307,9 @@ public class Game {
 		insertMaps();
 		
 		status = GameStatus.FINISHED;
+		rpsController = null;
+		pickController = null;
+		mapPickController = null;
 	}
 	
 	protected void cleanup() {
