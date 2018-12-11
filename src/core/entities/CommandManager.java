@@ -57,11 +57,11 @@ public class CommandManager {
 	}
 		
 	public boolean doesCommandExist(String cmdName){
-		return commandMap.containsKey(cmdName);
+		return commandMap.containsKey(cmdName.toLowerCase());
 	}
 	
 	public ICommand getCommand(String cmdName){
-		return commandMap.get(cmdName);
+		return commandMap.get(cmdName.toLowerCase());
 	}
 	
 	public List<ICommand> getCommandList(){
@@ -78,7 +78,7 @@ public class CommandManager {
 	}
 	
 	public void removeCommand(String cmdName){
-		commandMap.remove(cmdName);
+		commandMap.remove(cmdName.toLowerCase());
 	}
 	
 	public void disableCommand(String cmdName) {
