@@ -37,7 +37,7 @@ public class CmdNotify extends Command {
 			throw new InvalidUseException("Queue does not exist");
 		}
 
-		if (playerCount < 1 && playerCount >= queue.getMaxPlayers()) {
+		if (playerCount < 1 || playerCount >= queue.getMaxPlayers()) {
 			throw new InvalidUseException("Player count must be greater than zero and less than the maximum amount of players");
 		}
 
