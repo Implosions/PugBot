@@ -37,8 +37,8 @@ public class SettingAFKTimeout extends ServerSetting<Integer> {
 			throw new BadArgumentsException("Value must be a valid integer");
 		}
 		
-		if(newValue < 1){
-			throw new BadArgumentsException("Value must be greater than 1");
+		if(newValue < 0){
+			throw new BadArgumentsException("Value must be positive");
 		}
 		
 		setValue(newValue);

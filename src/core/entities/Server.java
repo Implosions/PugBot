@@ -177,6 +177,12 @@ public class Server {
 	}
 
 	protected void checkActivityList() {
+		int timeout = settingsManager.getAFKTimeout();
+		
+		if(timeout == 0) {
+			return;
+		}
+		
 		boolean update = false;
 		
 		for (Member member : activityList.keySet()) {
@@ -190,9 +196,9 @@ public class Server {
 			long timeDiffMs = System.currentTimeMillis() - time;
 			long minutes = TimeUnit.MINUTES.convert(timeDiffMs, TimeUnit.MILLISECONDS);
 			
-			if (minutes >= settingsManager.getAFKTimeout()) {
+			if (minutes >= timeout) {
 				String msg = String.format("<@%s> has been removed from all queues after being inactive for %d minutes",
-						member.getUser().getId(), settingsManager.getAFKTimeout());
+						member.getUser().getId(), timeout);
 				
 
 				queueManager.purgeQueue(member);
@@ -230,6 +236,10 @@ public class Server {
 	}
 
 	public void playerDisconnect(Member member) {
+		if(settingsManager.getDCTimeout() == 0) {
+			return;
+		}
+		
 		if (queueManager.isPlayerInQueue(member)) {
 			DCTimer timer = new DCTimer(this, member);
 			

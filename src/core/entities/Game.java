@@ -240,6 +240,10 @@ public class Game {
 	}
 	
 	private void insertPlayersInGame(){
+		if(pickController == null) {
+			return;
+		}
+		
 		List<Member> pickedPlayers = pickController.getPickedPlayers();
 		
 		for(int i = 0;i < pickedPlayers.size();i++){

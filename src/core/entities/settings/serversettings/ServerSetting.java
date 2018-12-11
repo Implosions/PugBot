@@ -10,6 +10,6 @@ public abstract class ServerSetting<T> extends Setting<T> {
 	}
 
 	public void save() {
-		Database.updateServerSetting(getServerId(), getName(), getValueString());
+		Database.updateServerSetting(getServerId(), getName(), getSaveString());
 	}
 }
