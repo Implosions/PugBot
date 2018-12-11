@@ -1,7 +1,6 @@
 package core.commands;
 
 import core.entities.Game;
-import core.entities.Game.GameStatus;
 import core.entities.QueueManager;
 import core.exceptions.BadArgumentsException;
 import core.exceptions.InvalidUseException;
@@ -25,10 +24,6 @@ public class CmdSubCaptain extends Command {
 		}
 
 		Game game = qm.getPlayersGame(caller);
-
-		if (game.getStatus() != GameStatus.PICKING) {
-			throw new InvalidUseException("Picking has already finished");
-		}
 
 		if (!game.isCaptain(target)) {
 			throw new InvalidUseException(target.getEffectiveName() + " is not a captain in your game");
