@@ -100,6 +100,6 @@ public class CommandManager {
 	}
 	
 	public boolean isCommandEnabled(String cmdName) {
-		return !disabledCommands.contains(cmdName);
+		return !disabledCommands.contains(cmdName.toLowerCase());
 	}
 }
