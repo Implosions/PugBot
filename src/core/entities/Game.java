@@ -3,14 +3,12 @@ package core.entities;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 import core.Database;
 import core.entities.menus.MapPickMenuController;
 import core.entities.menus.PUGPickMenuController;
 import core.entities.menus.RPSMenuController;
 import core.entities.settings.QueueSettingsManager;
-import core.util.MatchMaker;
 import core.util.Utils;
 import net.dv8tion.jda.core.entities.Category;
 import net.dv8tion.jda.core.entities.Member;
@@ -37,25 +35,32 @@ public class Game {
 		this.parentQueue = queue;
 		this.serverId = serverId;
 		this.timestamp = System.currentTimeMillis();
-		this.players = new ArrayList<Member>(players);
 		
 		Database.insertGame(timestamp, queue.getId(), serverId);
 		
-		if(players.size() == 2){
+		if(players.size() == 2) {
 			team1.setCaptain(players.get(0));
 			team2.setCaptain(players.get(1));
 			
 			status = GameStatus.PLAYING;
 			insertCaptains();
 		}
-		else{
-			randomizeCaptains();
+		else {
+			int minGamesSetting = parentQueue.getSettingsManager().getMinGamesPlayedToCaptain();
+			MatchMaker mm = new MatchMaker(players, serverId, parentQueue.getId(), minGamesSetting);
+			Member[] captains = mm.getRandomizedCaptains();
+			this.players = mm.getOrderedPlayerList();
+			
+			team1.setCaptain(captains[0]);
+			team2.setCaptain(captains[1]);
+			
+			startRPSGame();
 		}
 		
 		sendGameStartMessages();
 	}
 	
-	public enum GameStatus{
+	public enum GameStatus {
 		PICKING,
 		PLAYING,
 		FINISHED
@@ -109,24 +114,6 @@ public class Game {
 	
 	public boolean containsPlayer(Member player){
 		return players.contains(player);
-	}
-
-	/**
-	 * Chooses two random captains from the captainPool
-	 */
-	private void randomizeCaptains() {
-		Random random = new Random();
-		List<Member> captainPool = getCaptainPool();
-		Member captain1 = captainPool.get(random.nextInt(captainPool.size()));
-		
-		captainPool.remove(captain1);
-		
-		Member captain2 = MatchMaker.getMatch(captain1, captainPool);
-		
-		team1.setCaptain(captain1);
-		team2.setCaptain(captain2);
-		
-		startRPSGame();
 	}
 	
 	public PUGTeam getTeam1(){
@@ -347,7 +334,7 @@ public class Game {
 	 * @param sub the player replacing a captain
 	 * @param target the captain to be replaced
 	 */
-	public void subCaptain(Member sub, Member target){
+	public void subCaptain(Member sub, Member target) {
 		if(team1.getCaptain() == target){
 			team1.setCaptain(sub);
 			team1.updateVoiceChannel();
@@ -356,37 +343,13 @@ public class Game {
 			team2.updateVoiceChannel();
 		}
 		
-		if(status == GameStatus.PICKING){
+		if(status == GameStatus.PICKING) {
 			cancelMenus();
 			startRPSGame();
 		}
 	}
-
-	/**
-	 * Adds eligible players to the captainPool
-	 * Returns players of not enough eligible players
-	 */
-	private List<Member> getCaptainPool() {
-		List<Member> captainPool = new ArrayList<Member>();
-		int minGames = parentQueue.getSettingsManager().getMinGamesPlayedToCaptain();
-		
-		for(Member m : players){
-			int gamesPlayed = Database.queryGetPlayerTotalCompletedGames(
-					serverId, m.getUser().getIdLong(), parentQueue.getId());
-			
-			if(gamesPlayed >= minGames){
-				captainPool.add(m);
-			}
-		}
-		
-		if(captainPool.size() < 2){
-			return new ArrayList<Member>(players);
-		}
-		
-		return captainPool;
-	}
 	
-	private void sendGameStartMessages(){
+	private void sendGameStartMessages() {
 		Message dm = Utils.createMessage("Game starting",
 				  			String.format("Your game '%s' has begun", getQueueName()), true);
 		TextChannel pugChannel = ServerManager.getServer(serverId).getPugChannel();
