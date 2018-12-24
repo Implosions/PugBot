@@ -1456,4 +1456,34 @@ public class Database {
 			ex.printStackTrace();
 		}
 	}
+	
+	public static boolean queryIsPlayerOnCaptainCooldown(long serverId, long queueId, long playerId, int gameSize) {
+		String sql = "SELECT sum(captain) FROM "
+				   + "(SELECT captain FROM PlayerGame JOIN Game ON Game.timestamp = PlayerGame.timestamp "
+				   + "WHERE Game.serverId = ? AND queueId = ? AND playerId = ? AND completion_timestamp > 0 "
+				   + "ORDER BY Game.timestamp DESC "
+				   + "LIMIT ?)";
+		boolean cooldown = false;
+		int numOfGames = gameSize / 3;
+		
+		try(PreparedStatement statement = _conn.prepareStatement(sql)){
+			statement.setLong(1, serverId);
+			statement.setLong(2, queueId);
+			statement.setLong(3, playerId);
+			statement.setInt(4, numOfGames);
+			
+			try(ResultSet rs = statement.executeQuery()){
+				if(rs.next()){
+					int count = rs.getInt(1);
+					
+					cooldown = count > 0;
+				}
+			}
+			
+		}catch(SQLException ex){
+			ex.printStackTrace();
+		}
+		
+		return cooldown;
+	}
 }
