@@ -44,7 +44,7 @@ public class QueueManager {
 		for(String arg : args){
 			queue = getQueue(arg);
 			
-			if(queue != null){
+			if(queue != null && !queues.contains(queue)){
 				queues.add(queue);
 			}
 		}
