@@ -1,11 +1,9 @@
 package core.commands;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import core.entities.Game;
-import core.entities.Game.GameStatus;
 import core.entities.menus.RepickConfirmationMenu;
 import core.exceptions.InvalidUseException;
 import net.dv8tion.jda.core.entities.Member;
@@ -13,7 +11,7 @@ import net.dv8tion.jda.core.entities.Message;
 
 public class CmdRepick extends Command {
 
-	private static List<Long> gameList = Collections.synchronizedList(new ArrayList<Long>());
+	private List<Long> gameList = new ArrayList<Long>();
 	
 	@Override
 	public Message execCommand(Member caller, String[] args) {
@@ -25,10 +23,6 @@ public class CmdRepick extends Command {
 		
 		if(!game.isCaptain(caller)){
 			throw new InvalidUseException("You must be a captain to use this command");
-		}
-		
-		if(game.getStatus() != GameStatus.PLAYING){
-			throw new InvalidUseException("You must finish picking before calling for a repick");
 		}
 		
 		if(!gameList.contains(game.getTimestamp())){
