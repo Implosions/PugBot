@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 import core.Database;
-import core.entities.Game.GameStatus;
 import core.entities.timers.QueueFinishTimer;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.exceptions.PermissionException;
@@ -123,7 +122,6 @@ public class QueueManager {
 	public void updateTopic() {
 		try {
 			getServer().getPugChannel().getManager().setTopic(getHeader()).complete();
-			System.out.println("Topic updated");
 		} catch (PermissionException ex) {
 			ex.printStackTrace();
 		}
@@ -160,7 +158,6 @@ public class QueueManager {
 	private void addToJustFinished(Game game) {
 		QueueFinishTimer timer = new QueueFinishTimer(this);
 		
-		game.finish();
 		finishedGameMap.put(timer, game);
 		timer.start();
 	}
@@ -322,12 +319,11 @@ public class QueueManager {
 	public void finishGame(Game game, Integer winningTeam){
 		Queue queue = game.getParentQueue();
 		
-		game.setStatus(GameStatus.FINISHED);
+		game.finish();
 		queue.removeGame(game);
 		
 		if(winningTeam == null){
 			game.cleanup();
-			game = null;
 			updateTopic();
 			return;
 		}
