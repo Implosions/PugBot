@@ -1457,14 +1457,14 @@ public class Database {
 		}
 	}
 	
-	public static boolean queryIsPlayerOnCaptainCooldown(long serverId, long queueId, long playerId, int gameSize) {
+	public static boolean queryIsPlayerOnCaptainCooldown(long serverId, long queueId, long playerId) {
 		String sql = "SELECT sum(captain) FROM "
 				   + "(SELECT captain FROM PlayerGame JOIN Game ON Game.timestamp = PlayerGame.timestamp "
 				   + "WHERE Game.serverId = ? AND queueId = ? AND playerId = ? AND completion_timestamp > 0 "
 				   + "ORDER BY Game.timestamp DESC "
 				   + "LIMIT ?)";
 		boolean cooldown = false;
-		int numOfGames = gameSize / 3;
+		int numOfGames = 1;
 		
 		try(PreparedStatement statement = _conn.prepareStatement(sql)){
 			statement.setLong(1, serverId);

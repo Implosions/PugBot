@@ -58,7 +58,7 @@ public class MatchMaker {
 			long memberId = m.getUser().getIdLong();
 			int gamesPlayed = Database.queryGetPlayerTotalCompletedGames(
 					serverId, memberId, queueId);
-			boolean onCooldown = Database.queryIsPlayerOnCaptainCooldown(serverId, queueId, memberId, players.size());
+			boolean onCooldown = Database.queryIsPlayerOnCaptainCooldown(serverId, queueId, memberId);
 			
 			if(gamesPlayed >= minGamesPlayed && !onCooldown){
 				captainPool.add(m);
