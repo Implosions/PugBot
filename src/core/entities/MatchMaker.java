@@ -10,14 +10,14 @@ import net.dv8tion.jda.core.entities.Member;
 
 public class MatchMaker {
 	private static final Random rng = new Random();
-	private static final int START_TOLERANCE_PERCENT = 10;
 	private static final int FLAT_RATING_TOLERANCE = 1000;
 	
 	private final long serverId;
 	private final long queueId;
 	private final int minGamesPlayed;
 	private List<Member> players;
-	private HashMap<Member,Integer> playerRatingMap = new HashMap<>();
+	private List<Member> captainPool;
+	private HashMap<Long,Integer> playerRatingMap = new HashMap<>();
 	
 	public MatchMaker(List<Member> players, long serverId, long queueId, int minGamesPlayed) {
 		this.serverId = serverId;
@@ -28,24 +28,26 @@ public class MatchMaker {
 		for(Member p : players) {
 			int rating = getPlayerRating(p);
 			
-			playerRatingMap.put(p, rating);
+			playerRatingMap.put(p.getUser().getIdLong(), rating);
 		}
 		
-		this.players.sort((Member p1,  Member p2) -> playerRatingMap.get(p1) -  playerRatingMap.get(p2));
+		captainPool = getCaptainPool();
+		this.players.sort((Member p1,  Member p2) -> 
+			getPlayerRatingFromMember(p2) - getPlayerRatingFromMember(p1));
 	}
 	
 	private int getPlayerRating(Member player) {
 		double rating = 0.0;
-		long playerId = player.getUser().getIdLong();
 		
 		for(Member m : players){
+			long playerId = player.getUser().getIdLong();
 			long playerToCompareId = m.getUser().getIdLong();
 			
 			if(playerId != playerToCompareId) {
 				rating += Database.queryGetPickOrderDiff(serverId, playerId, playerToCompareId);
 			}
 		}
-
+		
 		return (int)(rating * 100);
 	}
 	
@@ -72,25 +74,24 @@ public class MatchMaker {
 	
 	public Member[] getRandomizedCaptains() {
 		Member[] captains;
-		List<Member> eligiblePlayers = getCaptainPool();
-		List<Member> captainPool = new ArrayList<>(eligiblePlayers);
+		List<Member> uncheckedPlayers = new ArrayList<>(captainPool);
 		int roll;
-		int tolerance = START_TOLERANCE_PERCENT;
+		int tolerance = FLAT_RATING_TOLERANCE;
 		
 		while(true) {
-			if(captainPool.isEmpty()) {
-				captainPool = new ArrayList<>(eligiblePlayers);
+			if(uncheckedPlayers.isEmpty()) {
+				uncheckedPlayers = new ArrayList<>(captainPool);
 				tolerance *= 2;
 			}
 			
 			captains = new Member[2];
-			roll = rng.nextInt(captainPool.size());
-			captains[0] = captainPool.get(roll);
+			roll = rng.nextInt(uncheckedPlayers.size());
+			captains[0] = uncheckedPlayers.get(roll);
 			
-			List<Member> possibleCoCaptains = getCaptainMatchesByRating(eligiblePlayers, captains[0], tolerance);
+			List<Member> possibleCoCaptains = getCaptainMatchesByRating(captains[0], tolerance);
 
 			if(possibleCoCaptains.isEmpty()) {
-				captainPool.remove(captains[0]);
+				uncheckedPlayers.remove(captains[0]);
 				continue;
 			}
 			
@@ -102,16 +103,15 @@ public class MatchMaker {
 		return captains;
 	}
 
-	private List<Member> getCaptainMatchesByRating(List<Member> captainPool, Member captain, int tolerance) {
+	private List<Member> getCaptainMatchesByRating(Member captain, int tolerance) {
 		List<Member> matches = new ArrayList<Member>();
-		int ratingToMatch = playerRatingMap.get(captain);
-		int matchLatitude = (int)(ratingToMatch * (double)(tolerance / 100)) + FLAT_RATING_TOLERANCE;
+		int ratingToMatch = getPlayerRatingFromMember(captain);
 		
 		for(Member member : captainPool) {
-			int memberRating = playerRatingMap.get(member);
+			int memberRating = getPlayerRatingFromMember(member);
 			int difference = Math.abs(ratingToMatch - memberRating);
 			
-			if(difference <= matchLatitude && captain != member) {
+			if(difference <= tolerance && captain != member) {
 				matches.add(member);
 			}
 		}
@@ -121,5 +121,9 @@ public class MatchMaker {
 	
 	public List<Member> getOrderedPlayerList() {
 		return players;
+	}
+	
+	private int getPlayerRatingFromMember(Member m) {
+		return playerRatingMap.get(m.getUser().getIdLong());
 	}
 }
