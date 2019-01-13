@@ -4,6 +4,7 @@ import java.util.concurrent.TimeUnit;
 
 import core.entities.Game;
 import core.entities.Game.GameStatus;
+import core.entities.PUGTeam;
 import core.entities.QueueManager;
 import core.exceptions.BadArgumentsException;
 import core.exceptions.InvalidUseException;
@@ -37,9 +38,11 @@ public class CmdFinishGame extends Command {
 			return Utils.createMessage("`Game cancelled`");
 		}
 		
+		PUGTeam[] teams = game.getPUGTeams();
+		
 		String title = String.format("Game '%s' finished", game.getQueueName());
 		String result = args[0].toLowerCase();
-		int team = caller.equals(game.getTeam1().getCaptain()) ? 1 : 2;
+		int team = caller.equals(teams[0].getCaptain()) ? 1 : 2;
 		int winningTeam;
 		
 		switch(result){
@@ -55,7 +58,7 @@ public class CmdFinishGame extends Command {
 		long duration = TimeUnit.MINUTES.convert(msDiff, TimeUnit.MILLISECONDS);
 		
 		if(winningTeam != 0){
-			Member winner = (winningTeam == 1) ? game.getTeam1().getCaptain() : game.getTeam2().getCaptain();
+			Member winner = (winningTeam == 1) ? teams[0].getCaptain() : teams[1].getCaptain();
 			String teamName = "Team " + winner.getEffectiveName();
 			
 			return Utils.createMessage(title, String.format("**Winner:** %s%n**Duration:** %d Minutes",

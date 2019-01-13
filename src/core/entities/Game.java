@@ -24,9 +24,7 @@ public class Game {
 	private long timestamp;
 	
 	private List<Member> players;
-	private PUGTeam team1 = new PUGTeam();
-	private PUGTeam team2 = new PUGTeam();
-	
+	private PUGTeam[] teams = new PUGTeam[2];
 	private GameStatus status = GameStatus.PICKING;
 	private PUGPickMenuController pickController;
 	private RPSMenuController rpsController;
@@ -41,8 +39,8 @@ public class Game {
 		Database.insertGame(timestamp, queue.getId(), serverId);
 		
 		if(players.size() == 2) {
-			team1.setCaptain(players.get(0));
-			team2.setCaptain(players.get(1));
+			teams[0] = new PUGTeam(players.get(0));
+			teams[1] = new PUGTeam(players.get(1));
 			
 			status = GameStatus.PLAYING;
 			insertCaptains();
@@ -53,8 +51,8 @@ public class Game {
 			Member[] captains = mm.getRandomizedCaptains();
 			this.players = mm.getOrderedPlayerList();
 			
-			team1.setCaptain(captains[0]);
-			team2.setCaptain(captains[1]);
+			teams[0] = new PUGTeam(captains[0]);
+			teams[1] = new PUGTeam(captains[1]);
 			
 			startRPSGame();
 		}
@@ -92,18 +90,18 @@ public class Game {
 		players.remove(target);
 		players.add(substitute);
 		
-		if(target == team1.getCaptain() || target == team2.getCaptain()){
+		if(target == teams[0].getCaptain() || target == teams[1].getCaptain()){
 			subCaptain(substitute, target);
 		}
 		else{
 			if(status == GameStatus.PLAYING){
-				if(team1.getPlayers().contains(target)){
-					team1.removePlayer(target);
-					team1.addPlayer(substitute);
+				if(teams[0].getPlayers().contains(target)){
+					teams[0].removePlayer(target);
+					teams[0].addPlayer(substitute);
 				}
 				else{
-					team2.removePlayer(target);
-					team2.addPlayer(substitute);
+					teams[1].removePlayer(target);
+					teams[1].addPlayer(substitute);
 				}
 			}
 			
@@ -118,12 +116,8 @@ public class Game {
 		return players.contains(player);
 	}
 	
-	public PUGTeam getTeam1(){
-		return team1;
-	}
-	
-	public PUGTeam getTeam2(){
-		return team2;
+	public PUGTeam[] getPUGTeams(){
+		return teams;
 	}
 
 	/**
@@ -147,7 +141,7 @@ public class Game {
 	private void startRPSGame(){
 		new Thread(new Runnable(){
 			public void run(){
-				RPSMenuController localRpsController = new RPSMenuController(team1.getCaptain(), team2.getCaptain());
+				RPSMenuController localRpsController = new RPSMenuController(teams[0].getCaptain(), teams[1].getCaptain());
 				rpsController = localRpsController;
 				localRpsController.start();
 				
@@ -157,9 +151,9 @@ public class Game {
 				
 				Member winner = localRpsController.getWinner();
 				
-				if(team2.getCaptain() == winner) {
-					team2.setCaptain(team1.getCaptain());
-					team1.setCaptain(winner);
+				if(teams[1].getCaptain() == winner) {
+					teams[1].setCaptain(teams[0].getCaptain());
+					teams[0].setCaptain(winner);
 				}
 				
 				startConfirmationMenu();
@@ -170,7 +164,7 @@ public class Game {
 	private void startConfirmationMenu() {
 		new Thread(new Runnable() {
 			public void run() {
-				ConfirmationMenu localcm = new ConfirmationMenu(team1.getCaptain(), "Take first pick?");
+				ConfirmationMenu localcm = new ConfirmationMenu(teams[0].getCaptain(), "Take first pick?");
 				startingOrderConfirmationMenu = localcm;
 				localcm.start();
 				
@@ -179,10 +173,10 @@ public class Game {
 				}
 				
 				if(!localcm.getResult()) {
-					Member tmp = team1.getCaptain();
+					Member tmp = teams[0].getCaptain();
 					
-					team1.setCaptain(team2.getCaptain());
-					team2.setCaptain(tmp);
+					teams[0].setCaptain(teams[1].getCaptain());
+					teams[1].setCaptain(tmp);
 				}
 				
 				startPUGPicking();
@@ -196,11 +190,11 @@ public class Game {
 				List<Member> playerPool = new ArrayList<Member>(players);
 				String pickingPattern = parentQueue.getSettingsManager().getPickPattern();
 				
-				playerPool.remove(team1.getCaptain());
-				playerPool.remove(team2.getCaptain());
+				playerPool.remove(teams[0].getCaptain());
+				playerPool.remove(teams[1].getCaptain());
 				
 				PUGPickMenuController localPickController = 
-						new PUGPickMenuController(team1.getCaptain(), team2.getCaptain(), playerPool, pickingPattern);
+						new PUGPickMenuController(teams[0].getCaptain(), teams[1].getCaptain(), playerPool, pickingPattern);
 				pickController = localPickController;
 				
 				localPickController.start();
@@ -229,7 +223,7 @@ public class Game {
 				List<String> mapPool = new ArrayList<>(settings.getMapPool());
 				
 				MapPickMenuController localMapPickController = 
-						new MapPickMenuController(team1.getCaptain(), team2.getCaptain(), 
+						new MapPickMenuController(teams[0].getCaptain(), teams[1].getCaptain(), 
 								mapCount, mapPool, settings.getPickStyle());
 				mapPickController = localMapPickController;
 				localMapPickController.start();
@@ -245,8 +239,7 @@ public class Game {
 	
 	private void pickingComplete(){
 		status = GameStatus.PLAYING;
-		team1 = pickController.getTeam1();
-		team2 = pickController.getTeam2();
+		teams = pickController.getTeams();
 		
 		createVoiceChannels();
 		postTeamsToPUGChannel();
@@ -261,15 +254,15 @@ public class Game {
 		
 		for(int i = 0;i < pickedPlayers.size();i++){
 			Member player = pickedPlayers.get(i);
-			int team = (getTeam(player) == team1) ? 1 : 2;
+			int team = (getTeam(player) == teams[0]) ? 1 : 2;
 			
 			Database.insertPlayerGame(player.getUser().getIdLong(), timestamp, serverId, i+1, team);
 		}
 	}
 	
 	private void insertCaptains(){
-		long c1 = team1.getCaptain().getUser().getIdLong();
-		long c2 = team2.getCaptain().getUser().getIdLong();
+		long c1 = teams[0].getCaptain().getUser().getIdLong();
+		long c2 = teams[1].getCaptain().getUser().getIdLong();
 		
 		Database.insertPlayerGameCaptain(c1, timestamp, serverId, 1);
 		Database.insertPlayerGameCaptain(c2, timestamp, serverId, 2);
@@ -308,14 +301,14 @@ public class Game {
 		if(createChannels){
 			Category category = parentQueue.getSettingsManager().getVoiceChannelCategory();
 			
-			team1.createVoiceChannel(category);
-			team2.createVoiceChannel(category);
+			teams[0].createVoiceChannel(category);
+			teams[1].createVoiceChannel(category);
 		}
 	}
 	
 	private void deleteVoiceChannels(){
-		team1.deleteVoiceChannel();
-		team2.deleteVoiceChannel();
+		teams[0].deleteVoiceChannel();
+		teams[1].deleteVoiceChannel();
 	}
 	
 	protected void finish(){
@@ -366,12 +359,12 @@ public class Game {
 	 * @param target the captain to be replaced
 	 */
 	public void subCaptain(Member sub, Member target) {
-		if(team1.getCaptain() == target){
-			team1.setCaptain(sub);
-			team1.updateVoiceChannel();
+		if(teams[0].getCaptain() == target){
+			teams[0].setCaptain(sub);
+			teams[0].updateVoiceChannel();
 		}else{
-			team2.setCaptain(sub);
-			team2.updateVoiceChannel();
+			teams[1].setCaptain(sub);
+			teams[1].updateVoiceChannel();
 		}
 		
 		if(status == GameStatus.PICKING) {
@@ -386,8 +379,8 @@ public class Game {
 		TextChannel pugChannel = ServerManager.getServer(serverId).getPugChannel();
 		StringBuilder builder = new StringBuilder();
 		
-		long c1 = team1.getCaptain().getUser().getIdLong();
-		long c2 = team2.getCaptain().getUser().getIdLong();
+		long c1 = teams[0].getCaptain().getUser().getIdLong();
+		long c2 = teams[1].getCaptain().getUser().getIdLong();
 		
 		builder.append(String.format("**Captains: <@%d> & <@%d>**%n", c1, c2));
 		
@@ -418,7 +411,7 @@ public class Game {
 	}
 	
 	public boolean isCaptain(Member player){
-		return team1.getCaptain() == player || team2.getCaptain() == player;
+		return teams[0].getCaptain() == player || teams[1].getCaptain() == player;
 	}
 	
 	public void repick(){
@@ -428,11 +421,11 @@ public class Game {
 	}
 	
 	public PUGTeam getTeam(Member player){
-		if(player == team1.getCaptain() || team1.getPlayers().contains(player)){
-			return team1;
+		if(player == teams[0].getCaptain() || teams[0].getPlayers().contains(player)){
+			return teams[0];
 		}
 		
-		return team2;
+		return teams[1];
 	}
 	
 	public void swapPlayers(Member p1, Member p2){

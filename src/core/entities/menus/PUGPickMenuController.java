@@ -150,11 +150,7 @@ public class PUGPickMenuController extends MenuController<PUGPickMenu> {
 		getMenuOptions().clearOptions();
 	}
 	
-	public PUGTeam getTeam1(){
-		return getMenu(0).getPUGTeam();
-	}
-	
-	public PUGTeam getTeam2(){
-		return getMenu(1).getPUGTeam();
+	public PUGTeam[] getTeams(){
+		return new PUGTeam[] { getMenu(0).getPUGTeam(), getMenu(1).getPUGTeam() };
 	}
 }

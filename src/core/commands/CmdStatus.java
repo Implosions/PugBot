@@ -4,6 +4,7 @@ import java.util.List;
 
 import core.entities.Game;
 import core.entities.Game.GameStatus;
+import core.entities.PUGTeam;
 import core.entities.Queue;
 import core.entities.QueueManager;
 import core.exceptions.InvalidUseException;
@@ -56,18 +57,19 @@ public class CmdStatus extends Command {
 				for (Game g : q.getGames()) {
 					status.append("**IN GAME**:");
 					
-					if(g.getStatus() == GameStatus.PICKING){
+					if(g.getStatus() == GameStatus.PICKING) {
 						for (Member m : g.getPlayers()) {
 							status.append(m.getEffectiveName() + ", ");
 						}
 						
 						status.delete(status.length() - 2, status.length());
-					}
-					else{
+					} else {
+						PUGTeam[] teams = g.getPUGTeams();
+						
 						status.append("\n");
-						status.append(g.getTeam1().toString());
+						status.append(teams[0].toString());
 						status.append("\n");
-						status.append(g.getTeam2().toString());
+						status.append(teams[1].toString());
 					}
 					
 					status.append("\n");

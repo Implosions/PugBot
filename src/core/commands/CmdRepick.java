@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import core.entities.Game;
+import core.entities.PUGTeam;
 import core.entities.menus.ConfirmationMenu;
 import core.exceptions.InvalidUseException;
 import net.dv8tion.jda.core.entities.Member;
@@ -31,11 +32,12 @@ public class CmdRepick extends Command {
 			new Thread(new Runnable(){
 				public void run(){
 					Member captain2;
+					PUGTeam[] teams = game.getPUGTeams();
 					
-					if(game.getTeam1().getCaptain() == caller) {
-						captain2 = game.getTeam2().getCaptain();
+					if(teams[0].getCaptain() == caller) {
+						captain2 = teams[1].getCaptain();
 					} else {
-						captain2 = game.getTeam1().getCaptain();
+						captain2 = teams[0].getCaptain();
 					}
 					
 					String title = "Your opponent has requested to repick the teams";
