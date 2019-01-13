@@ -8,6 +8,7 @@ import net.dv8tion.jda.core.entities.Member;
 public class ConfirmationMenu extends EmbedMenu {
 	
 	private boolean result = false;
+	private boolean cancelled = false;
 	
 	public ConfirmationMenu(Member member, String title) {
 		super(member.getUser().openPrivateChannel().complete());
@@ -51,4 +52,13 @@ public class ConfirmationMenu extends EmbedMenu {
 		return result;
 	}
 
+	public synchronized void cancel() {
+		cancelled = true;
+		
+		notifyAll();
+	}
+	
+	public boolean isCancelled() {
+		return cancelled;
+	}
 }

@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import core.Database;
+import core.entities.menus.ConfirmationMenu;
 import core.entities.menus.MapPickMenuController;
 import core.entities.menus.PUGPickMenuController;
 import core.entities.menus.RPSMenuController;
@@ -30,6 +31,7 @@ public class Game {
 	private PUGPickMenuController pickController;
 	private RPSMenuController rpsController;
 	private MapPickMenuController mapPickController;
+	private ConfirmationMenu startingOrderConfirmationMenu;
 
 	public Game(Queue queue, long serverId, List<Member> players) {
 		this.parentQueue = queue;
@@ -155,9 +157,32 @@ public class Game {
 				
 				Member winner = localRpsController.getWinner();
 				
-				if(team2.getCaptain() == winner){
+				if(team2.getCaptain() == winner) {
 					team2.setCaptain(team1.getCaptain());
 					team1.setCaptain(winner);
+				}
+				
+				startConfirmationMenu();
+			}
+		}).start();
+	}
+	
+	private void startConfirmationMenu() {
+		new Thread(new Runnable() {
+			public void run() {
+				ConfirmationMenu localcm = new ConfirmationMenu(team1.getCaptain(), "Take first pick?");
+				startingOrderConfirmationMenu = localcm;
+				localcm.start();
+				
+				if(localcm.isCancelled()){
+					return;
+				}
+				
+				if(!localcm.getResult()) {
+					Member tmp = team1.getCaptain();
+					
+					team1.setCaptain(team2.getCaptain());
+					team2.setCaptain(tmp);
 				}
 				
 				startPUGPicking();
@@ -177,6 +202,7 @@ public class Game {
 				PUGPickMenuController localPickController = 
 						new PUGPickMenuController(team1.getCaptain(), team2.getCaptain(), playerPool, pickingPattern);
 				pickController = localPickController;
+				
 				localPickController.start();
 				
 				if(localPickController.isCancelled()){
@@ -326,6 +352,11 @@ public class Game {
 			mapPickController.cancel();
 			mapPickController = null;
 		}
+		
+		if(startingOrderConfirmationMenu != null) {
+			startingOrderConfirmationMenu.cancel();
+			startingOrderConfirmationMenu = null;
+		}
 	}
 	
 	/**
@@ -391,15 +422,9 @@ public class Game {
 	}
 	
 	public void repick(){
-		if(status == GameStatus.PLAYING){
-			cancelMenus();
-			startPUGPicking();
-			status = GameStatus.PICKING;
-		}
-	}
-	
-	public void setStatus(GameStatus newStatus){
-		status = newStatus;
+		cancelMenus();
+		startConfirmationMenu();
+		status = GameStatus.PICKING;
 	}
 	
 	public PUGTeam getTeam(Member player){
