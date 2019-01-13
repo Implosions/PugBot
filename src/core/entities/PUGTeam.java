@@ -1,6 +1,7 @@
 package core.entities;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import net.dv8tion.jda.core.entities.Category;
@@ -11,21 +12,16 @@ import net.dv8tion.jda.core.entities.Member;
 public class PUGTeam {
 	
 	private Member captain;
-	private List<Member> players;
+	private HashMap<Member, Integer> playerMap;
 	private Channel voiceChannel;
 	
 	public PUGTeam() {
-		players = new ArrayList<Member>();
+		playerMap = new HashMap<>();
 	}
 	
 	public PUGTeam(Member captain) {
 		super();
 		this.captain = captain;
-	}
-	
-	public PUGTeam(Member captain, List<Member> players) {
-		this.captain = captain;
-		this.players = players;
 	}
 	
 	public Member getCaptain() {
@@ -37,15 +33,19 @@ public class PUGTeam {
 	}
 	
 	public List<Member> getPlayers(){
+		List<Member> players = new ArrayList<>(playerMap.keySet());
+		
+		players.sort((Member p1, Member p2) -> getNullCheckedVal(p1) - getNullCheckedVal(p2));
+		
 		return players;
 	}
 	
-	public void addPlayer(Member player) {
-		players.add(player);
+	public void addPlayer(Member player, Integer pickOrder) {
+		playerMap.put(player, pickOrder);
 	}
 	
 	public void removePlayer(Member player) {
-		players.remove(player);
+		playerMap.remove(player);
 	}
 	
 	@Override
@@ -54,8 +54,8 @@ public class PUGTeam {
 		
 		builder.append(captain.getEffectiveName() + ": ");
 		
-		if(players.size() > 0){
-			for(Member player : players){
+		if(playerMap.size() > 0) {
+			for(Member player : getPlayers()) {
 				builder.append(player.getEffectiveName() + ", ");
 			}
 			
@@ -97,5 +97,19 @@ public class PUGTeam {
 				ex.printStackTrace();
 			}
 		}
+	}
+	
+	public Integer getPickOrder(Member player) {
+		return playerMap.get(player);
+	}
+	
+	private int getNullCheckedVal(Member m) {
+		Integer val = getPickOrder(m);
+		
+		if(val == null) {
+			return Integer.MAX_VALUE;
+		}
+		
+		return val;
 	}
 }

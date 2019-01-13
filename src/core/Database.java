@@ -6,6 +6,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -324,7 +325,7 @@ public class Database {
 		}
 	}
 	
-	public static void insertPlayerGame(long playerId, long timestamp, long serverId, int pickOrder, int team) {
+	public static void insertPlayerGame(long playerId, long timestamp, long serverId, Integer pickOrder, int team) {
 		String sql = "INSERT OR REPLACE INTO PlayerGame "
 				   + "(playerId, timestamp, serverId, pickOrder, team, captain) "
 				   + "VALUES(?, ?, ?, ?, ?, 0)";
@@ -335,7 +336,7 @@ public class Database {
 			statement.setLong(1, playerId);
 			statement.setLong(2, timestamp);
 			statement.setLong(3, serverId);
-			statement.setInt(4, pickOrder);
+			statement.setObject(4, pickOrder, Types.INTEGER);
 			statement.setInt(5, team);
 			
 			statement.executeUpdate();

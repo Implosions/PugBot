@@ -40,7 +40,7 @@ public class PUGPickMenuController extends MenuController<PUGPickMenu> {
 		pickedPlayers.add(player);
 		playerPool.remove(player);
 		getMenuOptions().removeOption(index);
-		menu.getPUGTeam().addPlayer(player);
+		menu.getPUGTeam().addPlayer(player, pickedPlayers.size());
 		
 		picksRemaining--;
 		
@@ -144,8 +144,8 @@ public class PUGPickMenuController extends MenuController<PUGPickMenu> {
 		PUGPickMenu menu = getMenu(0).canPick() ? getMenu(0) : getMenu(1);
 		Member lastPlayer = playerPool.get(0);
 		
-		menu.getPUGTeam().addPlayer(lastPlayer);
 		pickedPlayers.add(lastPlayer);
+		menu.getPUGTeam().addPlayer(lastPlayer, pickedPlayers.size());
 		playerPool.clear();
 		getMenuOptions().clearOptions();
 	}

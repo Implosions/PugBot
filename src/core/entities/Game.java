@@ -97,11 +97,11 @@ public class Game {
 			if(status == GameStatus.PLAYING){
 				if(teams[0].getPlayers().contains(target)){
 					teams[0].removePlayer(target);
-					teams[0].addPlayer(substitute);
+					teams[0].addPlayer(substitute, null);
 				}
 				else{
 					teams[1].removePlayer(target);
-					teams[1].addPlayer(substitute);
+					teams[1].addPlayer(substitute, null);
 				}
 			}
 			
@@ -245,18 +245,13 @@ public class Game {
 		postTeamsToPUGChannel();
 	}
 	
-	private void insertPlayersInGame(){
-		if(pickController == null) {
-			return;
-		}
-		
-		List<Member> pickedPlayers = pickController.getPickedPlayers();
-		
-		for(int i = 0;i < pickedPlayers.size();i++){
-			Member player = pickedPlayers.get(i);
-			int team = (getTeam(player) == teams[0]) ? 1 : 2;
-			
-			Database.insertPlayerGame(player.getUser().getIdLong(), timestamp, serverId, i+1, team);
+	private void insertPlayersInGame() {
+		for(int i = 0; i < teams.length; i++) {
+			for(Member player : teams[i].getPlayers()) {
+				Integer pickOrder = teams[i].getPickOrder(player);
+				
+				Database.insertPlayerGame(player.getUser().getIdLong(), timestamp, serverId, pickOrder, i + 1);
+			}
 		}
 	}
 	
@@ -431,13 +426,13 @@ public class Game {
 	public void swapPlayers(Member p1, Member p2){
 		PUGTeam p1Team = getTeam(p1);
 		PUGTeam p2Team = getTeam(p2);
+		int p1PickOrder = p1Team.getPickOrder(p1);
+		int p2PickOrder = p2Team.getPickOrder(p2);
 		
 		p1Team.removePlayer(p1);
-		p1Team.addPlayer(p2);
+		p1Team.addPlayer(p2, p2PickOrder);
 		p2Team.removePlayer(p2);
-		p2Team.addPlayer(p1);
-		
-		Database.swapPlayers(timestamp, p1.getUser().getIdLong(), p2.getUser().getIdLong());
+		p2Team.addPlayer(p1, p1PickOrder);
 	}
 	
 	private void insertMaps() {
