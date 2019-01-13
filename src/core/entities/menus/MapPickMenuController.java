@@ -5,7 +5,7 @@ import java.util.List;
 
 import net.dv8tion.jda.core.entities.Member;
 
-public class MapPickMenuController extends MenuController<MapPickMenuManager> {
+public class MapPickMenuController extends MenuController<MapPickMenu> {
 	
 	private int mapCount;
 	private List<String> mapPool = new ArrayList<>();
@@ -21,16 +21,31 @@ public class MapPickMenuController extends MenuController<MapPickMenuManager> {
 		pickStyle = style;
 		this.mapCount = mapCount;
 		mapPool.addAll(maps);
-		manager1 = new MapPickMenuManager(p1, this);
-		manager2 = new MapPickMenuManager(p2, this);
 		
-		manager1.nextTurn();
+		MapPickMenu[] menus = new MapPickMenu[2];
+		menus[0] = new MapPickMenu(p1, this, style);
+		menus[1] = new MapPickMenu(p2, this, style);
+		setMenus(menus);
+		
+		getMenu(0).nextTurn();
+		getMenu(1).setEmbed();
 	}
 
 	@Override
-	protected synchronized void managerActionTaken(MapPickMenuManager manager) {
-		manager1.nextTurn();
-		manager2.nextTurn();
+	protected synchronized void menuActionTaken(IMenu sender) {
+		int index = ((MapPickMenu)sender).getPickIndex();
+		String map = mapPool.get(index);
+		
+		mapPool.remove(index);
+		
+		if(pickStyle == PickStyle.PICK) {
+			pickedMaps.add(map);
+		}
+		
+		getMenuOptions().removeOption(index);
+		
+		getMenu(0).nextTurn();
+		getMenu(1).nextTurn();
 		updateMenus();
 		notifyAll();
 	}
@@ -50,25 +65,22 @@ public class MapPickMenuController extends MenuController<MapPickMenuManager> {
 			pickedMaps.addAll(mapPool);
 		}
 		
-		options.clearOptions();
-		manager1.getMenu().updateFinished(pickedMaps);
-		manager2.getMenu().updateFinished(pickedMaps);
-		manager1.complete();
-		manager2.complete();
+		getMenuOptions().clearOptions();
+		getMenu(0).updateFinished(pickedMaps);
+		getMenu(1).updateFinished(pickedMaps);
+		getMenu(0).complete();
+		getMenu(1).complete();
 	}
 
 	@Override
-	protected void buildMenuOptions() {
-		options = new MenuOptions(5);
+	protected MenuOptions buildMenuOptions() {
+		MenuOptions options = new MenuOptions(5);
 		
 		for(String map : mapPool) {
 			options.addOption(map);
 		}
-	}
-
-	@Override
-	protected void onMenuCreation() {
-		updateMenus();
+		
+		return options;
 	}
 	
 	public List<String> getMapPool(){
@@ -78,22 +90,28 @@ public class MapPickMenuController extends MenuController<MapPickMenuManager> {
 	public List<String> getPickedMaps(){
 		return pickedMaps;
 	}
-
-	public void chooseMap(int index) {
-		String map = mapPool.get(index);
+	
+	public String getMenuDescription() {
+		StringBuilder description = new StringBuilder();;
 		
-		mapPool.remove(index);
+		if(pickedMaps.size() > 0) {
+			description.append(String.join(", ", pickedMaps));
+			description.append('\n');
+			description.append('\n');
+		}
+		
+		description.append("Total ");
 		
 		if(pickStyle == PickStyle.PICK) {
-			pickedMaps.add(map);
+			description.append("picks ");
+		} else {
+			description.append("bans ");
 		}
-	}
-	
-	private void updateMenus() {
-		String pickedMapsString = String.join(", ", pickedMaps);
 		
-		manager1.getMenu().update(manager1.canPick(), getRemainingTurns(), pickedMapsString);
-		manager2.getMenu().update(manager2.canPick(), getRemainingTurns(), pickedMapsString);
+		description.append("remaining: ");
+		description.append(getRemainingTurns());
+		
+		return description.toString();
 	}
 	
 	public PickStyle getPickStyle() {

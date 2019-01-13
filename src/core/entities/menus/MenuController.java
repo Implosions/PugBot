@@ -1,17 +1,17 @@
 package core.entities.menus;
 
-public abstract class MenuController<Manager extends MenuManager<?, ?>> {
+public abstract class MenuController<T extends EmbedMenu> {
 
-	protected Manager manager1;
-	protected Manager manager2;
-	protected MenuOptions options;
+	private T[] menus;
+	private MenuOptions options;
 	private boolean cancelled = false;
 
 	public synchronized void start() {
-		buildMenuOptions();
-		manager1.createMenu();
-		manager2.createMenu();
-		onMenuCreation();
+		options = buildMenuOptions();
+		
+		for(T menu : menus) {
+			menu.start();
+		}
 		
 		boolean condition = true;
 
@@ -31,20 +31,14 @@ public abstract class MenuController<Manager extends MenuManager<?, ?>> {
 
 		complete();
 	}
-
-	public Manager getOpponent(MenuManager<?, ?> manager) {
-		return (manager == manager1) ? manager2 : manager1;
-	}
-
-	public MenuOptions getOptions() {
-		return options;
-	}
 	
 	public synchronized void cancel(){
 		cancelled = true;
 		
-		manager1.cancel();
-		manager2.cancel();
+		for(T menu : menus) {
+			menu.delete();
+		}
+		
 		notifyAll();
 	}
 	
@@ -52,13 +46,33 @@ public abstract class MenuController<Manager extends MenuManager<?, ?>> {
 		return cancelled;
 	}
 
-	protected abstract void managerActionTaken(Manager manager);
+	protected abstract void menuActionTaken(IMenu sender);
 
 	protected abstract boolean checkCondition();
 
 	protected abstract void complete();
 
-	protected abstract void buildMenuOptions();
+	protected abstract MenuOptions buildMenuOptions();
 	
-	protected abstract void onMenuCreation();
+	public MenuOptions getMenuOptions() {
+		return options;
+	}
+	
+	public T[] getMenus() {
+		return menus;
+	}
+	
+	public T getMenu(int i) {
+		return menus[i];
+	}
+	
+	public void setMenus(T[] menus) {
+		this.menus = menus;
+	}
+	
+	public void updateMenus() {
+		for(T menu : menus) {
+			menu.update();
+		}
+	}
 }

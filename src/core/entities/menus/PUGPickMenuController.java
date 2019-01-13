@@ -7,7 +7,7 @@ import java.util.ListIterator;
 import core.entities.PUGTeam;
 import net.dv8tion.jda.core.entities.Member;
 
-public class PUGPickMenuController extends MenuController<PUGMenuManager>{
+public class PUGPickMenuController extends MenuController<PUGPickMenu> {
 	
 	private List<Member> playerPool;
 	private List<Member> pickedPlayers = new ArrayList<Member>();
@@ -15,20 +15,32 @@ public class PUGPickMenuController extends MenuController<PUGMenuManager>{
 	private ListIterator<Integer> pickIterator;
 	
 	public PUGPickMenuController(Member captain1, Member captain2, List<Member> playerPool, String pickPattern) {
-		manager1 = new PUGMenuManager(captain1, this);
-		manager2 = new PUGMenuManager(captain2, this);
+		PUGPickMenu[] menus = new PUGPickMenu[2];
+		menus[0] = new PUGPickMenu(captain1, this);
+		menus[1] = new PUGPickMenu(captain2, this);
+		setMenus(menus);
+		
 		this.playerPool = new ArrayList<Member>(playerPool);
 		parsePickPattern(pickPattern);
 		
-		manager1.nextTurn();
+		String title = "Captaining vs. ";
+		getMenu(0).setTitle(title + captain2.getEffectiveName());
+		getMenu(1).setTitle(title + captain1.getEffectiveName());
+		
+		getMenu(0).nextTurn();
+		getMenu(1).setEmbed();
 	}
 	
 	@Override
-	protected synchronized void managerActionTaken(PUGMenuManager manager) {
-		Member player = manager.getLastPick();
+	protected synchronized void menuActionTaken(IMenu sender) {
+		PUGPickMenu menu = (PUGPickMenu)sender;
+		int index = menu.getPickIndex();
+		Member player = playerPool.get(index);
 		
 		pickedPlayers.add(player);
 		playerPool.remove(player);
+		getMenuOptions().removeOption(index);
+		menu.getPUGTeam().addPlayer(player);
 		
 		picksRemaining--;
 		
@@ -38,37 +50,44 @@ public class PUGPickMenuController extends MenuController<PUGMenuManager>{
 			switchTurns();
 		}
 		
+		if(playerPool.size() == 1){
+			autoassignLastPick();
+		}
+		
 		updateMenus();
 		notifyAll();
 	}
 	
 	@Override
-	protected void onMenuCreation() {
-		updateMenus();
-	}
-	
-	@Override
 	protected boolean checkCondition() {
-		return playerPool.size() > 1;
+		return playerPool.size() > 0;
 	}
 
 	@Override
 	protected void complete() {
-		if(playerPool.size() == 1){
-			autoassignLastPick();
-		}
-		
-		manager1.complete();
-		manager2.complete();
+		getMenu(0).complete();
+		getMenu(1).complete();
 	}
 	
 	@Override
-	protected void buildMenuOptions(){
-		options = new MenuOptions(5);
+	protected MenuOptions buildMenuOptions(){
+		MenuOptions options = new MenuOptions(5);
 		
 		for(Member m : playerPool) {
 			options.addOption(m.getEffectiveName());
 		}
+		
+		return options;
+	}
+	
+	@Override
+	public void updateMenus() {
+		if(playerPool.isEmpty()) {
+			getMenu(0).setFinishedDescription();
+			getMenu(1).setFinishedDescription();
+		}
+		
+		super.updateMenus();
 	}
 	
 	public List<Member> getPlayerPool(){
@@ -80,22 +99,12 @@ public class PUGPickMenuController extends MenuController<PUGMenuManager>{
 	}
 	
 	private void switchTurns(){
-		manager1.nextTurn();
-		manager2.nextTurn();
+		getMenu(0).nextTurn();
+		getMenu(1).nextTurn();
 	}
 	
 	public String getTeamsString(){
-		return manager1.getPUGTeam().toString() + System.lineSeparator() + manager2.getPUGTeam().toString();
-	}
-	
-	private void updateMenus(){
-		if(manager1.isPicking()){
-			manager1.getMenu().updateYourTurn(getTeamsString());
-			manager2.getMenu().updateOpponentsTurn(getTeamsString());
-		}else{
-			manager2.getMenu().updateYourTurn(getTeamsString());
-			manager1.getMenu().updateOpponentsTurn(getTeamsString());
-		}
+		return getMenu(0).getPUGTeam().toString() + System.lineSeparator() + getMenu(1).getPUGTeam().toString();
 	}
 	
 	private void parsePickPattern(String pattern){
@@ -132,20 +141,20 @@ public class PUGPickMenuController extends MenuController<PUGMenuManager>{
 	}
 	
 	private void autoassignLastPick(){
-		PUGMenuManager team = manager1.isPicking() ? manager1 : manager2;
+		PUGPickMenu menu = getMenu(0).canPick() ? getMenu(0) : getMenu(1);
 		Member lastPlayer = playerPool.get(0);
 		
-		team.addPlayer(lastPlayer);
+		menu.getPUGTeam().addPlayer(lastPlayer);
 		pickedPlayers.add(lastPlayer);
 		playerPool.clear();
-		options.clearOptions();
+		getMenuOptions().clearOptions();
 	}
 	
 	public PUGTeam getTeam1(){
-		return manager1.getPUGTeam();
+		return getMenu(0).getPUGTeam();
 	}
 	
 	public PUGTeam getTeam2(){
-		return manager2.getPUGTeam();
+		return getMenu(1).getPUGTeam();
 	}
 }

@@ -9,24 +9,25 @@ public class RepickConfirmationMenu extends EmbedMenu {
 	
 	private boolean result = false;
 	
-	public RepickConfirmationMenu(Member user) {
-		super(user.getUser().openPrivateChannel().complete());
+	public RepickConfirmationMenu(Member member) {
+		super(member.getUser().openPrivateChannel().complete());
 		
-		embedBuilder.setTitle("Your opponent has requested to repick the teams")
+		getEmbedBuilder().setTitle("Your opponent has requested to repick the teams")
 					.setColor(Color.yellow)
 					.setDescription(String.format("%sAccept or %sDecline", 
 											Constants.Emoji.CHECKMARK,
 											Constants.Emoji.X));
 		
-		options = new MenuOptions(0);
+		MenuOptions options = new MenuOptions(0);
 		options.addUtilityButton(Constants.Emoji.CHECKMARK);
 		options.addUtilityButton(Constants.Emoji.X);
-		
-		register();
-		start();
+		setMenuOptions(options);
 	}
 	
-	private synchronized void start(){
+	@Override
+	public synchronized void start() {
+		super.start();
+		
 		try {
 			wait(5 * 60 * 1000);
 		} catch (InterruptedException e) {

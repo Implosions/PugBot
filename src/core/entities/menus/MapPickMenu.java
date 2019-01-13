@@ -4,64 +4,67 @@ import java.awt.Color;
 import java.util.List;
 
 import core.entities.menus.MapPickMenuController.PickStyle;
-import net.dv8tion.jda.core.entities.MessageChannel;
+import net.dv8tion.jda.core.entities.Member;
 
-public class MapPickMenu extends EmbedMenu {
+public class MapPickMenu extends TurnBasedEmbedMenu {
 	
 	PickStyle pickStyle;
 	
-	public MapPickMenu(MessageChannel channel, MenuManager<?, ?> manager, PickStyle style) {
-		super(channel, manager);
+	public MapPickMenu(Member owner, MapPickMenuController controller, PickStyle style) {
+		super(owner, controller);
 		pickStyle = style;
 		String title = String.format("%s maps until the limit is reached", style.toString());
 		
-		embedBuilder.setTitle(title);
-		register();
+		getEmbedBuilder().setTitle(title);
 	}
 
 	@Override
 	public void fieldButtonClick(int index) {
-		manager.menuAction(pageIndex, index);
+		if(!canPick()) {
+			return;
+		}
+		
+		setPickIndex(index);
+		getController().menuActionTaken(this);
 	}
 
 	@Override
 	public void utilityButtonClick(String emoteName) {
 	}
 	
-	public void update(boolean picking, int picksRemaining, String pickedMaps) {
-		Color color;
-		StringBuilder description = new StringBuilder();;
+	@Override
+	protected void setEmbed() {
+		super.setEmbed();
 		
-		if(pickedMaps.length() > 0) {
-			description.append(pickedMaps + "\n\n");
-		}
+		StringBuilder sb = getEmbedBuilder().getDescriptionBuilder();
+		String desc = ((MapPickMenuController)getController()).getMenuDescription();
 		
-		if(pickStyle == PickStyle.PICK) {
-			description.append("Picks ");
-		} else {
-			description.append("Bans ");
-		}
-		
-		description.append("remaining: " + picksRemaining + "\n\n");
-		
-		if(picking) {
-			color = Color.green;
-			description.append("Your turn to choose");
-		} else {
-			color = Color.yellow;
-			description.append("Your opponent is choosing");
-		}
-		
-		embedBuilder.setColor(color)
-					.setDescription(description.toString());
-		update();
+		sb.insert(0, "\n\n");
+		sb.insert(0, desc);
 	}
+	
+//	public void update(int picksRemaining, String pickedMaps) {
+//		Color color;
+//		
+//		
+//		if(canPick()) {
+//			color = Color.green;
+//			description.append("Your turn to choose");
+//		} else {
+//			color = Color.yellow;
+//			description.append("Your opponent is choosing");
+//		}
+//		
+//		getEmbedBuilder().setColor(color)
+//					.setDescription(description.toString());
+//		update();
+//	}
 	
 	public void updateFinished(List<String> maps) {
 		String mapsString = String.join(", ", maps);
 		
-		embedBuilder.setDescription("**Maps:** " + mapsString);
-		embedBuilder.setColor(Color.green);
+		getEmbedBuilder().setDescription("**Maps:** " + mapsString);
+		getEmbedBuilder().setColor(Color.green);
 		update();
 	}
 }

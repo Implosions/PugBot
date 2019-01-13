@@ -59,7 +59,9 @@ public class MenuOptions {
 	
 	public void setPageMaxSize(int size) {
 		if(size > 9) {
-			pageSize = 9;
+			size = 9;
+		} else if(size < 0) {
+			size = 0;
 		}
 		
 		pageSize = size;
@@ -87,9 +89,7 @@ public class MenuOptions {
 		return count;
 	}
 	
-	public void removeOption(int pageIndex, int fieldIndex) {
-		int index = (pageIndex * pageSize) + fieldIndex;
-		
+	public void removeOption(int index) {		
 		optionsList.remove(index);
 	}
 	
@@ -99,5 +99,9 @@ public class MenuOptions {
 	
 	public void clearOptions() {
 		optionsList.clear();
+	}
+	
+	public int size() {
+		return optionsList.size();
 	}
 }

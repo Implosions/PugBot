@@ -2,41 +2,52 @@ package core.entities.menus;
 
 import java.awt.Color;
 
-import net.dv8tion.jda.core.entities.MessageChannel;
+import core.entities.PUGTeam;
+import net.dv8tion.jda.core.entities.Member;
 
-public class PUGPickMenu extends EmbedMenu {
+public class PUGPickMenu extends TurnBasedEmbedMenu {
 
-	public PUGPickMenu(MessageChannel channel, PUGMenuManager manager) {
-		super(channel, manager);
-		embedBuilder.setTitle(String.format("Captaining vs. %s", manager.getOpponentOwner().getEffectiveName()));
-		
-		register();
+	private PUGTeam team = new PUGTeam();
+	
+	public PUGPickMenu(Member owner, PUGPickMenuController controller) {
+		super(owner, controller);
+		team.setCaptain(owner);
 	}
 
 	@Override
 	public void fieldButtonClick(int fieldIndex) {
-		manager.menuAction(pageIndex, fieldIndex);
+		if(!canPick()) {
+			return;
+		}
+		
+		setPickIndex(fieldIndex);
+		getController().menuActionTaken(this);
 	}
 
 	@Override
 	public void utilityButtonClick(String emoteName) {	
 	}
 	
-	public void updateYourTurn(String teams) {
-		embedBuilder.setColor(Color.green)
-					.setDescription(String.format("Teams:%n%s%n%nYour turn to pick", teams));
-		update();
+	@Override
+	protected void setEmbed() {
+		super.setEmbed();
+		
+		StringBuilder sb = getEmbedBuilder().getDescriptionBuilder();
+		
+		sb.insert(0, "\n\n");
+		sb.insert(0, getFormattedTeamsString());
 	}
 	
-	public void updateOpponentsTurn(String teams) {
-		embedBuilder.setColor(Color.yellow)
-					.setDescription(String.format("Teams:%n%s%n%nYour opponent is picking", teams));
-		update();
+	public void setFinishedDescription() {
+		getEmbedBuilder().setColor(Color.green)
+						 .setDescription(getFormattedTeamsString());
 	}
 	
-	public void updatePickingFinished(String teams) {
-		embedBuilder.setColor(Color.green)
-					.setDescription(String.format("Teams:%n%s", teams));
-		update();
+	public PUGTeam getPUGTeam() {
+		return team;
+	}
+	
+	private String getFormattedTeamsString() {
+		return String.format("Teams:%n%s", ((PUGPickMenuController)getController()).getTeamsString());
 	}
 }

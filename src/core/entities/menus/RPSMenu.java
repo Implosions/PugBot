@@ -3,23 +3,21 @@ package core.entities.menus;
 import java.awt.Color;
 
 import core.Constants;
-import core.entities.menus.RPSMenuController.RPSMove;
-import net.dv8tion.jda.core.entities.MessageChannel;
+import core.entities.RPSMove;
+import net.dv8tion.jda.core.entities.Member;
 
-public class RPSMenu extends EmbedMenu{
+public class RPSMenu extends EmbedMenu {
 	
-	public RPSMenu(MessageChannel channel, RPSTeam manager) {
-		super(channel, manager);
+	private RPSMove move;
+	private Member owner;
+	
+	public RPSMenu(Member member, RPSMenuController controller) {
+		super(member.getUser().openPrivateChannel().complete(), controller);
 		
-		embedBuilder.setDescription("Make a move!")
-					.setColor(Color.green)
-					.setTitle(String.format("%sRock %sPaper %sScissors%nvs. %s",
-							Constants.Emoji.PUNCH,
-							Constants.Emoji.RAISED_HAND,
-							Constants.Emoji.V,
-							manager.getOpponentOwner().getEffectiveName()));
+		owner = member;
 		
-		register();
+		getEmbedBuilder().setDescription("Make a move!")
+						 .setColor(Color.green);
 	}
 
 	@Override
@@ -28,8 +26,6 @@ public class RPSMenu extends EmbedMenu{
 
 	@Override
 	public void utilityButtonClick(String emoteName) {
-		RPSMove move = null;
-		
 		switch(emoteName){
 		case Constants.Emoji.PUNCH: move = RPSMove.ROCK; break;
 		
@@ -40,36 +36,48 @@ public class RPSMenu extends EmbedMenu{
 		case Constants.Emoji.STOP_SIGN: move = RPSMove.FORFEIT; break;
 		}
 		
-		manager.menuAction(0, move);
+		getController().menuActionTaken(this);
 	}
 	
 	public void updateWaiting() {
-		embedBuilder.setColor(Color.yellow)
+		getEmbedBuilder().setColor(Color.yellow)
 					.setDescription("Waiting for opponent...");		
 		update();
 	}
 	
 	public void updateWin() {
-		embedBuilder.setColor(Color.green)
-					.setDescription("You have won!");
+		getEmbedBuilder().setColor(Color.green)
+						 .setDescription("You have won!");
 		update();
 	}
 	
 	public void updateLoss() {
-		embedBuilder.setColor(Color.red)
-					.setDescription("You have lost");
+		String msg = "You have lost";
+		
+		if(move == RPSMove.FORFEIT) {
+			msg = "You have forfeited";
+		}
+		
+		getEmbedBuilder().setColor(Color.red)
+						 .setDescription(msg);
 		update();
 	}
 	
 	public void updateTie() {
-		embedBuilder.setColor(Color.yellow)
-					.setDescription("You have tied with your opponent");
+		getEmbedBuilder().setColor(Color.yellow)
+						 .setDescription("You have tied with your opponent");
 		update();
 	}
 	
-	public void updateForfeit() {
-		embedBuilder.setColor(Color.red)
-					.setDescription("You have forfeited");
-		update();
+	public RPSMove getMove() {
+		return move;
+	}
+	
+	public Member getOwner() {
+		return owner;
+	}
+	
+	public void resetMove() {
+		move = null;
 	}
 }

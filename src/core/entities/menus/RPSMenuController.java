@@ -2,115 +2,89 @@ package core.entities.menus;
 
 import core.Constants;
 import core.Database;
+import core.entities.RPSMove;
 import net.dv8tion.jda.core.entities.Member;
 
-public class RPSMenuController extends MenuController<RPSTeam> {
+public class RPSMenuController extends MenuController<RPSMenu> {
 
-	private Member winner = null;
-
-	public enum RPSMove {
-		ROCK,
-		PAPER,
-		SCISSORS,
-		FORFEIT
-	}
+	private int winner = -1;
 
 	public RPSMenuController(Member p1, Member p2) {
-		manager1 = new RPSTeam(p1, this);
-		manager2 = new RPSTeam(p2, this);
+		RPSMenu[] menus = new RPSMenu[2];
+		menus[0] = new RPSMenu(p1, this);
+		menus[1] = new RPSMenu(p2, this);
+		setMenus(menus);
+		
+		String title = String.format("%sRock %sPaper %sScissors%nvs. ",
+				Constants.Emoji.PUNCH,
+				Constants.Emoji.RAISED_HAND,
+				Constants.Emoji.V);
+		
+		getMenu(0).setTitle(title + p2.getEffectiveName());
+		getMenu(1).setTitle(title + p1.getEffectiveName());
 	}
 
 	public Member getWinner() {
-		return winner;
+		return getMenu(winner).getOwner();
 	}
 
-	@Override
-	public synchronized void managerActionTaken(RPSTeam manager) {
-		if (getOpponent(manager).getMove() == null) {
-			manager.getMenu().updateWaiting();
+	public synchronized void menuActionTaken(IMenu sender) {
+		if(getMenu(0).getMove() == null || getMenu(1).getMove() == null) {
+			((RPSMenu)sender).updateWaiting();
 		}
-
+		
 		notifyAll();
 	}
 
 	@Override
 	protected boolean checkCondition() {
-		if (manager1.getMove() == RPSMove.FORFEIT) {
-			winner = manager2.getOwner();
-		} else if (manager2.getMove() == RPSMove.FORFEIT) {
-			winner = manager1.getOwner();
-		} else if (manager1.getMove() != null && manager2.getMove() != null) {
-			winner = determineWinner(manager1, manager2);
+		RPSMove p1Move = getMenu(0).getMove();
+		RPSMove p2Move = getMenu(1).getMove();
+		
+		if (p1Move == RPSMove.FORFEIT) {
+			winner = 1;
+		} else if (p2Move == RPSMove.FORFEIT) {
+			winner = 0;
+		} else if (p1Move != null && p2Move != null) {
+			winner = RPSMove.getWinner(p1Move, p2Move);
 
-			if (winner == null) {
-				manager1.resetMove();
-				manager2.resetMove();
+			if (winner == -1) {
+				getMenu(0).resetMove();
+				getMenu(1).resetMove();
 
-				manager1.getMenu().updateTie();
-				manager2.getMenu().updateTie();
+				getMenu(0).updateTie();
+				getMenu(1).updateTie();
 			}
 		}
 
-		return winner == null;
+		return winner == -1;
 	}
 
 	@Override
 	protected void complete() {
 		Long timestamp = System.currentTimeMillis();
-		Member loser;
+		RPSMenu winningSide = getMenu(winner);
+		RPSMenu losingSide = getMenu((winner == 0) ? 1 : 0);
 		
-		if (winner == manager1.getOwner()) {
-			manager1.getMenu().updateWin();
+		winningSide.updateWin();
+		losingSide.updateLoss();
 
-			if (manager2.getMove() == RPSMove.FORFEIT) {
-				manager2.getMenu().updateForfeit();
-			} else {
-				manager2.getMenu().updateLoss();
-			}
-			
-			loser = manager2.getOwner();
-		} else {
-			manager2.getMenu().updateWin();
-
-			if (manager1.getMove() == RPSMove.FORFEIT) {
-				manager1.getMenu().updateForfeit();
-			} else {
-				manager1.getMenu().updateLoss();
-			}
-			
-			loser = manager1.getOwner();
-		}
-
-		manager1.complete();
-		manager2.complete();
+		getMenu(0).complete();
+		getMenu(1).complete();
 		
-		Database.insertRPSGame(timestamp, winner.getUser().getIdLong(), 1);
-		Database.insertRPSGame(timestamp, loser.getUser().getIdLong(), 0);
-	}
-
-	public Member determineWinner(RPSTeam t1, RPSTeam t2) {
-		if (t1.getMove() == t2.getMove()) {
-			return null;
-		} else if (t1.getMove() == RPSMove.ROCK) {
-			return t2.getMove() == RPSMove.SCISSORS ? t1.getOwner() : t2.getOwner();
-		} else if (t1.getMove() == RPSMove.PAPER) {
-			return t2.getMove() == RPSMove.ROCK ? t1.getOwner() : t2.getOwner();
-		} else {
-			return t2.getMove() == RPSMove.PAPER ? t1.getOwner() : t2.getOwner();
-		}
+		Database.insertRPSGame(timestamp, getWinner().getUser().getIdLong(), 1);
+		Database.insertRPSGame(timestamp, losingSide.getOwner().getUser().getIdLong(), 0);
 	}
 
 	@Override
-	protected void buildMenuOptions() {
-		options = new MenuOptions(0);
+	protected MenuOptions buildMenuOptions() {
+		MenuOptions options = new MenuOptions(0);
 		
 		options.addUtilityButton(Constants.Emoji.PUNCH);
 		options.addUtilityButton(Constants.Emoji.RAISED_HAND);
 		options.addUtilityButton(Constants.Emoji.V);
 		options.addUtilityButton(Constants.Emoji.STOP_SIGN);
-	}
-	
-	@Override
-	protected void onMenuCreation() {
+		
+		return options;
 	}
 }

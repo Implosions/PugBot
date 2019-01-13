@@ -14,24 +14,31 @@ import net.dv8tion.jda.core.entities.MessageEmbed.Field;
 public abstract class EmbedMenu implements IMenu {
 
 	private Message message;
-	protected MessageChannel channel;
-	protected MenuManager<?, ?> manager;
-	protected EmbedBuilder embedBuilder = new EmbedBuilder();
-	protected int pageIndex = 0;
-	protected MenuOptions options;
+	private MessageChannel channel;
+	private EmbedBuilder embedBuilder = new EmbedBuilder();
+	private int pageIndex = 0;
+	private MenuController<?> controller;
+	private MenuOptions options;
 	
 	public EmbedMenu(MessageChannel channel) {
 		this.channel = channel;
 	}
-
-	public EmbedMenu(MessageChannel channel, MenuManager<?, ?> manager) {
+	
+	public EmbedMenu(MessageChannel channel, MenuController<?> controller) {
 		this.channel = channel;
-		this.manager = manager;
-		this.options = manager.getOptions();
+		this.controller = controller;
+	}
+	
+	public void start() {
+		if(controller != null) {
+			setMenuOptions(controller.getMenuOptions());
+		}
+		
+		update();
+		register();
 	}
 
-	protected void register() {
-		update();
+	private void register() {
 		MenuRouter.register(this);
 	}
 
@@ -63,20 +70,21 @@ public abstract class EmbedMenu implements IMenu {
 		
 		if (emoteName.equals(Constants.Emoji.FORWARD_BUTTON) && pageIndex < pages - 1) {
 			pageIndex++;
+			update();
 		} else if (emoteName.equals(Constants.Emoji.BACK_BUTTON) && pageIndex > 0) {
 			pageIndex--;
-		} else if (fieldButtons != null && fieldButtons.contains(emoteName)) {
-			int index = fieldButtons.indexOf(emoteName);
-			fieldButtonClick(index);
-			return;
+			update();
+		} else if (fieldButtons.contains(emoteName)) {
+			int pageSize = options.getPageMaxSize();
+			int index = fieldButtons.indexOf(emoteName) + (pageIndex * pageSize);
+			
+			if(index < options.size()) {
+				fieldButtonClick(index);
+			}
+			
 		} else if (utilityButtons.contains(emoteName)) {
 			utilityButtonClick(emoteName);
-			return;
-		} else {
-			return;
 		}
-
-		update();
 	}
 
 	public abstract void fieldButtonClick(int index);
@@ -134,5 +142,29 @@ public abstract class EmbedMenu implements IMenu {
 		}
 
 		return buttons;
+	}
+	
+	public int getPageIndex() {
+		return pageIndex;
+	}
+	
+	public void setTitle(String title) {
+		embedBuilder.setTitle(title);
+	}
+	
+	public MenuOptions getMenuOptions() {
+		return options;
+	}
+	
+	public void setMenuOptions(MenuOptions options) {
+		this.options = options;
+	}
+	
+	public MenuController<?> getController() {
+		return controller;
+	}
+	
+	public EmbedBuilder getEmbedBuilder() {
+		return embedBuilder;
 	}
 }
