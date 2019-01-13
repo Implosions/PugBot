@@ -5,16 +5,16 @@ import java.awt.Color;
 import core.Constants;
 import net.dv8tion.jda.core.entities.Member;
 
-public class RepickConfirmationMenu extends EmbedMenu {
+public class ConfirmationMenu extends EmbedMenu {
 	
 	private boolean result = false;
 	
-	public RepickConfirmationMenu(Member member) {
+	public ConfirmationMenu(Member member, String title) {
 		super(member.getUser().openPrivateChannel().complete());
 		
-		getEmbedBuilder().setTitle("Your opponent has requested to repick the teams")
-					.setColor(Color.yellow)
-					.setDescription(String.format("%sAccept or %sDecline", 
+		getEmbedBuilder().setTitle(title)
+						 .setColor(Color.yellow)
+						 .setDescription(String.format("%sAccept or %sDecline", 
 											Constants.Emoji.CHECKMARK,
 											Constants.Emoji.X));
 		

@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import core.entities.Game;
-import core.entities.menus.RepickConfirmationMenu;
+import core.entities.menus.ConfirmationMenu;
 import core.exceptions.InvalidUseException;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.Message;
@@ -38,7 +38,9 @@ public class CmdRepick extends Command {
 						captain2 = game.getTeam1().getCaptain();
 					}
 					
-					RepickConfirmationMenu menu = new RepickConfirmationMenu(captain2);
+					String title = "Your opponent has requested to repick the teams";
+					ConfirmationMenu menu = new ConfirmationMenu(captain2, title);
+					menu.start();
 					
 					if(menu.getResult()){
 						game.repick();
