@@ -64,7 +64,7 @@ public class Server {
 	}
 	
 	public void processMessage(Message message) {
-		String content = message.getContent();
+		String content = message.getContentDisplay();
 		Member caller = guild.getMember(message.getAuthor());
 		
 		if (!content.startsWith("!") || caller.getUser().isBot()) {
@@ -353,7 +353,7 @@ public class Server {
 		for (Message m : messageCache) {
 			long timeDiff = message.getCreationTime().toEpochSecond() - m.getCreationTime().toEpochSecond();
 			if (timeDiff <= 3 && m.getAuthor().getIdLong() == message.getAuthor().getIdLong()
-					&& m.getContent().equals(message.getContent())) {
+					&& m.getContentDisplay().equals(message.getContentDisplay())) {
 				spam = true;
 				break;
 			}
@@ -385,9 +385,9 @@ public class Server {
 		Role role = guild.getController().createRole().complete();
 		RoleManager manager = role.getManager();
 
-		// TODO: Update with new syntax after JDA upgrade
-		manager.setMentionable(true).queue();
-		manager.setName(groupName).queue();
+		manager.setMentionable(true)
+			   .setName(groupName)
+			   .queue();
 
 		groupDict.put(groupName.toLowerCase(), role);
 		Database.insertGroup(getId(), role.getIdLong());

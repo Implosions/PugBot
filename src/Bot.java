@@ -10,10 +10,10 @@ import okhttp3.OkHttpClient;
 
 // Bot driver
 
-public class Bot{
+public class Bot {
 	
 	public static void main(String[] args) {
-		try{
+		try {
 			Database.createConnection();
 			OkHttpClient.Builder httpBuilder = new OkHttpClient.Builder()
 					.readTimeout(60, TimeUnit.SECONDS)
@@ -23,11 +23,11 @@ public class Bot{
 			JDA jda = new JDABuilder(AccountType.BOT)
 					.setToken(Tokens.TOKEN)
 					.setHttpClientBuilder(httpBuilder)
-					.buildBlocking();
+					.build();
 			
 			jda.setAutoReconnect(true);
-			jda.addEventListener(new EventHandler(jda));
-		}catch(Exception ex){
+			jda.addEventListener(new EventHandler());
+		} catch(Exception ex) {
 			ex.printStackTrace();
 		}
 	}

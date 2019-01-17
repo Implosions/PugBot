@@ -3,9 +3,9 @@ package core;
 import core.entities.MenuRouter;
 import core.entities.Server;
 import core.entities.ServerManager;
-import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.OnlineStatus;
 import net.dv8tion.jda.core.entities.Member;
+import net.dv8tion.jda.core.events.ReadyEvent;
 import net.dv8tion.jda.core.events.guild.GuildJoinEvent;
 import net.dv8tion.jda.core.events.guild.GuildLeaveEvent;
 import net.dv8tion.jda.core.events.guild.member.GuildMemberJoinEvent;
@@ -14,15 +14,16 @@ import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.core.events.message.guild.react.GenericGuildMessageReactionEvent;
 import net.dv8tion.jda.core.events.message.priv.react.PrivateMessageReactionAddEvent;
 import net.dv8tion.jda.core.events.message.priv.react.PrivateMessageReactionRemoveEvent;
-import net.dv8tion.jda.core.events.user.UserOnlineStatusUpdateEvent;
+import net.dv8tion.jda.core.events.user.update.UserUpdateOnlineStatusEvent;
 import net.dv8tion.jda.core.hooks.ListenerAdapter;
 
 // EventHandler class
 
 public class EventHandler extends ListenerAdapter {
 
-	public EventHandler(JDA jda) {
-		new ServerManager(jda);
+	@Override
+	public void onReady(ReadyEvent event) {
+		new ServerManager(event.getJDA());
 	}
 
 	@Override
@@ -33,8 +34,9 @@ public class EventHandler extends ListenerAdapter {
 		server.updateActivityList(event.getMember());
 	}
 
-	public void onUserOnlineStatusUpdate(UserOnlineStatusUpdateEvent event) {
-		Member m = event.getGuild().getMember(event.getUser());
+	public void onUserOnlineStatusUpdate(UserUpdateOnlineStatusEvent event) {
+		Member m = event.getMember();
+		
 		// Passes online status if a player goes offline
 		if (m.getOnlineStatus().equals(OnlineStatus.OFFLINE)) {
 			ServerManager.getServer(event.getGuild().getIdLong()).playerDisconnect(m);
