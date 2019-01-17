@@ -1,0 +1,23 @@
+plugins {
+	id 'java'
+	id 'application'
+	id 'com.github.johnrengelman.shadow' version '1.2.4'
+}
+
+sourceCompatibility = 1.8
+
+mainClassName = 'pugbot.Bot'
+
+repositories {
+	mavenCentral()
+	jcenter()
+}
+
+dependencies {
+	compile 'net.dv8tion:JDA:3.8.1_454'
+	compile 'org.xerial:sqlite-jdbc:3.25.2'
+	testImplementation 'junit:junit:5.4.0'
+}
+
+compileJava.options.encoding = 'UTF-8'
+
