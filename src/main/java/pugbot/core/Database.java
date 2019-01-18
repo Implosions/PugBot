@@ -33,6 +33,7 @@ import pugbot.core.entities.settings.queuesettings.SettingPickPattern;
 import pugbot.core.entities.settings.queuesettings.SettingRoleRestrictions;
 import pugbot.core.entities.settings.queuesettings.SettingVoiceChannelCategory;
 import pugbot.core.entities.settings.serversettings.SettingAFKTimeout;
+import pugbot.core.entities.settings.serversettings.SettingCommandPrefix;
 import pugbot.core.entities.settings.serversettings.SettingCreateTeamVoiceChannels;
 import pugbot.core.entities.settings.serversettings.SettingDCTimeout;
 import pugbot.core.entities.settings.serversettings.SettingPUGChannel;
@@ -63,7 +64,8 @@ public class Database {
 					+ "setting_DCTimeout INTEGER NOT NULL DEFAULT 5, "
 					+ "setting_PUGChannel INTEGER NOT NULL DEFAULT 0, "
 					+ "setting_QueueFinishTimer INTEGER NOT NULL DEFAULT 90, "
-					+ "setting_createTeamVoiceChannels VARCHAR(5) DEFAULT 'true', "
+					+ "setting_createTeamVoiceChannels VARCHAR(5) NOT NULL DEFAULT 'true', "
+					+ "setting_CommandPrefix VARCHAR(3) NOT NULL DEFAULT '!', "
 					+ "PRIMARY KEY (id)"
 					+ ")");
 			
@@ -577,7 +579,8 @@ public class Database {
 				+ "setting_DCTimeout, "
 				+ "setting_PUGChannel, "
 				+ "setting_QueueFinishTimer, "
-				+ "setting_createTeamVoiceChannels "
+				+ "setting_createTeamVoiceChannels, "
+				+ "setting_CommandPrefix "
 				+ "FROM DiscordServer WHERE id = ?";
 		
 		try(PreparedStatement statement = _conn.prepareStatement(sql)){
@@ -592,6 +595,7 @@ public class Database {
 				manager.addSetting(new SettingPUGChannel(guildId, channel));
 				manager.addSetting(new SettingQueueFinishTimer(guildId, rs.getInt(4)));
 				manager.addSetting(new SettingCreateTeamVoiceChannels(guildId, Boolean.valueOf(rs.getString(5))));
+				manager.addSetting(new SettingCommandPrefix(guildId, rs.getString(6)));
 			}
 			
 		}catch(SQLException ex){

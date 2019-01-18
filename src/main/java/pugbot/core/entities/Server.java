@@ -66,8 +66,9 @@ public class Server {
 	public void processMessage(Message message) {
 		String content = message.getContentDisplay();
 		Member caller = guild.getMember(message.getAuthor());
+		String commandPrefix = settingsManager.getCommandPrefix();
 		
-		if (!content.startsWith("!") || caller.getUser().isBot()) {
+		if (!content.startsWith(commandPrefix) || caller.getUser().isBot()) {
 			return;
 		}
 		
@@ -95,7 +96,7 @@ public class Server {
 		}
 
 		// Remove command prefix and extra spaces
-		content = content.substring(1);
+		content = content.substring(commandPrefix.length());
 		content = content.trim().replaceAll(" +", " ");
 		
 		String[] args = content.split(" ");
@@ -105,7 +106,7 @@ public class Server {
 	
 	private void processCommand(Member caller, TextChannel channel, String[] args) {
 		String commandName = args[0];
-		String[] commandArgs = Arrays.copyOfRange(args, 1,args.length);
+		String[] commandArgs = Arrays.copyOfRange(args, 1, args.length);
 		Message response = null;
 		ICommand cmd = null;
 

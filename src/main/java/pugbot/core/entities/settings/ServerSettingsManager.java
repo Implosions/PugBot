@@ -4,6 +4,7 @@ import net.dv8tion.jda.core.entities.TextChannel;
 import pugbot.core.Database;
 import pugbot.core.entities.Server;
 import pugbot.core.entities.settings.serversettings.SettingAFKTimeout;
+import pugbot.core.entities.settings.serversettings.SettingCommandPrefix;
 import pugbot.core.entities.settings.serversettings.SettingCreateTeamVoiceChannels;
 import pugbot.core.entities.settings.serversettings.SettingDCTimeout;
 import pugbot.core.entities.settings.serversettings.SettingPUGChannel;
@@ -34,5 +35,9 @@ public class ServerSettingsManager extends SettingManager {
 	
 	public int getQueueFinishTimer(){
 		return ((SettingQueueFinishTimer)getSetting("QueueFinishTimer")).getValue();
+	}
+	
+	public String getCommandPrefix() {
+		return ((SettingCommandPrefix)getSetting("CommandPrefix")).getValue();
 	}
 }
