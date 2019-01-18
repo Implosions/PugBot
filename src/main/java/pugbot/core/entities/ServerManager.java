@@ -4,7 +4,6 @@ import java.util.HashMap;
 
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.entities.Guild;
-import pugbot.Utils;
 import pugbot.core.entities.timers.AFKTimer;
 
 public class ServerManager {
@@ -24,9 +23,6 @@ public class ServerManager {
 	}
 	
 	public ServerManager(JDA jda){
-		
-		Utils.createDir("app_data");
-		
 		jdaInstance = jda;
 		manager = new ServerManager();
 	}

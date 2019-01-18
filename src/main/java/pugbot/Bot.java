@@ -1,6 +1,13 @@
 package pugbot;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.Properties;
 import java.util.concurrent.TimeUnit;
+
+import javax.security.auth.login.LoginException;
 
 import net.dv8tion.jda.core.AccountType;
 import net.dv8tion.jda.core.JDA;
@@ -13,23 +20,39 @@ import pugbot.core.EventHandler;
 
 public class Bot {
 	
-	public static void main(String[] args) {
-		try {
-			Database.createConnection();
-			OkHttpClient.Builder httpBuilder = new OkHttpClient.Builder()
-					.readTimeout(60, TimeUnit.SECONDS)
-					.connectTimeout(60, TimeUnit.SECONDS)
-					.writeTimeout(60, TimeUnit.SECONDS);
+	private final static String propertiesFilepath = "app_data/.properties";
+	private final static String key = "OAuthToken";
+	
+	public static void main(String[] args) throws LoginException, IOException {
+		Utils.createDir("app_data");
+		
+		Properties properties = new Properties();
+		
+		try(FileInputStream is = new FileInputStream(propertiesFilepath)){
+			properties.load(is);
+		} catch(FileNotFoundException ex) {
+			System.out.println(".properties file not found! Generating new file");
+			properties.setProperty(key, new String());
 			
-			JDA jda = new JDABuilder(AccountType.BOT)
-					.setToken(Tokens.TOKEN)
-					.setHttpClientBuilder(httpBuilder)
-					.build();
-			
-			jda.setAutoReconnect(true);
-			jda.addEventListener(new EventHandler());
-		} catch(Exception ex) {
-			ex.printStackTrace();
+			try(FileOutputStream os = new FileOutputStream(propertiesFilepath)){
+				properties.store(os, "--- PugBot properties ---");
+			}
 		}
+		
+		String token = properties.getProperty(key);
+		
+		Database.createConnection();
+		OkHttpClient.Builder httpBuilder = new OkHttpClient.Builder()
+				.readTimeout(60, TimeUnit.SECONDS)
+				.connectTimeout(60, TimeUnit.SECONDS)
+				.writeTimeout(60, TimeUnit.SECONDS);
+		
+		JDA jda = new JDABuilder(AccountType.BOT)
+				.setToken(token)
+				.setHttpClientBuilder(httpBuilder)
+				.build();
+		
+		jda.setAutoReconnect(true);
+		jda.addEventListener(new EventHandler());
 	}
 }
