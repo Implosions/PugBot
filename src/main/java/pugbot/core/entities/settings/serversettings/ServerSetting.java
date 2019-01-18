@@ -5,8 +5,8 @@ import pugbot.core.entities.settings.Setting;
 
 public abstract class ServerSetting<T> extends Setting<T> {
 
-	public ServerSetting(T value) {
-		super(value);
+	public ServerSetting(long serverId, T value) {
+		super(serverId, value);
 	}
 
 	public void save() {

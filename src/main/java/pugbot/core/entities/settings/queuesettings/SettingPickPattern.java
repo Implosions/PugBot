@@ -4,8 +4,8 @@ import pugbot.core.exceptions.BadArgumentsException;
 
 public class SettingPickPattern extends QueueSetting<String> {
 
-	public SettingPickPattern(String value) {
-		super(value);
+	public SettingPickPattern(long serverId, long queueId, String value) {
+		super(serverId, queueId, value);
 	}
 
 	@Override

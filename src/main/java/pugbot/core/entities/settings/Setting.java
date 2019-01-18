@@ -2,11 +2,12 @@ package pugbot.core.entities.settings;
 
 public abstract class Setting<T> implements ISetting {
 	
-	protected SettingManager manager;
 	private T value;
+	private long serverId;
 	
-	public Setting(T value){
+	public Setting(long serverId, T value){
 		this.value = value;
+		this.serverId = serverId;
 	}
 	
 	public T getValue(){
@@ -17,11 +18,7 @@ public abstract class Setting<T> implements ISetting {
 		value = newValue;
 	}
 	
-	public void setManager(SettingManager manager){
-		this.manager = manager;
-	}
-	
 	public long getServerId() {
-		return manager.getServer().getId();
+		return serverId;
 	}
 }

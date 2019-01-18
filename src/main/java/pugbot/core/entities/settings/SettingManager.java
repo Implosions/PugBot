@@ -21,7 +21,6 @@ public abstract class SettingManager {
 	}
 	
 	public void addSetting(Setting<?> setting){
-		setting.setManager(this);
 		settingMap.put(setting.getName().toLowerCase(), setting);
 	}
 	

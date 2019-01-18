@@ -4,8 +4,8 @@ import pugbot.core.exceptions.BadArgumentsException;
 
 public class SettingMapCount extends QueueSetting<Integer>{
 
-	public SettingMapCount(Integer value) {
-		super(value);
+	public SettingMapCount(long serverId, long queueId, Integer value) {
+		super(serverId, queueId, value);
 	}
 
 	@Override

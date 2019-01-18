@@ -4,8 +4,8 @@ import pugbot.core.exceptions.BadArgumentsException;
 
 public class SettingAFKTimeout extends ServerSetting<Integer> {
 	
-	public SettingAFKTimeout(int value) {
-		super(value);
+	public SettingAFKTimeout(long serverId, int value) {
+		super(serverId, value);
 	}
 
 	@Override

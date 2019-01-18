@@ -585,12 +585,13 @@ public class Database {
 			
 			try(ResultSet rs = statement.executeQuery()){
 				TextChannel channel = manager.getServer().getGuild().getTextChannelById(rs.getLong(3));
+				long guildId = manager.getServer().getGuild().getIdLong();
 				
-				manager.addSetting(new SettingAFKTimeout(rs.getInt(1)));
-				manager.addSetting(new SettingDCTimeout(rs.getInt(2)));
-				manager.addSetting(new SettingPUGChannel(channel));
-				manager.addSetting(new SettingQueueFinishTimer(rs.getInt(4)));
-				manager.addSetting(new SettingCreateTeamVoiceChannels(Boolean.valueOf(rs.getString(5))));
+				manager.addSetting(new SettingAFKTimeout(guildId, rs.getInt(1)));
+				manager.addSetting(new SettingDCTimeout(guildId, rs.getInt(2)));
+				manager.addSetting(new SettingPUGChannel(guildId, channel));
+				manager.addSetting(new SettingQueueFinishTimer(guildId, rs.getInt(4)));
+				manager.addSetting(new SettingCreateTeamVoiceChannels(guildId, Boolean.valueOf(rs.getString(5))));
 			}
 			
 		}catch(SQLException ex){
@@ -622,11 +623,11 @@ public class Database {
 			try(ResultSet rs = statement.executeQuery()){
 				Category category = guild.getCategoryById(rs.getLong(3));
 				
-				manager.addSetting(new SettingMinGamesPlayedToCaptain(rs.getInt(1)));
-				manager.addSetting(new SettingPickPattern(rs.getString(2)));
-				manager.addSetting(new SettingVoiceChannelCategory(category));
-				manager.addSetting(new SettingMapCount(rs.getInt(4)));
-				manager.addSetting(new SettingMapPickingStyle(rs.getInt(5)));
+				manager.addSetting(new SettingMinGamesPlayedToCaptain(guild.getIdLong(), queueId, rs.getInt(1)));
+				manager.addSetting(new SettingPickPattern(guild.getIdLong(), queueId, rs.getString(2)));
+				manager.addSetting(new SettingVoiceChannelCategory(guild.getIdLong(), queueId, category));
+				manager.addSetting(new SettingMapCount(guild.getIdLong(), queueId, rs.getInt(4)));
+				manager.addSetting(new SettingMapPickingStyle(guild.getIdLong(), queueId, rs.getInt(5)));
 			}
 
 		}catch(SQLException ex){
@@ -636,8 +637,8 @@ public class Database {
 		List<Role> roles = getQueueRoles(guild, queueId);
 		List<String> maps = getQueueMaps(guild.getIdLong(), queueId);
 		
-		manager.addSetting(new SettingRoleRestrictions(roles));
-		manager.addSetting(new SettingMapPool(maps));
+		manager.addSetting(new SettingRoleRestrictions(guild.getIdLong(), queueId, roles));
+		manager.addSetting(new SettingMapPool(guild.getIdLong(), queueId, maps));
 	}
 	
 	private static List<String> getQueueMaps(long serverId, long queueId) {

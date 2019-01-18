@@ -5,13 +5,14 @@ import java.util.List;
 
 import net.dv8tion.jda.core.entities.Role;
 import pugbot.core.Database;
+import pugbot.core.entities.ServerManager;
 import pugbot.core.exceptions.BadArgumentsException;
 import pugbot.core.exceptions.InvalidUseException;
 
 public class SettingRoleRestrictions extends QueueSetting<List<Role>>{
 
-	public SettingRoleRestrictions(List<Role> value) {
-		super(value);
+	public SettingRoleRestrictions(long serverId, long queueId, List<Role> value) {
+		super(serverId, queueId, value);
 	}
 
 	@Override
@@ -81,7 +82,7 @@ public class SettingRoleRestrictions extends QueueSetting<List<Role>>{
 	}
 	
 	private Role findRole(String roleName){
-		List<Role> roles = manager.getServer().getGuild().getRolesByName(roleName, true);
+		List<Role> roles = ServerManager.getGuild(getServerId()).getRolesByName(roleName, true);
 		
 		if(roles.size() == 0){
 			throw new InvalidUseException(String.format("role '%s' does not exist", roleName));

@@ -4,8 +4,8 @@ import pugbot.core.exceptions.BadArgumentsException;
 
 public class SettingCreateTeamVoiceChannels extends ServerSetting<Boolean> {
 	
-	public SettingCreateTeamVoiceChannels(Boolean value) {
-		super(value);
+	public SettingCreateTeamVoiceChannels(long serverId, Boolean value) {
+		super(serverId, value);
 	}
 
 	@Override

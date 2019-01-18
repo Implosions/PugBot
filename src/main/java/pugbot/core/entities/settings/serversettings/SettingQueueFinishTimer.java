@@ -4,8 +4,8 @@ import pugbot.core.exceptions.BadArgumentsException;
 
 public class SettingQueueFinishTimer extends ServerSetting<Integer>{
 
-	public SettingQueueFinishTimer(Integer value) {
-		super(value);
+	public SettingQueueFinishTimer(long serverId, Integer value) {
+		super(serverId, value);
 	}
 
 	@Override

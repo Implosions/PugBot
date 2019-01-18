@@ -9,8 +9,8 @@ import pugbot.core.exceptions.InvalidUseException;
 
 public class SettingMapPool extends QueueSetting<List<String>> {
 	
-	public SettingMapPool(List<String> value) {
-		super(value);
+	public SettingMapPool(long serverId, long queueId, List<String> value) {
+		super(serverId, queueId, value);
 	}
 
 	@Override

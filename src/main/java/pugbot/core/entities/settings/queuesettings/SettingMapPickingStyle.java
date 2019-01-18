@@ -6,8 +6,8 @@ import pugbot.core.exceptions.InvalidUseException;
 
 public class SettingMapPickingStyle extends QueueSetting<PickStyle>{
 	
-	public SettingMapPickingStyle(Integer value) {
-		super(PickStyle.values()[value]);
+	public SettingMapPickingStyle(long serverId, long queueId, Integer value) {
+		super(serverId, queueId, PickStyle.values()[value]);
 	}
 
 	@Override

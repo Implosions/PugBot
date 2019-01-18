@@ -4,8 +4,8 @@ import pugbot.core.exceptions.BadArgumentsException;
 
 public class SettingDCTimeout extends ServerSetting<Integer> {
 	
-	public SettingDCTimeout(Integer value) {
-		super(value);
+	public SettingDCTimeout(long serverId, Integer value) {
+		super(serverId, value);
 	}
 
 	@Override

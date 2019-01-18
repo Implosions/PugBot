@@ -4,8 +4,8 @@ import pugbot.core.exceptions.BadArgumentsException;
 
 public class SettingMinGamesPlayedToCaptain extends QueueSetting<Integer>{
 
-	public SettingMinGamesPlayedToCaptain(Integer value) {
-		super(value);
+	public SettingMinGamesPlayedToCaptain(long serverId, long queueId, Integer value) {
+		super(serverId, queueId, value);
 	}
 
 	@Override
