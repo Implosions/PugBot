@@ -34,7 +34,8 @@ public class EventHandler extends ListenerAdapter {
 		server.updateActivityList(event.getMember());
 	}
 
-	public void onUserOnlineStatusUpdate(UserUpdateOnlineStatusEvent event) {
+	@Override
+	public void onUserUpdateOnlineStatus(UserUpdateOnlineStatusEvent event) {
 		Member m = event.getMember();
 		
 		// Passes online status if a player goes offline
@@ -43,12 +44,14 @@ public class EventHandler extends ListenerAdapter {
 		}
 	}
 
+	@Override
 	public void onGuildJoin(GuildJoinEvent event) {
 		// Adds the new server to the server list
 		ServerManager.addNewServer(event.getGuild());
 		System.out.println(String.format("Joined server: %s", event.getGuild().getName()));
 	}
 
+	@Override
 	public void onGuildLeave(GuildLeaveEvent event) {
 		// Removes the server from the server list
 		ServerManager.removeServer(event.getGuild().getIdLong());
