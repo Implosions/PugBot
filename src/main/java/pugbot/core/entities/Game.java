@@ -426,8 +426,8 @@ public class Game {
 	public void swapPlayers(Member p1, Member p2){
 		PUGTeam p1Team = getTeam(p1);
 		PUGTeam p2Team = getTeam(p2);
-		int p1PickOrder = p1Team.getPickOrder(p1);
-		int p2PickOrder = p2Team.getPickOrder(p2);
+		Integer p1PickOrder = p1Team.getPickOrder(p1);
+		Integer p2PickOrder = p2Team.getPickOrder(p2);
 		
 		p1Team.removePlayer(p1);
 		p1Team.addPlayer(p2, p2PickOrder);
