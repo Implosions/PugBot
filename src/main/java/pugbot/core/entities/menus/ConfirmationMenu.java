@@ -5,7 +5,7 @@ import java.awt.Color;
 import net.dv8tion.jda.core.entities.Member;
 import pugbot.core.Constants;
 
-public class ConfirmationMenu extends EmbedMenu {
+public class ConfirmationMenu extends EmbedMenu implements IMenuController {
 	
 	private boolean result = false;
 	private boolean cancelled = false;

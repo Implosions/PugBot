@@ -1,6 +1,6 @@
 package pugbot.core.entities.menus;
 
-public abstract class MenuController<T extends EmbedMenu> {
+public abstract class MenuController<T extends EmbedMenu> implements IMenuController {
 
 	private T[] menus;
 	private MenuOptions options;
