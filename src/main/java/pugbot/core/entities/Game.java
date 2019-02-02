@@ -12,6 +12,7 @@ import net.dv8tion.jda.core.entities.TextChannel;
 import pugbot.Utils;
 import pugbot.core.Database;
 import pugbot.core.entities.menus.ConfirmationMenu;
+import pugbot.core.entities.menus.IMenuController;
 import pugbot.core.entities.menus.MapPickMenuController;
 import pugbot.core.entities.menus.PUGPickMenuController;
 import pugbot.core.entities.menus.RPSMenuController;
@@ -141,15 +142,13 @@ public class Game {
 	private void startRPSGame(){
 		new Thread(new Runnable(){
 			public void run(){
-				RPSMenuController localRpsController = new RPSMenuController(teams[0].getCaptain(), teams[1].getCaptain());
-				rpsController = localRpsController;
-				localRpsController.start();
+				rpsController = new RPSMenuController(teams[0].getCaptain(), teams[1].getCaptain());
 				
-				if(localRpsController.isCancelled()){
+				if(!runController(rpsController)){
 					return;
 				}
 				
-				Member winner = localRpsController.getWinner();
+				Member winner = rpsController.getWinner();
 				
 				if(teams[1].getCaptain() == winner) {
 					teams[1].setCaptain(teams[0].getCaptain());
@@ -164,15 +163,13 @@ public class Game {
 	private void startConfirmationMenu() {
 		new Thread(new Runnable() {
 			public void run() {
-				ConfirmationMenu localcm = new ConfirmationMenu(teams[0].getCaptain(), "Take first pick?");
-				startingOrderConfirmationMenu = localcm;
-				localcm.start();
+				startingOrderConfirmationMenu = new ConfirmationMenu(teams[0].getCaptain(), "Take first pick?");
 				
-				if(localcm.isCancelled()){
+				if(!runController(startingOrderConfirmationMenu)){
 					return;
 				}
 				
-				if(!localcm.getResult()) {
+				if(!startingOrderConfirmationMenu.getResult()) {
 					Member tmp = teams[0].getCaptain();
 					
 					teams[0].setCaptain(teams[1].getCaptain());
@@ -193,13 +190,10 @@ public class Game {
 				playerPool.remove(teams[0].getCaptain());
 				playerPool.remove(teams[1].getCaptain());
 				
-				PUGPickMenuController localPickController = 
+				pickController = 
 						new PUGPickMenuController(teams[0].getCaptain(), teams[1].getCaptain(), playerPool, pickingPattern);
-				pickController = localPickController;
-				
-				localPickController.start();
-				
-				if(localPickController.isCancelled()){
+
+				if(!runController(pickController)) {
 					return;
 				}
 				
@@ -222,13 +216,11 @@ public class Game {
 			public void run(){
 				List<String> mapPool = new ArrayList<>(settings.getMapPool());
 				
-				MapPickMenuController localMapPickController = 
+				mapPickController = 
 						new MapPickMenuController(teams[0].getCaptain(), teams[1].getCaptain(), 
 								mapCount, mapPool, settings.getPickStyle());
-				mapPickController = localMapPickController;
-				localMapPickController.start();
 				
-				if(localMapPickController.isCancelled()){
+				if(!runController(mapPickController)){
 					return;
 				}
 				
@@ -441,5 +433,12 @@ public class Game {
 				Database.insertGameMap(serverId, getParentQueue().getId(), timestamp, map);
 			}
 		}
+	}
+	
+	private boolean runController(IMenuController controller) {
+		IMenuController localController = controller;
+		localController.start();
+		
+		return !localController.isCancelled();
 	}
 }
