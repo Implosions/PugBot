@@ -53,7 +53,10 @@ public abstract class EmbedMenu implements IMenu {
 
 	@Override
 	public void delete() {
-		message.delete().queue();
+		if(message != null) {
+			message.delete().queue();
+		}
+		
 		unregister();
 	}
 
