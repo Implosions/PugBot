@@ -1,5 +1,6 @@
 package pugbot.core.entities;
 
+import java.awt.Color;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
@@ -9,6 +10,8 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
+import net.dv8tion.jda.core.EmbedBuilder;
+import net.dv8tion.jda.core.MessageBuilder;
 import net.dv8tion.jda.core.OnlineStatus;
 import net.dv8tion.jda.core.Permission;
 import net.dv8tion.jda.core.entities.Emote;
@@ -185,6 +188,11 @@ public class Server {
 		}
 		
 		boolean update = false;
+		String format = "%s has been removed from all queues after being inactive for %d minutes";
+		EmbedBuilder eb = new EmbedBuilder();
+		MessageBuilder mb = new MessageBuilder();
+		
+		eb.setColor(Color.RED);
 		
 		for (Member member : activityList.keySet()) {
 			long time = activityList.get(member);
@@ -198,12 +206,13 @@ public class Server {
 			long minutes = TimeUnit.MINUTES.convert(timeDiffMs, TimeUnit.MILLISECONDS);
 			
 			if (minutes >= timeout) {
-				String msg = String.format("<@%s> has been removed from all queues after being inactive for %d minutes",
-						member.getUser().getId(), timeout);
-				
+				String msg = String.format(format, member.getEffectiveName(), timeout);
+				eb.setDescription(msg);
+				mb.setContent(member.getAsMention());
+				mb.setEmbed(eb.build());
 
 				queueManager.purgeQueue(member);
-				getPugChannel().sendMessage(Utils.createMessage("", msg, false)).queue();
+				getPugChannel().sendMessage(mb.build()).queue();
 				
 				update = true;
 			}
