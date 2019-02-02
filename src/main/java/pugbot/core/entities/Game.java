@@ -437,7 +437,15 @@ public class Game {
 	
 	private boolean runController(IMenuController controller) {
 		IMenuController localController = controller;
-		localController.start();
+		
+		try {
+			localController.start();
+		} catch(IllegalStateException ex) {
+			TextChannel pugChannel = ServerManager.getServer(serverId).getPugChannel();
+			
+			pugChannel.sendMessage(Utils.createMessage("Error!", ex.getMessage(), false)).queue();;
+		}
+		
 		
 		return !localController.isCancelled();
 	}

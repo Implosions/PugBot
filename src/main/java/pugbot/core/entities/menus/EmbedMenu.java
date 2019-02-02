@@ -8,6 +8,8 @@ import net.dv8tion.jda.core.MessageBuilder;
 import net.dv8tion.jda.core.entities.Message;
 import net.dv8tion.jda.core.entities.MessageChannel;
 import net.dv8tion.jda.core.entities.MessageEmbed.Field;
+import net.dv8tion.jda.core.entities.PrivateChannel;
+import net.dv8tion.jda.core.exceptions.ErrorResponseException;
 import pugbot.core.Constants;
 import pugbot.core.entities.MenuRouter;
 
@@ -43,7 +45,9 @@ public abstract class EmbedMenu implements IMenu {
 	}
 
 	private void unregister() {
-		MenuRouter.unregister(getId());
+		if(message != null) {
+			MenuRouter.unregister(getId());
+		}
 	}
 
 	@Override
@@ -117,15 +121,25 @@ public abstract class EmbedMenu implements IMenu {
 
 		updatedMessage = new MessageBuilder().setEmbed(embedBuilder.build()).build();
 
-		if (message != null) {
-			message.editMessage(updatedMessage).queue();
-		} else {
-			message = channel.sendMessage(updatedMessage).complete();
-
-			for (String emote : getButtonList()) {
-				message.addReaction(emote).queue();
+		try {
+			if (message != null) {
+				message.editMessage(updatedMessage).queue();
+			} else {
+				message = channel.sendMessage(updatedMessage).complete();
+		
+				for (String emote : getButtonList()) {
+					message.addReaction(emote).queue();
+				}
 			}
+		} catch(ErrorResponseException ex) {
+			controller.cancel();
+			
+			PrivateChannel pChannel = (PrivateChannel)channel;
+			String err = String.format("User '%s' has blocked me", pChannel.getUser().getName());
+			
+			throw new IllegalStateException(err);
 		}
+		
 	}
 
 	private List<String> getButtonList() {
