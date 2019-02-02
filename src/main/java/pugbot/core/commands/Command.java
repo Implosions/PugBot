@@ -9,7 +9,9 @@ public abstract class Command implements ICommand {
 	protected Server server;
 	
 	protected String getBaseCommand(){
-		return "!" + getName();
+		String prefix = server.getSettingsManager().getCommandPrefix();
+		
+		return prefix + getName();
 	}
 	
 	public void setServer(Server server) {
