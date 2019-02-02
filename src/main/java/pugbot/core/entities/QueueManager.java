@@ -4,8 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
+import net.dv8tion.jda.core.Permission;
 import net.dv8tion.jda.core.entities.Member;
-import net.dv8tion.jda.core.exceptions.PermissionException;
+import net.dv8tion.jda.core.entities.TextChannel;
 import pugbot.core.Database;
 import pugbot.core.entities.timers.QueueFinishTimer;
 
@@ -120,10 +121,11 @@ public class QueueManager {
 	 * Sets the topic of the server's pug channel and saves the queue to file.
 	 */
 	public void updateTopic() {
-		try {
-			getServer().getPugChannel().getManager().setTopic(getHeader()).complete();
-		} catch (PermissionException ex) {
-			ex.printStackTrace();
+		Member self = getServer().getGuild().getSelfMember();
+		TextChannel pugChannel = getServer().getPugChannel();
+		
+		if(self.hasPermission(pugChannel, Permission.MANAGE_CHANNEL)) {
+			pugChannel.getManager().setTopic(getHeader()).queue();
 		}
 	}
 
