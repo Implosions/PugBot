@@ -43,7 +43,7 @@ public class CmdSwapPlayers extends Command {
 		}
 		
 		if(game.getTeam(p1) == game.getTeam(p2)){
-			throw new InvalidUseException("Players must be on different teaams");
+			throw new InvalidUseException("Players must be on different teams");
 		}
 		
 		game.swapPlayers(p1, p2);
