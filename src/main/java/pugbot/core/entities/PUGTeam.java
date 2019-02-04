@@ -20,7 +20,7 @@ public class PUGTeam {
 	}
 	
 	public PUGTeam(Member captain) {
-		super();
+		this();
 		this.captain = captain;
 	}
 	

@@ -42,6 +42,7 @@ public class Game {
 		if(players.size() == 2) {
 			teams[0] = new PUGTeam(players.get(0));
 			teams[1] = new PUGTeam(players.get(1));
+			this.players = players;
 			
 			status = GameStatus.PLAYING;
 			insertCaptains();
@@ -239,8 +240,10 @@ public class Game {
 	
 	private void insertPlayersInGame() {
 		for(int i = 0; i < teams.length; i++) {
-			for(Member player : teams[i].getPlayers()) {
-				Integer pickOrder = teams[i].getPickOrder(player);
+			PUGTeam team = teams[i];
+			
+			for(Member player : team.getPlayers()) {
+				Integer pickOrder = team.getPickOrder(player);
 				
 				Database.insertPlayerGame(player.getUser().getIdLong(), timestamp, serverId, pickOrder, i + 1);
 			}
