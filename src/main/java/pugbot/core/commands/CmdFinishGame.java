@@ -18,21 +18,21 @@ public class CmdFinishGame extends Command {
 	public Message execCommand(Member caller, String[] args) {
 		QueueManager qm = server.getQueueManager();
 		
-		if(qm.isPlayerWaiting(caller)){
+		if(qm.hasPlayerJustFinished(caller)) {
 			return null;
 		}
 		
 		Game game = qm.getPlayersGame(caller);
 		
-		if(game == null){
+		if(game == null) {
 			throw new InvalidUseException("You are not currently in-game");
 		}
 		
-		if(!game.isCaptain(caller)){
+		if(!game.isCaptain(caller)) {
 			throw new InvalidUseException("You must be a captain to finish your game");
 		}
 		
-		if(game.getStatus() == GameStatus.PICKING || args.length == 0){
+		if(game.getStatus() == GameStatus.PICKING) {
 			qm.finishGame(game, null);
 			
 			return Utils.createMessage("`Game cancelled`");
@@ -41,7 +41,7 @@ public class CmdFinishGame extends Command {
 		PUGTeam[] teams = game.getPUGTeams();
 		
 		String title = String.format("Game '%s' finished", game.getQueueName());
-		String result = args[0].toLowerCase();
+		String result = (args.length > 0) ? args[0].toLowerCase() : new String();
 		int team = caller.equals(teams[0].getCaptain()) ? 1 : 2;
 		int winningTeam;
 		
