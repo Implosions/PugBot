@@ -309,7 +309,7 @@ public class Database {
 		}
 	}
 	
-	public static void updateGameInfo(long timestamp, long queueId, long serverId, long finishTime, int winningTeam) {
+	public static void updateGameInfo(long timestamp, long queueId, long serverId, long finishTime, Integer winningTeam) {
 		String sql = "UPDATE Game "
 				   + "SET completion_timestamp = ?, winning_team = ? "
 				   + "WHERE timestamp = ? "
@@ -317,7 +317,7 @@ public class Database {
 				   + "AND serverId = ?";
 		try(PreparedStatement statement = _conn.prepareStatement(sql)){
 			statement.setLong(1, finishTime);
-			statement.setInt(2, winningTeam);
+			statement.setObject(2, winningTeam, Types.INTEGER);
 			statement.setLong(3, timestamp);
 			statement.setLong(4, queueId);
 			statement.setLong(5, serverId);

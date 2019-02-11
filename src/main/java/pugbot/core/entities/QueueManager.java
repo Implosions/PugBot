@@ -324,14 +324,15 @@ public class QueueManager {
 		game.finish();
 		queue.removeGame(game);
 		
+		Database.updateGameInfo(game.getTimestamp(), queue.getId(), 
+				getServerId(), System.currentTimeMillis(), winningTeam);
+		
 		if(winningTeam == null){
 			game.cleanup();
 			updateTopic();
 			return;
 		}
 		
-		Database.updateGameInfo(game.getTimestamp(), queue.getId(), 
-				getServerId(), System.currentTimeMillis(), winningTeam);
 		addToJustFinished(game);
 	}
 }
