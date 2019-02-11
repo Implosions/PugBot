@@ -19,6 +19,7 @@ import net.dv8tion.jda.core.entities.Role;
 import net.dv8tion.jda.core.entities.TextChannel;
 import pugbot.core.commands.CustomCommand;
 import pugbot.core.entities.CommandManager;
+import pugbot.core.entities.MatchRecord;
 import pugbot.core.entities.Queue;
 import pugbot.core.entities.QueueManager;
 import pugbot.core.entities.Server;
@@ -1491,5 +1492,61 @@ public class Database {
 		}
 		
 		return cooldown;
+	}
+	
+	public static List<MatchRecord> queryGetServerMatchRecords(long serverId, int limit) {
+		String sql = "SELECT timestamp, queueId, Queue.name as queueName, winning_team, "
+				   + "(SELECT playerId FROM PlayerGame "
+				   + "WHERE timestamp = g.timestamp AND captain = 1 AND team = 1) as team1Captain, "
+				   + "(SELECT playerId "
+				   + "FROM PlayerGame "
+				   + "WHERE timestamp = g.timestamp AND captain = 1 AND team = 2) as team2Captain "
+				   + "FROM Game AS g JOIN Queue ON g.queueId = Queue.id AND g.serverId = Queue.serverId "
+				   + "ORDER BY timestamp DESC "
+				   + "LIMIT ?";
+		
+		List<MatchRecord> records = new ArrayList<>();
+		
+		try(PreparedStatement statement = _conn.prepareStatement(sql)){
+			statement.setInt(1, limit);
+			
+			try(ResultSet rs = statement.executeQuery()) {
+				while(rs.next()) {
+					long timestamp = rs.getLong("timestamp");
+					long queueId = rs.getLong("queueId");
+					String queueName = rs.getString("queueName");
+					Integer result = rs.getInt("winning_team");
+					
+					if(rs.wasNull()) {
+						result = null;
+					}
+					
+					long[] captains = new long[] { rs.getLong("team1Captain"), rs.getLong("team2Captain") };
+					
+					records.add(new MatchRecord(serverId, timestamp, captains, queueId, queueName, result));
+				}
+			}
+			
+		}catch(SQLException ex){
+			ex.printStackTrace();
+		}
+		
+		return records;
+	}
+	
+	public static void updateGameResult(long serverId, long queueId, long timestamp, Integer result) {
+		String sql = "UPDATE Game SET winning_team = ? "
+				   + "WHERE serverId = ? AND queueId = ? AND timestamp = ?";
+		
+		try(PreparedStatement statement = _conn.prepareStatement(sql)) {
+			statement.setObject(1, result, Types.INTEGER);
+			statement.setLong(2, serverId);
+			statement.setLong(3, queueId);
+			statement.setLong(4, timestamp);
+			
+			statement.executeUpdate();
+		}catch(SQLException ex){
+			ex.printStackTrace();
+		}
 	}
 }

@@ -54,6 +54,7 @@ public class CommandManager {
 		addCommand(new CmdRepick());
 		addCommand(new CmdDisableCommand());
 		addCommand(new CmdEnableCommand());
+		addCommand(new CmdMatchHistory());
 	}
 		
 	public boolean doesCommandExist(String cmdName){
