@@ -1144,7 +1144,7 @@ public class Database {
 		String sql = "SELECT count(timestamp) "
 				+ "FROM Game WHERE serverId = ? "
 				+ "AND timestamp >= ? "
-				+ "AND completion_timestamp > 0";
+				+ "AND winning_team >= 0";
 		int result = 0;
 		
 		try(PreparedStatement statement = _conn.prepareStatement(sql)){
@@ -1189,7 +1189,7 @@ public class Database {
 				+ "WHERE Game.serverId = ? "
 				+ "AND playerId = ? "
 				+ "AND queueId = ? "
-				+ "AND completion_timestamp > 0";
+				+ "AND winning_team >= 0";
 		int result = 0;
 		
 		try(PreparedStatement statement = _conn.prepareStatement(sql)){
@@ -1214,7 +1214,6 @@ public class Database {
 				+ "WHERE Game.serverId = ? "
 				+ "AND playerId = ? "
 				+ "AND queueId = ? "
-				+ "AND completion_timestamp > 0 "
 				+ "AND winning_team = team";
 		int result = 0;
 		
@@ -1240,9 +1239,8 @@ public class Database {
 				+ "WHERE Game.serverId = ? "
 				+ "AND playerId = ? "
 				+ "AND queueId = ? "
-				+ "AND completion_timestamp > 0 "
-				+ "AND NOT winning_team = team "
-				+ "AND NOT winning_team = 0";
+				+ "AND winning_team >= 1 "
+				+ "AND NOT winning_team = team";
 		int result = 0;
 		
 		try(PreparedStatement statement = _conn.prepareStatement(sql)){
@@ -1290,15 +1288,14 @@ public class Database {
 		String sql = "SELECT ((count(playerId) * 100) / "
 				  + "(SELECT count(playerId) "
 				  + "FROM PlayerGame JOIN Game ON PlayerGame.timestamp = Game.timestamp "
-				  + "WHERE Game.serverId = ? AND playerId = ? AND queueId = ? AND completion_timestamp > 0 "
+				  + "WHERE Game.serverId = ? AND playerId = ? AND queueId = ? AND winning_team >= 0 "
 				  + "AND captain = 1)) "
 				+ "FROM PlayerGame JOIN Game ON PlayerGame.timestamp = Game.timestamp "
 				+ "WHERE Game.serverId = ? "
 				+ "AND playerId = ? "
 				+ "AND queueId = ? "
 				+ "AND captain = 1 "
-				+ "AND winning_team = team "
-				+ "AND completion_timestamp > 0";
+				+ "AND winning_team = team";
 		int result = 0;
 		
 		try(PreparedStatement statement = _conn.prepareStatement(sql)){
@@ -1467,7 +1464,7 @@ public class Database {
 	public static boolean queryIsPlayerOnCaptainCooldown(long serverId, long queueId, long playerId) {
 		String sql = "SELECT sum(captain) FROM "
 				   + "(SELECT captain FROM PlayerGame JOIN Game ON Game.timestamp = PlayerGame.timestamp "
-				   + "WHERE Game.serverId = ? AND queueId = ? AND playerId = ? AND completion_timestamp > 0 "
+				   + "WHERE Game.serverId = ? AND queueId = ? AND playerId = ? AND winning_team >= 0 "
 				   + "ORDER BY Game.timestamp DESC "
 				   + "LIMIT ?)";
 		boolean cooldown = false;
