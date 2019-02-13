@@ -1546,4 +1546,24 @@ public class Database {
 			ex.printStackTrace();
 		}
 	}
+	
+	public static String queryGetUsername(long playerId) {
+		String sql = "SELECT name FROM Player WHERE id = ?";
+		String name = null;
+		
+		try(PreparedStatement statement = _conn.prepareStatement(sql)){
+			statement.setLong(1, playerId);
+			
+			try(ResultSet rs = statement.executeQuery()){
+				if(rs.next()){
+					name = rs.getString("name");
+				}
+			}
+			
+		}catch(SQLException ex){
+			ex.printStackTrace();
+		}
+		
+		return name;
+	}
 }
