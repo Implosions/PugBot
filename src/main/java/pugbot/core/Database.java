@@ -1499,13 +1499,15 @@ public class Database {
 				   + "FROM PlayerGame "
 				   + "WHERE timestamp = g.timestamp AND captain = 1 AND team = 2) as team2Captain "
 				   + "FROM Game AS g JOIN Queue ON g.queueId = Queue.id AND g.serverId = Queue.serverId "
+				   + "WHERE g.serverId = ?"
 				   + "ORDER BY timestamp DESC "
 				   + "LIMIT ?";
 		
 		List<MatchRecord> records = new ArrayList<>();
 		
 		try(PreparedStatement statement = _conn.prepareStatement(sql)){
-			statement.setInt(1, limit);
+			statement.setLong(1, serverId);
+			statement.setInt(2, limit);
 			
 			try(ResultSet rs = statement.executeQuery()) {
 				while(rs.next()) {
