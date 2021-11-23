@@ -29,7 +29,7 @@ public class CmdSetTeams extends Command {
             throw new InvalidUseException(String.format("%s is not in-game", caller.getEffectiveName()));
         }
         if (!(game.isCaptain(caller))) {
-            throw new InvalidUseException("You must be a captain or admin to use this command");
+            throw new InvalidUseException("You must be a captain to use this command");
         }
         if (game.getStatus() != Game.GameStatus.PICKING) {
             throw new InvalidUseException("Game must be currently picking");
