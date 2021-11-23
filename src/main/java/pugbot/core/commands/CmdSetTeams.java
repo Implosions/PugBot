@@ -29,7 +29,7 @@ public class CmdSetTeams extends Command {
             throw new InvalidUseException(String.format("%s is not in-game", caller.getEffectiveName()));
         }
         if (!(game.isCaptain(caller))) {
-            throw new InvalidUseException("You must be a captain or admin to use this command");
+            throw new InvalidUseException("You must be a captain to use this command");
         }
         if (game.getStatus() != Game.GameStatus.PICKING) {
             throw new InvalidUseException("Game must be currently picking");
@@ -42,12 +42,20 @@ public class CmdSetTeams extends Command {
         }
 
         for (int i = 0; i < maxPlayers / 2; i++) {
-            firstTeamMembers.add(server.getMember(args[i]));
+            Member member = server.getMember(args[i]);
+            if (!game.containsPlayer(member)) {
+                throw new InvalidUseException(String.format("Player %s is not in game", member.getEffectiveName()));
+            }
+            firstTeamMembers.add(member);
         }
 
         // Add 1 to account for the word "vs" in the middle
         for (int i = (maxPlayers / 2) + 1; i < maxPlayers + 1; i++) {
-            secondTeamMembers.add(server.getMember(args[i]));
+            Member member = server.getMember(args[i]);
+            if (!game.containsPlayer(member)) {
+                throw new InvalidUseException(String.format("Player %s is not in game", member.getEffectiveName()));
+            }
+            secondTeamMembers.add(member);
         }
 
         PUGTeam team0 = game.getPUGTeams()[0];
