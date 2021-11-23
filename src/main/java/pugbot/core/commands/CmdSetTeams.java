@@ -60,6 +60,9 @@ public class CmdSetTeams extends Command {
 
         PUGTeam team0 = game.getPUGTeams()[0];
         PUGTeam team1 = game.getPUGTeams()[1];
+        team0.clearPlayers();
+        team1.clearPlayers();
+
         int i = 0;
         if (firstTeamMembers.contains(team0.getCaptain())) {
             // firstTeam corresponds to team0

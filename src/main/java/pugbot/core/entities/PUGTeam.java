@@ -47,7 +47,11 @@ public class PUGTeam {
 	public void removePlayer(Member player) {
 		playerMap.remove(player);
 	}
-	
+
+	public void clearPlayers() {
+		playerMap.clear();
+	}
+
 	@Override
 	public String toString(){
 		StringBuilder builder = new StringBuilder();
